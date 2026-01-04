@@ -1,0 +1,56 @@
+openapi: "3.0.1"
+info:
+  title: Task Resolver API
+  version: v1
+tags:
+  - name: Task Resolver
+    description: Методы для работы с Task Resolver
+security:
+  - basicAuth: [ ]
+paths:
+  /api/v1/task-resolver/task/start:
+    get:
+      tags:
+        - Task Resolver
+      summary: Запустить проверку задачи
+      operationId: startTask
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartTaskSuccessResponse'
+        '400':
+          description: Невалидный запрос
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '403':
+          description: Доступ запрещен
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+components:
+    schemas:
+      StartTaskSuccessResponse:
+        title: Успешный ответ на запуск задачи
+        required:
+          - result
+        properties:
+          result:
+            $ref: './common-models.yml#/components/schemas/ResultResponse'
+          id:
+            $ref: './common-models.yml#/components/schemas/Id'
+
+
+
+

@@ -1,0 +1,46 @@
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  parameters:
+    orderId:
+      in: path
+      name: orderId
+      description: Id заказа на выпуск КЭП
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+  schemas:
+    ResultResponse:
+      title: Успешность запроса
+      properties:
+        success:
+          type: boolean
+          description: Успешность запроса
+          example: true
+    Id:
+      type: string
+      format: uuid
+      example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+
+    ErrorDetails:
+      title: Детали ошибки
+      type: object
+
+    ErrorResponse:
+      title: Информация об ошибке
+      required:
+        - errorMessage
+        - errorDetails
+      type: object
+      properties:
+        errorMessage:
+          title: Сообщение об ошибке
+          type: string
+          example: Произошла системная ошибка
+        errorDetails:
+          $ref: '#/components/schemas/ErrorDetails'
+
