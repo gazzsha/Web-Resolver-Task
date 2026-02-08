@@ -28,6 +28,10 @@ pluginManagement {
     }
 }
 include(
+    "api-generator",
     "task-resolver",
-    "api-generator"
+    "common",
+    "task-process",
+    "MainApplication",
+    "db"
 )

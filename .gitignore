@@ -1,0 +1,15 @@
+# Idea
+.idea
+
+# Gradle
+.gradle
+build
+
+# Macos
+.DS_Store
+
+
+# Dumps
+heapdump*
+javacore*
+Snap*

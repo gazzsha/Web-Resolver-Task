@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: docker-proxy.artifactory.tcsbank.ru/postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${DIPLOM_DB_NAME}
+      POSTGRES_USER: ${DIPLOM_DB_USER}
+      POSTGRES_PASSWORD: ${DIPLOM_DB_PASSWORD}
+    ports:
+      - "${DIPLOM_DB_PORT}:5432"

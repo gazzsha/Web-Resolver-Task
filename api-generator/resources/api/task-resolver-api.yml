@@ -9,11 +9,17 @@ security:
   - basicAuth: [ ]
 paths:
   /api/v1/task-resolver/task/start:
-    get:
+    patch:
       tags:
         - Task Resolver
       summary: Запустить проверку задачи
       operationId: startTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartTaskRequest'
       responses:
         '200':
           description: Успешный запрос
@@ -40,16 +46,41 @@ paths:
               schema:
                 $ref: './common-models.yml#/components/schemas/ErrorResponse'
 components:
-    schemas:
-      StartTaskSuccessResponse:
-        title: Успешный ответ на запуск задачи
-        required:
-          - result
-        properties:
-          result:
-            $ref: './common-models.yml#/components/schemas/ResultResponse'
-          id:
-            $ref: './common-models.yml#/components/schemas/Id'
+  schemas:
+    StartTaskSuccessResponse:
+      title: Успешный ответ на запуск задачи
+      required:
+        - result
+      properties:
+        result:
+          $ref: './common-models.yml#/components/schemas/ResultResponse'
+        id:
+          $ref: './common-models.yml#/components/schemas/Id'
+    StartTaskRequest:
+      title: Запрос на запуск задачи
+      required:
+        - testId
+        - code
+        - language
+      properties:
+        testId:
+          type: string
+          format: uuid
+          example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+        language:
+          $ref: './common-models.yml#/components/schemas/lang'
+        code:
+          type: string
+          nullable: false
+          example: |
+            class Solution {
+              public int sum(int a, int b) {
+                return a + b;
+              }
+            }
+            
+          
+        
 
 
 

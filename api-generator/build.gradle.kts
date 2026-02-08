@@ -14,9 +14,6 @@ dependencies {
     implementation(libs.swagger.annotations.jakarta)
     implementation(libs.jakarta.annotation.api)
     implementation(libs.jakarta.validation.api)
-
-    implementation(libs.springdoc.openapi.starter.webmvc.ui)
-    implementation(libs.springdoc.openapi.starter.webmvc.api)
 }
 
 

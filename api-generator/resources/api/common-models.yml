@@ -25,6 +25,16 @@ components:
       type: string
       format: uuid
       example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+    IdLong:
+      type: integer
+      format: int64
+      example: 1
+    lang:
+      type: string
+      enum:
+        - java
+        - kotlin
+      example: java
 
     ErrorDetails:
       title: Детали ошибки

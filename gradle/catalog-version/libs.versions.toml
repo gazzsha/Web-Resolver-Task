@@ -1,13 +1,21 @@
 [versions]
-springBoot = "4.0.0"
+springBoot = "3.5.0"
 springdocOpenapi = "2.9.0"
 jackson = "3.0.3"
 jacksonDatabindNullable = '0.2.8'
+kotlin = "2.2.21"
+logger = "7.0.14"
 
 swaggerAnnotations = "2.2.38"
 jakartaAnnotationApi = "2.1.1"
 jakartaValidationApi = "3.0.2"
 openapiGenerator = "7.18.0"
+chatGPT = "5.1.1"
+liquibase = "3.1.0"
+liquibaseCore = "5.0.1"
+postgresVersion = "42.7.4"
+kafkaVersion = "3.2.8"
+
 
 
 [libraries]
@@ -15,7 +23,9 @@ openapiGenerator = "7.18.0"
 spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springBoot" }
 spring-boot-starter-validation = { module = "org.springframework.boot:spring-boot-starter-validation", version.ref = "springBoot" }
 spring-boot-starter-data-jpa = { module = "org.springframework.boot:spring-boot-starter-data-jpa", version.ref = "springBoot" }
-
+spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "kafkaVersion" }
+postgres = { module = "org.postgresql:postgresql", version.ref = "postgresVersion" }
+logger = { module = "io.github.oshai:kotlin-logging", version.ref = "logger" }
 springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdocOpenapi" }
 springdoc-openapi-starter-webmvc-api = { module = "org.springdoc:springdoc-openapi-starter-webmvc-api", version.ref = "springdocOpenapi" }
 
@@ -28,3 +38,13 @@ jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api",
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version.ref = "jakartaValidationApi" }
 
 openapi-generator-gradle-plugin = { module = "org.openapi.generator:org.openapi.generator.gradle.plugin", version.ref = "openapiGenerator" }
+
+liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibaseCore" }
+
+chatgpt = { module = "com.github.plexpt:chatgpt", version.ref = "chatGPT" }
+
+[plugins]
+
+liquibase-gradle-plugin = { id = "org.liquibase.gradle", version.ref = "liquibase" }
+spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }

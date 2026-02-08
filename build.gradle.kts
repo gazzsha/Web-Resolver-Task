@@ -5,12 +5,17 @@
  * To learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.7/samples
  */
 
+
+
+
 plugins {
     kotlin("jvm") version "2.2.21"
 }
 
 subprojects {
-
     apply(plugin = "org.jetbrains.kotlin.jvm")
-
+    kotlin {
+        jvmToolchain(21)
+    }
 }
+
