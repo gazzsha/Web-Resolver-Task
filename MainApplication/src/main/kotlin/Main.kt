@@ -34,7 +34,6 @@ import org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfig
 import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
 import org.springframework.boot.autoconfigure.data.rest.RepositoryRestMvcAutoConfiguration
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
-import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration
 import org.springframework.boot.autoconfigure.groovy.template.GroovyTemplateAutoConfiguration
 import org.springframework.boot.autoconfigure.h2.H2ConsoleAutoConfiguration
@@ -106,7 +105,6 @@ import org.springframework.boot.runApplication
         ElasticsearchRestClientAutoConfiguration::class,
         EmbeddedLdapAutoConfiguration::class,
         ErrorWebFluxAutoConfiguration::class,
-        FlywayAutoConfiguration::class,
         FreeMarkerAutoConfiguration::class,
         GroovyTemplateAutoConfiguration::class,
         H2ConsoleAutoConfiguration::class,

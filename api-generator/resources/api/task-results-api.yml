@@ -10,14 +10,14 @@ tags:
 security:
   - basicAuth: []
 paths:
-  /api/v1/task-results/{taskId}:
+  /api/v1/task-results/{submissionId}:
     get:
       tags:
         - Task Results
       summary: Получить результат выполнения задачи
       operationId: getTaskResult
       parameters:
-        - name: taskId
+        - name: submissionId
           in: path
           required: true
           schema:
@@ -72,14 +72,14 @@ paths:
               schema:
                 $ref: './common-models.yml#/components/schemas/ErrorResponse'
 
-  /api/v1/ai-analysis/{taskId}:
+  /api/v1/ai-analysis/{submissionId}:
     get:
       tags:
         - AI Analysis
       summary: Получить AI-анализ решения
       operationId: getAIAnalysis
       parameters:
-        - name: taskId
+        - name: submissionId
           in: path
           required: true
           schema:
@@ -105,14 +105,14 @@ paths:
               schema:
                 $ref: './common-models.yml#/components/schemas/ErrorResponse'
 
-  /api/v1/ai-analysis/{taskId}/explain:
+  /api/v1/ai-analysis/{submissionId}/explain:
     post:
       tags:
         - AI Analysis
       summary: Получить объяснение ошибки от AI
       operationId: explainError
       parameters:
-        - name: taskId
+        - name: submissionId
           in: path
           required: true
           schema:

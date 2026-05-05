@@ -1,7 +1,0 @@
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app
-
-COPY run-java.sh /app/run-java.sh
-RUN chmod +x /app/run-java.sh
-
-CMD ["/app/run-java.sh"]

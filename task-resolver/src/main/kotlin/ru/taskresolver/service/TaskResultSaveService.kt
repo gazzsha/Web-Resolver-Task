@@ -2,9 +2,16 @@ package ru.taskresolver.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import ru.db.entity.*
+import ru.db.entity.ScenarioResultJson
+import ru.db.entity.StepResultJson
+import ru.db.entity.TaskResultEntity
+import ru.db.entity.TestResultJson
+import ru.db.entity.SubmissionStatus
 import ru.db.repository.SubmissionRepository
 import ru.db.repository.TaskResultRepository
+import ru.worker.model.TaskStatus
+import ru.worker.model.TestStatus
+import ru.worker.model.Verdict
 import java.time.Instant
 import java.util.*
 
@@ -49,7 +56,6 @@ class TaskResultSaveService(
             createdAt = Instant.now()
         )
 
-        // Update submission status
         submissionRepository.findById(submissionId).ifPresent { submission ->
             submission.status = SubmissionStatus.COMPLETED
             submission.updatedAt = Instant.now()

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import ru.db.entity.TaskResultEntity
-import ru.db.entity.TaskStatus
+import ru.worker.model.TaskStatus
 import java.util.UUID
 
 @Repository

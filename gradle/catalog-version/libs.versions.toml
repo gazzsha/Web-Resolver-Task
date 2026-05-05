@@ -16,6 +16,7 @@ liquibaseCore = "5.0.1"
 postgresVersion = "42.7.4"
 kafkaVersion = "3.2.8"
 dependencyManagement = "1.1.7"
+flywayVersion = "10.20.1"
 
 [libraries]
 
@@ -39,6 +40,8 @@ jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api",
 openapi-generator-gradle-plugin = { module = "org.openapi.generator:org.openapi.generator.gradle.plugin", version.ref = "openapiGenerator" }
 
 liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibaseCore" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flywayVersion" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flywayVersion" }
 
 chatgpt = { module = "com.github.plexpt:chatgpt", version.ref = "chatGPT" }
 

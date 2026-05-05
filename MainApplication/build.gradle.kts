@@ -5,10 +5,11 @@ plugins {
 
 dependencies {
     implementation(libs.spring.boot.starter.web)
+    implementation(libs.flyway.core)
+    runtimeOnly(libs.flyway.postgresql)
     implementation(project(":common"))
     implementation(project(":api-generator"))
     implementation(project(":task-resolver"))
-    implementation(project(":task-process"))
     implementation(project(":db"))
     implementation(project(":sandbox"))
     implementation(project(":worker"))

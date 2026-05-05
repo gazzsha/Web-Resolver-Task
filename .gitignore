@@ -5,6 +5,10 @@
 .gradle
 build
 
+# Kotlin compiler cache
+.kotlin
+.nessy
+
 # Macos
 .DS_Store
 
@@ -13,3 +17,11 @@ build
 heapdump*
 javacore*
 Snap*
+
+# Local env
+.env
+
+# Claude Code local settings / runtime
+.claude/.DS_Store
+.claude/scheduled_tasks.lock
+.claude/worktrees/

@@ -7,13 +7,13 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 import ru.taskresolver.service.TaskResultSaveService
+import ru.taskresolver.service.TestExecutionResult
+import ru.worker.model.TestStatus
+import ru.worker.model.Verdict
 import java.util.*
 
 private val logger = KotlinLogging.logger {}
 
-/**
- * Kafka listener for receiving task results from Worker
- */
 @Component
 class TaskResultKafkaListener(
     private val taskResultSaveService: TaskResultSaveService,
@@ -29,12 +29,10 @@ class TaskResultKafkaListener(
         logger.info { "Received result from Kafka: topic=${record.topic()}, key=${record.key()}" }
 
         try {
-            // Parse WorkerTaskResult from Kafka message
             val jsonNode = objectMapper.readTree(record.value())
 
-            // submissionId is the same as taskId in the message
             val submissionId = UUID.fromString(jsonNode.get("taskId").asText())
-            val taskId = submissionId // For backward compatibility
+            val taskId = submissionId
             val testId = UUID.fromString(jsonNode.get("testId").asText())
             val code = jsonNode.get("code").asText()
             val language = jsonNode.get("language").asText()
@@ -42,10 +40,10 @@ class TaskResultKafkaListener(
 
             val testResultsNode = jsonNode.get("testResults")
             val testResults = testResultsNode.map { tr ->
-                ru.taskresolver.service.TestExecutionResult(
+                TestExecutionResult(
                     testId = UUID.fromString(tr.get("testId").asText()),
-                    status = ru.db.entity.TestStatus.valueOf(tr.get("status").asText()),
-                    verdict = ru.db.entity.Verdict.valueOf(tr.get("verdict").asText()),
+                    status = TestStatus.valueOf(tr.get("status").asText()),
+                    verdict = Verdict.valueOf(tr.get("verdict").asText()),
                     output = tr.get("output")?.asText(null),
                     error = tr.get("error")?.asText(null),
                     executionTimeMs = tr.get("executionTimeMs").asLong(),
@@ -53,7 +51,6 @@ class TaskResultKafkaListener(
                 )
             }
 
-            // Save to database using submissionId
             val savedResult = taskResultSaveService.saveResult(
                 submissionId = submissionId,
                 taskId = taskId,

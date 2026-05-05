@@ -40,7 +40,6 @@ include(
     "api-generator",
     "task-resolver",
     "common",
-    "task-process",
     "MainApplication",
     "db",
     "sandbox",

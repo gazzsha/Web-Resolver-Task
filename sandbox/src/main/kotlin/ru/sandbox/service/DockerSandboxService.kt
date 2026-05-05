@@ -19,13 +19,12 @@ private val logger = KotlinLogging.logger {}
  * - Read-only filesystem
  * - Timeout protection
  */
-class DockerSandboxService {
+class DockerSandboxService(
+    private val imageManager: SandboxImageManager
+) {
     
     private val workDir = Paths.get("/tmp/web-resolver-sandbox")
-    
-    // Resource limits for security
-    private val defaultTimeoutSeconds = 10L
-    
+
     init {
         // Create work directory
         Files.createDirectories(workDir)
@@ -89,8 +88,9 @@ class DockerSandboxService {
             // Compile and execute using Docker with JDK
             // User code should have main method that reads from stdin
             val runResult = runInDocker(
+                requestId = request.requestId,
                 requestDir = requestDir,
-                image = "docker-proxy.artifactory.tcsbank.ru/eclipse-temurin:21-jdk-alpine",
+                image = "eclipse-temurin:21-jdk-alpine",
                 command = listOf("sh", "-c", "javac $className.java && java $className < input.txt"),
                 timeoutSeconds = request.timeoutSeconds,
                 memoryLimitMb = request.memoryLimitMb,
@@ -130,8 +130,9 @@ class DockerSandboxService {
 
             // Run Python code in container with internal registry
             val runResult = runInDocker(
+                requestId = request.requestId,
                 requestDir = requestDir,
-                image = "docker-proxy.artifactory.tcsbank.ru/python:3.11-alpine",
+                image = "python:3.11-alpine",
                 command = listOf("python", "solution.py"),
                 timeoutSeconds = request.timeoutSeconds,
                 memoryLimitMb = request.memoryLimitMb,
@@ -169,8 +170,9 @@ class DockerSandboxService {
 
             // Compile and run Kotlin code in container with internal registry
             val runResult = runInDocker(
+                requestId = request.requestId,
                 requestDir = requestDir,
-                image = "docker-proxy.artifactory.tcsbank.ru/gradle:8.5-jdk21",
+                image = "gradle:8.5-jdk21",
                 command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar"),
                 timeoutSeconds = request.timeoutSeconds * 3,
                 memoryLimitMb = request.memoryLimitMb,
@@ -193,6 +195,7 @@ class DockerSandboxService {
     }
     
     private fun runInDocker(
+        requestId: UUID,
         requestDir: java.nio.file.Path,
         image: String,
         command: List<String>,
@@ -201,39 +204,17 @@ class DockerSandboxService {
         cpuLimit: Double
     ): SandboxExecutionResult {
         try {
-            // First pull the image (with timeout for large images)
-            logger.info { "Pulling Docker image: $image" }
-            val pullCmd = listOf("docker", "pull", image)
-            val pullProcess = ProcessBuilder(pullCmd)
-                .redirectErrorStream(true)
-                .start()
-            
-            val pullFinished = pullProcess.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)
-            if (!pullFinished) {
-                pullProcess.destroyForcibly()
+            if (!imageManager.ensureImage(image)) {
                 return SandboxExecutionResult(
-                    requestId = UUID.randomUUID(),
+                    requestId = requestId,
                     status = ExecutionStatus.INTERNAL_ERROR,
                     output = null,
-                    error = "Docker image pull timed out",
+                    error = "Image not available: $image",
                     executionTimeMs = 0,
                     memoryUsedKb = 0
                 )
             }
-            
-            val pullExitCode = pullProcess.exitValue()
-            if (pullExitCode != 0) {
-                val pullOutput = pullProcess.inputStream.bufferedReader().readText().trim()
-                return SandboxExecutionResult(
-                    requestId = UUID.randomUUID(),
-                    status = ExecutionStatus.INTERNAL_ERROR,
-                    output = pullOutput,
-                    error = "Failed to pull Docker image",
-                    executionTimeMs = 0,
-                    memoryUsedKb = 0
-                )
-            }
-            
+
             // Build Docker run command
             val dockerCmd = buildList {
                 add("docker")
@@ -242,7 +223,10 @@ class DockerSandboxService {
                 add("--network=none")
                 add("--read-only")
                 add("--tmpfs")
-                add("/tmp:rw,noexec,nosuid,size=64m")
+                add("/tmp:rw,noexec,nosuid,nodev,size=64m")
+                add("--cap-drop=ALL")
+                add("--security-opt=no-new-privileges:true")
+                add("--pids-limit=64")
                 add("-m")
                 add("${memoryLimitMb}m")
                 add("--cpus")
@@ -281,7 +265,7 @@ class DockerSandboxService {
             }
 
             return SandboxExecutionResult(
-                requestId = UUID.randomUUID(),
+                requestId = requestId,
                 status = status,
                 output = output,
                 error = null,
@@ -291,7 +275,7 @@ class DockerSandboxService {
         } catch (e: Exception) {
             logger.error(e) { "Docker execution failed" }
             return SandboxExecutionResult(
-                requestId = UUID.randomUUID(),
+                requestId = requestId,
                 status = ExecutionStatus.INTERNAL_ERROR,
                 output = null,
                 error = e.message,

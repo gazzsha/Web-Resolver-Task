@@ -1,23 +1,30 @@
 package ru.worker.config
 
+import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.event.EventListener
+import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.EnableAsync
+import org.springframework.stereotype.Component
 import ru.worker.service.*
 import ru.aianalyzer.service.AIAnalyzer
-import ru.aianalyzer.service.SimpleRuleBasedAnalyzer
 import ru.scenarioplayer.ScenarioRunner
 import ru.sandbox.service.DockerSandboxService
+import ru.sandbox.service.SandboxImageManager
 
 /**
  * Worker service configuration with Docker Sandbox support
  */
 @Configuration
+@EnableAsync
 class WorkerServiceConfig {
 
     @Bean
-    fun dockerSandboxService(): DockerSandboxService {
-        return DockerSandboxService()
-    }
+    fun sandboxImageManager(): SandboxImageManager = SandboxImageManager()
+
+    @Bean
+    fun dockerSandboxService(im: SandboxImageManager): DockerSandboxService = DockerSandboxService(im)
 
     @Bean
     fun testEngine(dockerSandboxService: DockerSandboxService): TestEngine {
@@ -62,11 +69,6 @@ class WorkerServiceConfig {
     }
 
     @Bean
-    fun aiAnalyzer(): AIAnalyzer {
-        return SimpleRuleBasedAnalyzer()
-    }
-
-    @Bean
     fun workerService(
         testEngine: TestEngine,
         scenarioRunner: ScenarioRunner,
@@ -77,5 +79,15 @@ class WorkerServiceConfig {
             scenarioRunner = scenarioRunner,
             aiAnalyzer = aiAnalyzer
         )
+    }
+}
+
+@Component
+class SandboxImagePrewarmer(private val imageManager: SandboxImageManager) {
+
+    @Async
+    @EventListener(ApplicationReadyEvent::class)
+    fun onApplicationReady() {
+        imageManager.prewarm()
     }
 }

@@ -3,12 +3,12 @@ package ru.db.entity
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import ru.worker.model.TaskStatus
+import ru.worker.model.TestStatus
+import ru.worker.model.Verdict
 import java.time.Instant
 import java.util.UUID
 
-/**
- * Entity for storing task execution results
- */
 @Entity
 @Table(name = "task_results")
 data class TaskResultEntity(
@@ -69,16 +69,6 @@ data class TaskResultEntity(
     var updatedAt: Instant? = null
 )
 
-enum class TaskStatus {
-    SUCCESS,
-    PARTIAL_SUCCESS,
-    FAILED,
-    ERROR
-}
-
-/**
- * JSON representation of test result
- */
 data class TestResultJson(
     val testId: UUID,
     val status: TestStatus,
@@ -89,26 +79,6 @@ data class TestResultJson(
     val memoryUsedKb: Long
 )
 
-enum class TestStatus {
-    PASSED,
-    FAILED,
-    ERROR,
-    SKIPPED
-}
-
-enum class Verdict {
-    OK,
-    WRONG_ANSWER,
-    PRESENTATION_ERROR,
-    TIME_LIMIT_EXCEEDED,
-    MEMORY_LIMIT_EXCEEDED,
-    RUNTIME_ERROR,
-    COMPILATION_ERROR
-}
-
-/**
- * JSON representation of scenario result
- */
 data class ScenarioResultJson(
     val scenarioId: UUID,
     val status: TestStatus,

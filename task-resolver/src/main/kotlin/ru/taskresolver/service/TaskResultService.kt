@@ -1,6 +1,7 @@
 package ru.taskresolver.service
 
 import model.AIAnalysisResponse
+import model.AIAnalysisSummary
 import model.CodeComplexity
 import model.CodeIssue
 import model.IssueType
@@ -13,36 +14,57 @@ import model.TestResultDetail
 import model.TestStatus
 import model.Verdict
 import org.springframework.stereotype.Service
-import ru.db.entity.AIAnalysisEntity
+import org.springframework.transaction.annotation.Transactional
 import ru.db.entity.TaskResultEntity
-import ru.db.repository.AIAnalysisRepository
 import ru.db.repository.TaskResultRepository
 import java.util.UUID
 
 @Service
 class TaskResultService(
-    private val taskResultRepository: TaskResultRepository,
-    private val aiAnalysisRepository: AIAnalysisRepository
+    private val taskResultRepository: TaskResultRepository
 ) {
-    
+
     fun getTaskResult(taskId: UUID): TaskResultResponse? {
-        val entity = taskResultRepository.findByTaskId(taskId) ?: return null
-        
+        val entity = taskResultRepository.findBySubmissionId(taskId) ?: return null
         return mapToResponse(entity)
     }
-    
+
     fun getTestResults(testId: UUID): List<TaskResultResponse> {
         return taskResultRepository.findByTestId(testId)
             .map { mapToResponse(it) }
     }
-    
+
+    @Transactional(readOnly = true)
+    fun getAIAnalysis(taskId: UUID): AIAnalysisResponse? {
+        val entity = taskResultRepository.findBySubmissionId(taskId) ?: return null
+        val ai = entity.aiAnalysis ?: return null
+        return AIAnalysisResponse()
+            .codeQuality(ai.codeQualityScore)
+            .issues(ai.issues.map { issue ->
+                CodeIssue()
+                    .type(IssueType.fromValue(issue.type.name))
+                    .severity(Severity.fromValue(issue.severity.name))
+                    .line(issue.line)
+                    .message(issue.message)
+                    .suggestion(issue.suggestion)
+            })
+            .recommendations(ai.recommendations)
+            .explanation(ai.explanation)
+            .complexity(CodeComplexity.fromValue(ai.complexity.name))
+    }
+
+    @Transactional(readOnly = true)
+    fun getTaskEntityBySubmissionId(submissionId: UUID): TaskResultEntity? {
+        return taskResultRepository.findBySubmissionId(submissionId)
+    }
+
     private fun mapToResponse(entity: TaskResultEntity): TaskResultResponse {
         return TaskResultResponse()
             .taskId(entity.taskId)
             .testId(entity.testId)
             .status(TaskStatus.fromValue(entity.status.name))
-            .totalTests(entity.totalTests.toInt())
-            .passedTests(entity.passedTests.toInt())
+            .totalTests(entity.totalTests)
+            .passedTests(entity.passedTests)
             .totalExecutionTimeMs(entity.totalExecutionTimeMs.toInt())
             .memoryUsedKb(entity.memoryUsedKb.toInt())
             .testResults(entity.testResults.map { testResult ->
@@ -70,7 +92,7 @@ class TaskResultService(
                     .finalState(scenarioResult.finalState)
             })
             .aiAnalysis(entity.aiAnalysis?.let { ai ->
-                model.AIAnalysisSummary()
+                AIAnalysisSummary()
                     .codeQuality(ai.codeQualityScore)
                     .issueCount(ai.issues.size)
                     .complexity(CodeComplexity.fromValue(ai.complexity.name))

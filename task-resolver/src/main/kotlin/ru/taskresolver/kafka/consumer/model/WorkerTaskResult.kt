@@ -1,7 +1,7 @@
 package ru.taskresolver.kafka.consumer.model
 
-import ru.db.entity.TestStatus
-import ru.db.entity.Verdict
+import ru.worker.model.TestStatus
+import ru.worker.model.Verdict
 
 data class WorkerTaskResult(
     val taskId: String,

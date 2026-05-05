@@ -3,7 +3,7 @@ version: "3.9"
 services:
   # PostgreSQL Database
   postgres:
-    image: docker-proxy.artifactory.tcsbank.ru/postgres:16-alpine
+    image: postgres:16-alpine
     container_name: web-resolver-db
     environment:
       POSTGRES_DB: ${DIPLOM_DB_NAME:-web_resolver}
@@ -23,7 +23,7 @@ services:
 
   # Apache Kafka
   zookeeper:
-    image: docker-proxy.artifactory.tcsbank.ru/confluentinc/cp-zookeeper:7.5.0
+    image: confluentinc/cp-zookeeper:7.5.0
     container_name: web-resolver-zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
@@ -32,7 +32,7 @@ services:
       - web-resolver-network
 
   kafka:
-    image: docker-proxy.artifactory.tcsbank.ru/confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka:7.5.0
     container_name: web-resolver-kafka
     depends_on:
       - zookeeper
