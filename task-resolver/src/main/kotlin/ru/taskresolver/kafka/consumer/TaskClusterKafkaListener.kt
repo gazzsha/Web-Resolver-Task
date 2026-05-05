@@ -9,15 +9,12 @@ class TaskClusterKafkaListener(
 ) {
 
     @KafkaListener(
-        topics = [
-            "\${kafka.clusters.kaas-common.topics.meeteor-meetings-raw.name}"
-        ],
-        groupId = "\${kafka.clusters.kaas-common.topics.meeteor-meetings-raw.group-id}",
-        containerFactory = ,
-        errorHandler = "defaultKafkaListenerErrorHandler",
-        autoStartup = "\${kafka.clusters.kaas-common.topics.meeteor-meetings-raw.enabled:true}"
+        topics = ["\${kafka.worker.topic:task-execution}"],
+        groupId = "\${kafka.worker.group-id:task-resolver}",
+        containerFactory = "kafkaListenerContainerFactory",
+        autoStartup = "false"
     )
     fun listen() {
-
+        // Placeholder for future implementation
     }
 }

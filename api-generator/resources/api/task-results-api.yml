@@ -1,0 +1,407 @@
+openapi: "3.0.1"
+info:
+  title: Task Results API
+  version: v1
+tags:
+  - name: Task Results
+    description: Методы для получения результатов выполнения задач
+  - name: AI Analysis
+    description: Методы для получения AI-анализа кода
+security:
+  - basicAuth: []
+paths:
+  /api/v1/task-results/{taskId}:
+    get:
+      tags:
+        - Task Results
+      summary: Получить результат выполнения задачи
+      operationId: getTaskResult
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Результат найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResultResponse'
+        '404':
+          description: Результат не найден
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+  /api/v1/task-results/test/{testId}:
+    get:
+      tags:
+        - Task Results
+      summary: Получить все результаты для теста
+      operationId: getTestResults
+      parameters:
+        - name: testId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Результаты найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskResultResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+  /api/v1/ai-analysis/{taskId}:
+    get:
+      tags:
+        - AI Analysis
+      summary: Получить AI-анализ решения
+      operationId: getAIAnalysis
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: AI-анализ найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAnalysisResponse'
+        '404':
+          description: Анализ не найден
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+  /api/v1/ai-analysis/{taskId}/explain:
+    post:
+      tags:
+        - AI Analysis
+      summary: Получить объяснение ошибки от AI
+      operationId: explainError
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExplainErrorRequest'
+      responses:
+        '200':
+          description: Объяснение получено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExplainErrorResponse'
+        '400':
+          description: Невалидный запрос
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    TaskResultResponse:
+      title: Результат выполнения задачи
+      required:
+        - taskId
+        - testId
+        - status
+        - testResults
+      properties:
+        taskId:
+          type: string
+          format: uuid
+        testId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        totalTests:
+          type: integer
+          example: 10
+        passedTests:
+          type: integer
+          example: 8
+        totalExecutionTimeMs:
+          type: integer
+          example: 1500
+        memoryUsedKb:
+          type: integer
+          example: 51200
+        testResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestResultDetail'
+        scenarioResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScenarioResultDetail'
+        aiAnalysis:
+          $ref: '#/components/schemas/AIAnalysisSummary'
+        createdAt:
+          type: string
+          format: date-time
+
+    TaskStatus:
+      type: string
+      enum:
+        - SUCCESS
+        - PARTIAL_SUCCESS
+        - FAILED
+        - ERROR
+
+    TestResultDetail:
+      title: Детали результата теста
+      required:
+        - testId
+        - status
+        - verdict
+      properties:
+        testId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TestStatus'
+        verdict:
+          $ref: '#/components/schemas/Verdict'
+        output:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        executionTimeMs:
+          type: integer
+        memoryUsedKb:
+          type: integer
+
+    TestStatus:
+      type: string
+      enum:
+        - PASSED
+        - FAILED
+        - ERROR
+        - SKIPPED
+
+    Verdict:
+      type: string
+      enum:
+        - OK
+        - WRONG_ANSWER
+        - PRESENTATION_ERROR
+        - TIME_LIMIT_EXCEEDED
+        - MEMORY_LIMIT_EXCEEDED
+        - RUNTIME_ERROR
+        - COMPILATION_ERROR
+
+    ScenarioResultDetail:
+      title: Детали результата сценария
+      required:
+        - scenarioId
+        - status
+        - stepResults
+      properties:
+        scenarioId:
+          type: string
+          format: uuid
+        status:
+          $ref: '#/components/schemas/TestStatus'
+        stepResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/StepResultDetail'
+        finalState:
+          type: string
+          nullable: true
+
+    StepResultDetail:
+      title: Детали результата шага сценария
+      required:
+        - stepNumber
+        - status
+      properties:
+        stepNumber:
+          type: integer
+        status:
+          $ref: '#/components/schemas/TestStatus'
+        actualOutput:
+          type: string
+          nullable: true
+        expectedOutput:
+          type: string
+          nullable: true
+        stateMatches:
+          type: boolean
+
+    AIAnalysisSummary:
+      title: Краткий AI-анализ
+      properties:
+        codeQuality:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 75
+        issueCount:
+          type: integer
+          example: 3
+        complexity:
+          $ref: '#/components/schemas/CodeComplexity'
+        explanation:
+          type: string
+          example: "Код работает правильно, но есть проблемы с производительностью"
+
+    AIAnalysisResponse:
+      title: Полный AI-анализ
+      required:
+        - codeQuality
+        - issues
+        - recommendations
+        - explanation
+        - complexity
+      properties:
+        codeQuality:
+          type: integer
+          minimum: 0
+          maximum: 100
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodeIssue'
+        recommendations:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: string
+        complexity:
+          $ref: '#/components/schemas/CodeComplexity'
+
+    CodeComplexity:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+        - VERY_HIGH
+
+    CodeIssue:
+      title: Проблема в коде
+      required:
+        - type
+        - severity
+        - message
+        - suggestion
+      properties:
+        type:
+          $ref: '#/components/schemas/IssueType'
+        severity:
+          $ref: '#/components/schemas/Severity'
+        line:
+          type: integer
+          nullable: true
+        message:
+          type: string
+        suggestion:
+          type: string
+
+    IssueType:
+      type: string
+      enum:
+        - BUG
+        - CODE_SMELL
+        - SECURITY
+        - PERFORMANCE
+        - STYLE
+
+    Severity:
+      type: string
+      enum:
+        - BLOCKER
+        - CRITICAL
+        - MAJOR
+        - MINOR
+        - INFO
+
+    ExplainErrorRequest:
+      title: Запрос на объяснение ошибки
+      required:
+        - error
+        - testInput
+      properties:
+        error:
+          type: string
+          example: "NullPointerException at Solution.main(Solution.java:10)"
+        testInput:
+          type: string
+          example: "5 3"
+
+    ExplainErrorResponse:
+      title: Объяснение ошибки
+      required:
+        - errorType
+        - explanation
+        - fixSuggestions
+      properties:
+        errorType:
+          type: string
+          example: "Null Pointer Exception"
+        explanation:
+          type: string
+          example: "Вы пытаетесь вызвать метод на null объекте"
+        commonCauses:
+          type: array
+          items:
+            type: string
+        fixSuggestions:
+          type: array
+          items:
+            type: string
+        correctedExample:
+          type: string
+          nullable: true

@@ -13,6 +13,6 @@ interface TestRepository : JpaRepository<Test, Long> {
     fun getTestByTestId(problemId: UUID): Test =
         findTestByTestId(problemId) ?: throw NotFoundException(NOT_FOUND_EXCEPTION_MESSAGE)
 
-
+    fun findAllByOrderByDifficulty(): List<Test>
 }
 

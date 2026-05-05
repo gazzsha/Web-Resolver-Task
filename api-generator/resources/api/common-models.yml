@@ -34,7 +34,16 @@ components:
       enum:
         - java
         - kotlin
+        - python
       example: java
+
+    Difficulty:
+      type: string
+      enum:
+        - Easy
+        - Medium
+        - Hard
+      example: Easy
 
     ErrorDetails:
       title: Детали ошибки

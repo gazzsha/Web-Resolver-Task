@@ -89,7 +89,6 @@ import org.springframework.boot.runApplication
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 @SpringBootApplication(
     exclude = [
-        KafkaAutoConfiguration::class,
         ActiveMQAutoConfiguration::class,
         ArtemisAutoConfiguration::class,
         BatchAutoConfiguration::class,

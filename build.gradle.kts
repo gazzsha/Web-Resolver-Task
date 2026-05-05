@@ -5,17 +5,17 @@
  * To learn more about Gradle by exploring our Samples at https://docs.gradle.org/8.7/samples
  */
 
-
-
-
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.2.21" apply false
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    kotlin {
-        jvmToolchain(21)
+    
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
     }
 }
 

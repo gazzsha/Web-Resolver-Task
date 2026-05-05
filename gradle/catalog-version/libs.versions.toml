@@ -9,14 +9,13 @@ logger = "7.0.14"
 swaggerAnnotations = "2.2.38"
 jakartaAnnotationApi = "2.1.1"
 jakartaValidationApi = "3.0.2"
-openapiGenerator = "7.18.0"
+openapiGenerator = "7.17.0"
 chatGPT = "5.1.1"
 liquibase = "3.1.0"
 liquibaseCore = "5.0.1"
 postgresVersion = "42.7.4"
 kafkaVersion = "3.2.8"
-
-
+dependencyManagement = "1.1.7"
 
 [libraries]
 
@@ -48,3 +47,5 @@ chatgpt = { module = "com.github.plexpt:chatgpt", version.ref = "chatGPT" }
 liquibase-gradle-plugin = { id = "org.liquibase.gradle", version.ref = "liquibase" }
 spring-boot = { id = "org.springframework.boot", version.ref = "springBoot" }
 kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+dependency-management = { id = "io.spring.dependency-management", version.ref = "dependencyManagement" }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.spring)
-    alias(libs.plugins.spring.boot)
     kotlin("plugin.jpa") version "2.2.21"
 }
 
@@ -12,6 +11,11 @@ dependencies {
     implementation(libs.spring.kafka)
     implementation(project(":api-generator"))
     implementation(project(":common"))
+    implementation(project(":db"))
+    implementation(project(":ai-analyzer"))
+    implementation(project(":sandbox"))
+    implementation(project(":scenario-runner"))
+    implementation(project(":worker"))
     implementation(libs.logger)
 
 

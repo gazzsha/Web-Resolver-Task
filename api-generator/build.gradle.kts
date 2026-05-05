@@ -44,7 +44,8 @@ val resourcesDir = "$projectDir/resources"
 val generatedDir = "$buildDir/generated/openapi/"
 
 val openApiFilesGroupByProcess = mapOf(
-    "task-resolver-api.yml" to "TaskResolver"
+    "task-resolver-api.yml" to "TaskResolver",
+    "task-results-api.yml" to "TaskResults"
 )
 
 val generatorTaskNames = openApiFilesGroupByProcess.map { registerGenerateTask(it.key, it.value) }

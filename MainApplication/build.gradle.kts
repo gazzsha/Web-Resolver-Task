@@ -10,4 +10,8 @@ dependencies {
     implementation(project(":task-resolver"))
     implementation(project(":task-process"))
     implementation(project(":db"))
+    implementation(project(":sandbox"))
+    implementation(project(":worker"))
+    implementation(project(":ai-analyzer"))
+    implementation(project(":scenario-runner"))
 }

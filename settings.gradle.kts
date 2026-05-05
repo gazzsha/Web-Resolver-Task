@@ -25,6 +25,15 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         mavenCentral()
+        google()
+    }
+    plugins {
+        kotlin("jvm") version "2.2.21"
+        kotlin("plugin.spring") version "2.2.21"
+        kotlin("plugin.jpa") version "2.2.21"
+        id("org.springframework.boot") version "3.5.0"
+        id("io.spring.dependency-management") version "1.1.7"
+        id("org.openapi.generator") version "7.17.0"
     }
 }
 include(
@@ -33,5 +42,9 @@ include(
     "common",
     "task-process",
     "MainApplication",
-    "db"
+    "db",
+    "sandbox",
+    "worker",
+    "ai-analyzer",
+    "scenario-runner"
 )

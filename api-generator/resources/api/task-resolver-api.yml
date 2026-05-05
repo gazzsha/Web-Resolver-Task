@@ -5,9 +5,70 @@ info:
 tags:
   - name: Task Resolver
     description: Методы для работы с Task Resolver
+  - name: Tasks
+    description: Методы для получения списка задач
 security:
   - basicAuth: [ ]
 paths:
+  /api/v1/tasks:
+    get:
+      tags:
+        - Tasks
+      summary: Получить список всех задач
+      operationId: getAllTasks
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskInfo'
+        '403':
+          description: Доступ запрещен
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}:
+    get:
+      tags:
+        - Tasks
+      summary: Получить задачу по ID
+      operationId: getTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInfo'
+        '404':
+          description: Задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
   /api/v1/task-resolver/task/start:
     patch:
       tags:
@@ -47,6 +108,29 @@ paths:
                 $ref: './common-models.yml#/components/schemas/ErrorResponse'
 components:
   schemas:
+    TaskInfo:
+      title: Информация о задаче
+      required:
+        - testId
+        - title
+        - description
+        - difficulty
+      properties:
+        testId:
+          type: string
+          format: uuid
+          example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+        title:
+          type: string
+          example: "Two Sum"
+        description:
+          type: string
+          example: "Given an array of integers, return indices of the two numbers that add up to a specific target."
+        difficulty:
+          $ref: './common-models.yml#/components/schemas/Difficulty'
+        category:
+          type: string
+          example: "Array"
     StartTaskSuccessResponse:
       title: Успешный ответ на запуск задачи
       required:

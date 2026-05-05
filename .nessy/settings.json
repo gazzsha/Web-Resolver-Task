@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew *)",
+      "Bash(rm *)",
+      "Bash(mkdir *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(sleep *)",
+      "Bash(curl *)",
+      "Bash(lsof *)",
+      "Bash(docker-compose *)",
+      "Bash(timeout *)",
+      "Bash(npm *)",
+      "Bash(docker exec *)",
+      "Bash(python3 *)",
+      "Bash(} } *)",
+      "Bash(chmod *)",
+      "Bash(bash *)",
+      "Bash(docker logs *)",
+      "Bash(cd *)",
+      "Bash(tail *)",
+      "Bash(xargs *)",
+      "Bash(pkill *)",
+      "Bash(head *)",
+      "Bash(docker ps)",
+      "Bash(tee *)",
+      "Bash(ls *)",
+      "Bash(docker pull *)",
+      "Bash(strings)"
+    ]
+  },
+  "$version": 3
+}
