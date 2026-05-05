@@ -1,20 +1,18 @@
-version: "3.9"
-
 services:
   # PostgreSQL Database
   postgres:
     image: postgres:16-alpine
     container_name: web-resolver-db
     environment:
-      POSTGRES_DB: ${DIPLOM_DB_NAME:-web_resolver}
-      POSTGRES_USER: ${DIPLOM_DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DIPLOM_DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-web_resolver}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
     ports:
-      - "${DIPLOM_DB_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DIPLOM_DB_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,47 +54,6 @@ services:
       timeout: 10s
       retries: 5
 
-#  # Main Application (API Gateway + Frontend)
-#  main-app:
-#    build:
-#      context: .
-#      dockerfile: MainApplication/Dockerfile
-#    container_name: web-resolver-api
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      kafka:
-#        condition: service_healthy
-#    ports:
-#      - "8080:8080"
-#    environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:7777/${DIPLOM_DB_NAME:-web_resolver}
-#      SPRING_DATASOURCE_USERNAME: ${DIPLOM_DB_USER:-postgres}
-#      SPRING_DATASOURCE_PASSWORD: ${DIPLOM_DB_PASSWORD:-postgres}
-#      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-#      AI_CHATGPT_API_KEY: ${AI_CHATGPT_API_KEY:-}
-#    networks:
-#      - web-resolver-network
-
-#  # Worker Service (Code Execution)
-#  worker:
-#    build:
-#      context: .
-#      dockerfile: worker/Dockerfile
-#    depends_on:
-#      - kafka
-#    environment:
-#      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-#      KAFKA_WORKER_GROUP_ID: worker-group
-#      KAFKA_WORKER_TOPIC: task-execution
-#      KAFKA_RESULT_TOPIC: task-results
-#      DOCKER_HOST: unix:///var/run/docker.sock
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
-#      - worker-temp:/tmp/web-resolver-sandbox
-#    networks:
-#      - web-resolver-network
-
   # Docker-in-Docker for Sandbox (optional, for enhanced isolation)
   # Note: In production, use separate Docker daemon or rootless Docker
   dind:
@@ -114,8 +71,6 @@ services:
 
 volumes:
   postgres_data:
-    driver: local
-  worker-temp:
     driver: local
   dind-data:
     driver: local
