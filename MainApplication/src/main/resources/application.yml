@@ -1,0 +1,77 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:web_resolver}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  liquibase:
+    enabled: false
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: main-app-group
+      auto-offset-reset: earliest
+    producer:
+      acks: all
+
+kafka:
+  config:
+    task-cluster:
+      consumer:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        topic: task-results
+        group-id: task-cluster-group
+      producer:
+        bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+        topic: task-execution
+        acks: all
+
+gigachat:
+  auth-key: ${GIGACHAT_AUTH_KEY:}
+  scope: ${GIGACHAT_SCOPE:GIGACHAT_API_PERS}
+  model: ${GIGACHAT_MODEL:GigaChat}
+  oauth-base-url: ${GIGACHAT_OAUTH_BASE_URL:https://ngw.devices.sberbank.ru:9443}
+  api-base-url: ${GIGACHAT_API_BASE_URL:https://gigachat.devices.sberbank.ru}
+  request-timeout-seconds: 30
+  connect-timeout-ms: 5000
+  response-timeout-ms: 30000
+  max-retries: 3
+  token-ttl-minutes: 30
+  cache:
+    ttl-minutes: 60
+    max-size: 500
+
+# Phase 4 placeholders (auth not wired yet)
+jwt:
+  secret: ${JWT_SECRET:}
+  access-ttl-minutes: ${JWT_ACCESS_TTL_MINUTES:60}
+  refresh-ttl-days: ${JWT_REFRESH_TTL_DAYS:7}
+
+logging:
+  level:
+    root: INFO
+    ru: DEBUG
+    ru.sandbox: DEBUG
+    ru.worker: DEBUG
+    ru.aianalyzer: DEBUG
