@@ -37,8 +37,9 @@ class TaskResultKafkaListener(
             val jsonNode = objectMapper.readTree(record.value())
 
             val submissionId = UUID.fromString(jsonNode.get("taskId").asText())
-            val taskId = submissionId
             val testId = UUID.fromString(jsonNode.get("testId").asText())
+            // task_id == real testId (the catalogue id), not the per-attempt submissionId
+            val taskId = testId
             val code = jsonNode.get("code").asText()
             val language = jsonNode.get("language").asText()
             val statusStr = jsonNode.get("status").asText()

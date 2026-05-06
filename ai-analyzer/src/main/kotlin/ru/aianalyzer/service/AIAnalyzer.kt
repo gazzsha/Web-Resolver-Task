@@ -73,7 +73,8 @@ data class AIAnalysisResult(
     val issues: List<CodeIssue>,
     val recommendations: List<String>,
     val explanation: String,
-    val complexity: CodeComplexity
+    val complexity: CodeComplexity,
+    val modelVersion: String = "unknown"
 )
 
 /**

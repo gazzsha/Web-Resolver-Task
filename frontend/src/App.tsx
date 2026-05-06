@@ -9,6 +9,8 @@ import TaskList from './pages/TaskList';
 import TaskDetail from './pages/TaskDetail';
 import Submission from './pages/Submission';
 import Results from './pages/Results';
+import SubmissionsPage from './pages/SubmissionsPage';
+import StatisticsPage from './pages/StatisticsPage';
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
                   <Route path="/tasks/:id" element={<TaskDetail />} />
                   <Route path="/submit/:id" element={<Submission />} />
                   <Route path="/results/:id" element={<Results />} />
+                  <Route path="/submissions" element={<SubmissionsPage />} />
+                  <Route path="/statistics" element={<StatisticsPage />} />
                 </Routes>
               </Layout>
             </RequireAuth>

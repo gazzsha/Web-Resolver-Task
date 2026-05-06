@@ -3,6 +3,7 @@ package ru.taskresolver.service.process
 import com.fasterxml.jackson.databind.ObjectMapper
 import model.StartTaskRequest
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import ru.db.entity.SubmissionEntity
 import ru.db.entity.SubmissionStatus
@@ -28,6 +29,13 @@ class TaskResolverProcessService(
         val test = testService.getTestById(request.testId)
         val testCases = getTestCases(request.testId)
 
+        // UserPrincipal lives in MainApplication to avoid circular deps; extract id via reflection at runtime.
+        val userId = SecurityContextHolder.getContext().authentication?.principal?.let { p ->
+            runCatching {
+                p.javaClass.getDeclaredField("id").apply { isAccessible = true }.get(p) as? java.util.UUID
+            }.getOrNull()
+        }
+
         // Generate submission ID
         val submissionId = UUID.randomUUID()
 
@@ -36,6 +44,7 @@ class TaskResolverProcessService(
             id = submissionId,
             taskId = test.testId,  // Use testId as taskId
             testId = test.testId,
+            userId = userId,
             code = request.code,
             language = request.language.value,
             status = SubmissionStatus.PENDING,

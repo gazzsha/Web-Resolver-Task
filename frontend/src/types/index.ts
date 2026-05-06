@@ -109,3 +109,22 @@ export interface LanguageDataPoint {
   language: string;
   count: number;
 }
+
+// Me-service types (used by /me/submissions and /me/stats endpoints)
+export interface SubmissionSummary {
+  id: string;
+  taskId: string;
+  taskTitle: string | null;
+  status: 'SUCCESS' | 'PARTIAL_SUCCESS' | 'FAILED' | 'ERROR' | 'PENDING' | 'PROCESSING';
+  language: 'java' | 'kotlin' | 'python';
+  passedTests: number | null;
+  totalTests: number | null;
+  createdAt: string;
+}
+
+export interface UserStats {
+  tasksSolved: number;
+  totalSubmissions: number;
+  averageQuality: number | null;
+  recentSubmissions: SubmissionSummary[];
+}

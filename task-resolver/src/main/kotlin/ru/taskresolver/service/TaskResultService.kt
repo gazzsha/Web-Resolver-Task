@@ -38,6 +38,7 @@ class TaskResultService(
     fun getAIAnalysis(taskId: UUID): AIAnalysisResponse? {
         val entity = taskResultRepository.findBySubmissionId(taskId) ?: return null
         val ai = entity.aiAnalysis ?: return null
+        if (ai.modelVersion == "rule-based") return null
         return AIAnalysisResponse()
             .codeQuality(ai.codeQualityScore)
             .issues(ai.issues.map { issue ->
@@ -91,7 +92,7 @@ class TaskResultService(
                     })
                     .finalState(scenarioResult.finalState)
             })
-            .aiAnalysis(entity.aiAnalysis?.let { ai ->
+            .aiAnalysis(entity.aiAnalysis?.takeIf { it.modelVersion != "rule-based" }?.let { ai ->
                 AIAnalysisSummary()
                     .codeQuality(ai.codeQualityScore)
                     .issueCount(ai.issues.size)

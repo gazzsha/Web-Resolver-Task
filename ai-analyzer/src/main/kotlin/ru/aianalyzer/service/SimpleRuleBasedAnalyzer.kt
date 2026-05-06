@@ -72,7 +72,8 @@ class SimpleRuleBasedAnalyzer : AIAnalyzer {
             issues = issues,
             recommendations = recommendations.ifEmpty { listOf("Code looks good!") },
             explanation = buildExplanation(executionResults, failedResults),
-            complexity = estimateComplexity(code)
+            complexity = estimateComplexity(code),
+            modelVersion = "rule-based"
         )
     }
     

@@ -73,7 +73,8 @@ class GigaChatAnalyzer(
             issues = issues,
             recommendations = payload.recommendations.take(20),
             explanation = payload.explanation,
-            complexity = complexity
+            complexity = complexity,
+            modelVersion = "gigachat"
         )
     }
 

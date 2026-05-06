@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Task, Submission, SubmissionResult, AIAnalysisFull, UserStatistics } from '@/types';
+import type { Task, Submission, SubmissionResult, AIAnalysisFull, UserStatistics, SubmissionSummary, UserStats } from '@/types';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -102,6 +102,18 @@ export const statsService = {
   getUserStats: async (userId: string): Promise<UserStatistics> => {
     const response = await api.get<UserStatistics>(`/users/${userId}/stats`);
     return response.data;
+  },
+};
+
+// Me-service — authenticated user's own submissions and stats
+export const meService = {
+  getSubmissions: async (): Promise<SubmissionSummary[]> => {
+    const r = await api.get<SubmissionSummary[]>('/me/submissions');
+    return r.data;
+  },
+  getStats: async (): Promise<UserStats> => {
+    const r = await api.get<UserStats>('/me/stats');
+    return r.data;
   },
 };
 

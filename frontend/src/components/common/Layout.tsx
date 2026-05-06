@@ -1,72 +1,137 @@
-import React from 'react';
-import { Box, Drawer, AppBar, Toolbar, CssBaseline } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Drawer, AppBar, Toolbar, CssBaseline, useMediaQuery, useTheme, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useAppStore } from '@/store/appStore';
 import Header from './Header';
 import Sidebar from './Sidebar';
 
-const drawerWidth = 260;
+const DRAWER_WIDTH = 256;
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { sidebarOpen, darkMode } = useAppStore();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { sidebarOpen } = useAppStore();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleMobileToggle = () => setMobileOpen((prev) => !prev);
+
+  // Desktop: permanent drawer toggled by sidebarOpen
+  // Mobile: temporary drawer toggled by mobileOpen
+  const desktopOpen = !isMobile && sidebarOpen;
+  const effectiveDrawerWidth = desktopOpen ? DRAWER_WIDTH : 0;
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <CssBaseline />
-      
-      {/* App Bar */}
+
+      {/* AppBar */}
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-          backgroundColor: darkMode ? '#1e1e1e' : '#1976d2',
+          zIndex: (t) => t.zIndex.drawer + 1,
+          // adaptive width on desktop
+          width: { md: `calc(100% - ${effectiveDrawerWidth}px)` },
+          ml: { md: `${effectiveDrawerWidth}px` },
+          transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
-        <Header />
+        <Header
+          mobileMenuButton={
+            isMobile ? (
+              <IconButton
+                size="large"
+                edge="start"
+                color="inherit"
+                onClick={handleMobileToggle}
+                sx={{ mr: 1, color: 'text.primary' }}
+                aria-label="открыть меню"
+              >
+                <MenuIcon />
+              </IconButton>
+            ) : null
+          }
+        />
       </AppBar>
 
-      {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: sidebarOpen ? drawerWidth : 0,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: sidebarOpen ? drawerWidth : 0,
-            boxSizing: 'border-box',
-            overflowX: 'hidden',
-            transition: (theme) =>
-              theme.transitions.create('width', {
+      {/* Mobile Drawer */}
+      {isMobile && (
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleMobileToggle}
+          ModalProps={{ keepMounted: true }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              boxSizing: 'border-box',
+            },
+          }}
+        >
+          <Toolbar />
+          <Sidebar onNavigate={() => setMobileOpen(false)} />
+        </Drawer>
+      )}
+
+      {/* Desktop Drawer */}
+      {!isMobile && (
+        <Drawer
+          variant="permanent"
+          open={desktopOpen}
+          sx={{
+            width: effectiveDrawerWidth,
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
+              width: DRAWER_WIDTH,
+              boxSizing: 'border-box',
+              transform: desktopOpen ? 'none' : `translateX(-${DRAWER_WIDTH}px)`,
+              visibility: desktopOpen ? 'visible' : 'hidden',
+              overflowX: 'hidden',
+              transition: theme.transitions.create(['transform', 'visibility', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.standard,
               }),
-          },
-        }}
-      >
-        <Toolbar />
-        <Sidebar />
-      </Drawer>
+            },
+          }}
+        >
+          <Toolbar />
+          <Sidebar />
+        </Drawer>
+      )}
 
-      {/* Main Content */}
+      {/* Main content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          ml: sidebarOpen ? `${drawerWidth}px` : 0,
-          transition: (theme) =>
-            theme.transitions.create('margin', {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.standard,
-            }),
+          minWidth: 0,
           minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.standard,
+          }),
         }}
       >
         <Toolbar />
-        {children}
+        <Box
+          sx={{
+            flexGrow: 1,
+            p: { xs: 2, sm: 3 },
+            width: '100%',
+            maxWidth: '100%',
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );

@@ -1,68 +1,145 @@
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import React from 'react';
+import {
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+} from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import TaskIcon from '@mui/icons-material/Task';
 import CodeIcon from '@mui/icons-material/Code';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import { useAppStore } from '@/store/appStore';
+import HistoryIcon from '@mui/icons-material/History';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import { brand } from '@/theme/theme';
 
 const menuItems = [
-  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-  { text: 'Tasks', icon: <TaskIcon />, path: '/tasks' },
-  { text: 'Submissions', icon: <CodeIcon />, path: '/submissions' },
-  { text: 'Statistics', icon: <AssessmentIcon />, path: '/statistics' },
+  {
+    label: 'Главная',
+    icon: DashboardIcon,
+    path: '/',
+    exact: true,
+  },
+  {
+    label: 'Задачи',
+    icon: CodeIcon,
+    path: '/tasks',
+    exact: false,
+  },
+  {
+    label: 'Мои решения',
+    icon: HistoryIcon,
+    path: '/submissions',
+    exact: false,
+  },
+  {
+    label: 'Статистика',
+    icon: BarChartIcon,
+    path: '/statistics',
+    exact: false,
+  },
 ];
 
-const Sidebar = () => {
+interface SidebarProps {
+  onNavigate?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { sidebarOpen, toggleSidebar } = useAppStore();
 
-  const handleNavigation = (path: string) => {
+  const isActive = (path: string, exact: boolean) => {
+    if (exact) return location.pathname === path;
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
+
+  const handleNav = (path: string) => {
     navigate(path);
-    if (window.innerWidth < 960) {
-      toggleSidebar();
-    }
+    onNavigate?.();
   };
 
   return (
-    <List sx={{ pt: 2 }}>
-      {menuItems.map((item) => {
-        const isActive = location.pathname === item.path;
-        return (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={isActive}
-              onClick={() => handleNavigation(item.path)}
-              sx={{
-                mx: 1,
-                my: 0.5,
-                borderRadius: 2,
-                '&.Mui-selected': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.12)',
-                  },
-                },
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 40, color: isActive ? 'primary.main' : 'inherit' }}>
-                {item.icon}
-              </ListItemIcon>
-              {sidebarOpen && (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        py: 1,
+      }}
+    >
+      {/* Nav links */}
+      <List sx={{ px: 0, flexGrow: 1 }}>
+        {menuItems.map((item) => {
+          const active = isActive(item.path, item.exact);
+          const Icon = item.icon;
+
+          return (
+            <ListItem key={item.label} disablePadding sx={{ display: 'block' }}>
+              <ListItemButton
+                selected={active}
+                onClick={() => handleNav(item.path)}
+                sx={{
+                  mx: '8px',
+                  my: '2px',
+                  borderRadius: '10px',
+                  width: 'calc(100% - 16px)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  ...(active && {
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: '25%',
+                      bottom: '25%',
+                      width: 3,
+                      borderRadius: '0 3px 3px 0',
+                      background: `linear-gradient(180deg, ${brand.indigo} 0%, ${brand.rose} 100%)`,
+                    },
+                  }),
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 38,
+                    color: active ? 'primary.main' : 'text.secondary',
+                    transition: 'color 0.15s',
+                  }}
+                >
+                  <Icon fontSize="small" />
+                </ListItemIcon>
                 <ListItemText
-                  primary={item.text}
+                  primary={item.label}
                   primaryTypographyProps={{
-                    fontWeight: isActive ? 600 : 400,
-                    color: isActive ? 'primary.main' : 'inherit',
+                    fontSize: '0.875rem',
+                    fontWeight: active ? 700 : 500,
+                    color: active ? 'primary.main' : 'text.primary',
+                    noWrap: true,
                   }}
                 />
-              )}
-            </ListItemButton>
-          </ListItem>
-        );
-      })}
-    </List>
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
+
+      {/* Footer version tag */}
+      <Box sx={{ px: 2.5, pb: 2.5 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: 'text.disabled',
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '0.65rem',
+            display: 'block',
+          }}
+        >
+          v1.0 · web-resolver-task
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 

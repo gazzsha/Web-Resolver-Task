@@ -21,6 +21,14 @@ interface TaskResultRepository : JpaRepository<TaskResultEntity, Long> {
 
     fun findByUserId(userId: UUID): List<TaskResultEntity>
 
+    fun findBySubmissionIdIn(submissionIds: List<UUID>): List<TaskResultEntity>
+
+    @Query(
+        "SELECT COUNT(DISTINCT tr.taskId) FROM TaskResultEntity tr " +
+        "WHERE tr.submissionId IN :submissionIds AND tr.status = 'SUCCESS'"
+    )
+    fun countDistinctSolvedTasksBySubmissionIds(@Param("submissionIds") submissionIds: List<UUID>): Long
+
     @Query("SELECT tr FROM TaskResultEntity tr WHERE tr.testId = :testId AND tr.userId = :userId ORDER BY tr.createdAt DESC")
     fun findByTestIdAndUserId(
         @Param("testId") testId: UUID,
