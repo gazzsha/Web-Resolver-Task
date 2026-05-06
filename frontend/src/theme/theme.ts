@@ -1,4 +1,4 @@
-import { createTheme, responsiveFontSizes } from '@mui/material/styles';
+import { createTheme, responsiveFontSizes, type TypographyVariantsOptions } from '@mui/material/styles';
 
 // Custom color palette
 const colors = {
@@ -95,11 +95,7 @@ const lightTheme = createTheme({
       textTransform: 'none',
       fontWeight: 600,
     },
-    code: {
-      fontFamily: '"JetBrains Mono", "Fira Code", monospace',
-      fontSize: '0.875rem',
-    },
-  },
+  } as TypographyVariantsOptions,
   shape: {
     borderRadius: 8,
   },

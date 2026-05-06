@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Task, SubmissionResult, AIAnalysis } from '@/types';
+import type { Task, SubmissionResult } from '@/types';
 
 interface AppState {
   // Tasks

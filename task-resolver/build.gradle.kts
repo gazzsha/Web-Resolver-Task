@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.security)
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(libs.postgres)
     implementation(libs.spring.kafka)

@@ -17,6 +17,7 @@ postgresVersion = "42.7.4"
 kafkaVersion = "3.2.8"
 dependencyManagement = "1.1.7"
 flywayVersion = "10.20.1"
+jjwtVersion = "0.12.6"
 
 [libraries]
 
@@ -42,6 +43,11 @@ openapi-generator-gradle-plugin = { module = "org.openapi.generator:org.openapi.
 liquibase-core = { module = "org.liquibase:liquibase-core", version.ref = "liquibaseCore" }
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flywayVersion" }
 flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flywayVersion" }
+spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security", version.ref = "springBoot" }
+spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator", version.ref = "springBoot" }
+jjwt-api = { module = "io.jsonwebtoken:jjwt-api", version.ref = "jjwtVersion" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwtVersion" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwtVersion" }
 
 chatgpt = { module = "com.github.plexpt:chatgpt", version.ref = "chatGPT" }
 

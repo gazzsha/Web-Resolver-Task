@@ -1,6 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
 import Layout from './components/common/Layout';
+import { RequireAuth } from './components/auth/RequireAuth';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import TaskList from './pages/TaskList';
 import TaskDetail from './pages/TaskDetail';
@@ -10,15 +13,26 @@ import Results from './pages/Results';
 function App() {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<TaskList />} />
-          <Route path="/tasks/:id" element={<TaskDetail />} />
-          <Route path="/submit/:id" element={<Submission />} />
-          <Route path="/results/:id" element={<Results />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/*"
+          element={
+            <RequireAuth>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/tasks" element={<TaskList />} />
+                  <Route path="/tasks/:id" element={<TaskDetail />} />
+                  <Route path="/submit/:id" element={<Submission />} />
+                  <Route path="/results/:id" element={<Results />} />
+                </Routes>
+              </Layout>
+            </RequireAuth>
+          }
+        />
+      </Routes>
     </Box>
   );
 }

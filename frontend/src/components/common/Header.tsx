@@ -8,15 +8,24 @@ import {
   Menu,
   MenuItem,
   Tooltip,
+  ListItemIcon,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/store/appStore';
+import { useAuthStore } from '@/store/authStore';
 
-const Header = () => {
-  const { sidebarOpen, toggleSidebar, darkMode, toggleDarkMode } = useAppStore();
+const Header: React.FC = () => {
+  const { toggleSidebar, darkMode, toggleDarkMode } = useAppStore();
+  const userEmail = useAuthStore((s) => s.user?.email);
+  const navigate = useNavigate();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -25,6 +34,12 @@ const Header = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    handleMenuClose();
+    useAuthStore.getState().logout();
+    navigate('/login');
   };
 
   return (
@@ -45,38 +60,54 @@ const Header = () => {
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        {/* Theme Toggle */}
         <Tooltip title={darkMode ? 'Light Mode' : 'Dark Mode'}>
           <IconButton onClick={toggleDarkMode} color="inherit" size="large">
             {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
           </IconButton>
         </Tooltip>
 
-        {/* User Menu */}
-        <Tooltip title="Account">
-          <IconButton onClick={handleMenuOpen} color="inherit" size="large">
-            <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
-              <AccountCircleIcon />
-            </Avatar>
-          </IconButton>
-        </Tooltip>
+        {userEmail && (
+          <>
+            <Typography
+              variant="body2"
+              sx={{ display: { xs: 'none', sm: 'block' }, opacity: 0.85 }}
+            >
+              {userEmail}
+            </Typography>
 
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          PaperProps={{
-            elevation: 3,
-            sx: { mt: 1, minWidth: 180 },
-          }}
-        >
-          <MenuItem onClick={handleMenuClose}>
-            <AccountCircleIcon sx={{ mr: 2 }} />
-            Profile
-          </MenuItem>
-          <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-          <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
-        </Menu>
+            <Tooltip title="Аккаунт">
+              <IconButton onClick={handleMenuOpen} color="inherit" size="large">
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}>
+                  <AccountCircleIcon />
+                </Avatar>
+              </IconButton>
+            </Tooltip>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              PaperProps={{
+                elevation: 3,
+                sx: { mt: 1, minWidth: 180 },
+              }}
+            >
+              <MenuItem disabled>
+                <ListItemText
+                  primary={userEmail}
+                  primaryTypographyProps={{ variant: 'body2', noWrap: true }}
+                />
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary="Выйти" />
+              </MenuItem>
+            </Menu>
+          </>
+        )}
       </Box>
     </Toolbar>
   );

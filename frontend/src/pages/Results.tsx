@@ -21,7 +21,6 @@ import {
   TableRow,
   Card,
   CardContent,
-  Fade,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -29,7 +28,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import TimerIcon from '@mui/icons-material/Timer';
 import MemoryIcon from '@mui/icons-material/Memory';
 import CodeIcon from '@mui/icons-material/Code';
-import type { SubmissionResult, TestResult } from '@/types';
+import type { SubmissionResult } from '@/types';
 import { submissionService } from '@/services/api';
 
 const Results = () => {

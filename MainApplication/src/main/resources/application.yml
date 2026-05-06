@@ -46,6 +46,27 @@ kafka:
         bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
         topic: task-execution
         acks: all
+  worker:
+    topic: task-execution
+    group-id: ${KAFKA_WORKER_GROUP_ID:worker-group}
+  result:
+    topic: task-results
+
+# In-process worker (modular monolith). Used by ru.worker.* beans
+sandbox:
+  docker:
+    enabled: true
+    network: none
+    read-only: true
+    memory-limit-mb: 256
+    cpu-limit: 1.0
+  timeout-seconds: 5
+  max-memory-limit-mb: 512
+  max-timeout-seconds: 10
+
+worker:
+  concurrency: 3
+  max-tasks-per-poll: 10
 
 gigachat:
   auth-key: ${GIGACHAT_AUTH_KEY:}

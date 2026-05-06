@@ -1,0 +1,161 @@
+openapi: "3.0.1"
+info:
+  title: Auth API
+  version: v1
+tags:
+  - name: Auth
+    description: Регистрация, логин и обновление токена
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Регистрация нового пользователя
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Пользователь создан, выданы токены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '400':
+          description: Невалидный запрос
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '409':
+          description: Email уже занят
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Логин пользователя
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Токены выданы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Неверные учётные данные
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Обновить access-токен по refresh-токену
+      operationId: refresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Новая пара токенов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JwtResponse'
+        '401':
+          description: Refresh-токен невалиден или просрочен
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Role:
+      type: string
+      enum:
+        - STUDENT
+        - TEACHER
+
+    RegisterRequest:
+      title: Регистрация пользователя
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@diplom.local
+          minLength: 3
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          example: Student123!
+          minLength: 8
+          maxLength: 128
+        role:
+          $ref: '#/components/schemas/Role'
+
+    LoginRequest:
+      title: Логин пользователя
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: student@diplom.local
+        password:
+          type: string
+          format: password
+          example: Student123!
+
+    RefreshRequest:
+      title: Обновление токена
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    JwtResponse:
+      title: Пара JWT-токенов
+      required:
+        - accessToken
+        - refreshToken
+        - role
+        - email
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+        email:
+          type: string
+          format: email

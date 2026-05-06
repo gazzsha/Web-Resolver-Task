@@ -1,8 +1,9 @@
 components:
   securitySchemes:
-    basicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     orderId:
       in: path

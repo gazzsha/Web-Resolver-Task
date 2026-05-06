@@ -26,8 +26,9 @@ import java.util.concurrent.TimeUnit
 @Configuration
 class AiAnalyzerConfig {
 
-    @Bean
+    @Bean(name = ["aiAnalyzerObjectMapper"])
     fun aiAnalyzerObjectMapper(): ObjectMapper = jacksonObjectMapper()
+        .findAndRegisterModules()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
     @Bean(name = ["gigaChatWebClient"])
@@ -93,6 +94,7 @@ class AiAnalyzerConfig {
     @Primary
     fun gigaChatAnalyzer(
         client: GigaChatClient,
+        @org.springframework.beans.factory.annotation.Qualifier("aiAnalyzerObjectMapper")
         objectMapper: ObjectMapper,
         fallback: SimpleRuleBasedAnalyzer,
         @org.springframework.beans.factory.annotation.Qualifier("aiAnalysisCache")

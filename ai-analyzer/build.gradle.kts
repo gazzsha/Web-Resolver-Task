@@ -22,6 +22,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test:3.5.0")
     testImplementation("io.mockk:mockk:1.13.13")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {

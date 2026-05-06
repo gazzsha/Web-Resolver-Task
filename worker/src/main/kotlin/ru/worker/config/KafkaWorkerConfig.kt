@@ -21,7 +21,7 @@ class KafkaWorkerConfig {
     @Value("\${spring.kafka.bootstrap-servers:localhost:9092}")
     private val bootstrapServers: String = "localhost:9092"
 
-    @Value("\${spring.kafka.consumer.group-id:worker-group}")
+    @Value("\${kafka.worker.group-id:worker-group}")
     private val groupId: String = "worker-group"
 
     @Bean

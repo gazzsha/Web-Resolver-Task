@@ -16,9 +16,8 @@
 ```bash
 cp .env.example .env       # заполнить GIGACHAT_AUTH_KEY, JWT_SECRET и т.п.
 docker compose up -d postgres kafka zookeeper
-./gradlew :MainApplication:bootRun        # терминал 1, порт 8080
-./gradlew :worker:bootRun                 # терминал 2
-cd frontend && npm install && npm run dev # терминал 3, порт 5173
+./gradlew :MainApplication:bootRun        # терминал 1, порт 8080 (включает worker как модуль)
+cd frontend && npm install && npm run dev # терминал 2, порт 5173
 ```
 
 ## Модули
@@ -30,7 +29,7 @@ cd frontend && npm install && npm run dev # терминал 3, порт 5173
 | `api-generator` | OpenAPI → Spring interfaces + DTO |
 | `db` | JPA-сущности, миграции Flyway |
 | `sandbox` | изолированное исполнение пользовательского кода в Docker |
-| `worker` | фоновое исполнение задач, Kafka consumer/producer |
+| `worker` | фоновое исполнение задач (Kafka consumer/producer + sandbox-runner). Линкуется в `MainApplication` — модульный монолит, отдельного процесса нет. |
 | `ai-analyzer` | LLM-интеграция (GigaChat) + rule-based fallback |
 | `scenario-runner` | runner тестовых сценариев |
 | `common` | общий код |

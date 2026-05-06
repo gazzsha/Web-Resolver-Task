@@ -8,7 +8,15 @@ const api = axios.create({
   },
 });
 
-// Request interceptor for adding auth token
+// Dedicated instance for /auth endpoints (no /api/v1 prefix, no auth header needed)
+export const authApi = axios.create({
+  baseURL: '/auth',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor — attach Bearer token from localStorage
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -20,11 +28,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+// Response interceptor — on 401 clear auth state so RequireAuth redirects to /login
+// TODO: automatic token refresh on 401 (MVP skipped — too many edge cases with concurrent requests)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+  (error: unknown) => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      // Import lazily to avoid circular dependency at module evaluation time
+      import('@/store/authStore').then(({ useAuthStore }) => {
+        useAuthStore.getState().logout();
+      });
+    }
+    console.error('API Error:', axios.isAxiosError(error) ? error.response?.data ?? error.message : error);
     return Promise.reject(error);
   }
 );
@@ -80,7 +95,6 @@ export const aiService = {
 // Statistics services
 export const statsService = {
   getUserStats: async (userId: string): Promise<UserStatistics> => {
-    // Mock implementation - replace with actual API
     const response = await api.get<UserStatistics>(`/users/${userId}/stats`);
     return response.data;
   },

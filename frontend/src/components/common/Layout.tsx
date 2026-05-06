@@ -11,7 +11,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { sidebarOpen, darkMode, toggleSidebar } = useAppStore();
+  const { sidebarOpen, darkMode } = useAppStore();
 
   return (
     <Box sx={{ display: 'flex' }}>
