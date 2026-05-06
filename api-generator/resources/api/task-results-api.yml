@@ -187,6 +187,12 @@ components:
         createdAt:
           type: string
           format: date-time
+        code:
+          type: string
+          nullable: true
+          description: Исходный код решения (для Resubmit-prefill)
+        language:
+          $ref: './common-models.yml#/components/schemas/lang'
 
     TaskStatus:
       type: string

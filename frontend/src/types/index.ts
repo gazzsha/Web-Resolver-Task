@@ -24,7 +24,7 @@ export interface SubmissionResult {
   memoryUsedKb: number;
   testResults: TestResult[];
   scenarioResults?: ScenarioResult[];
-  aiAnalysis?: AIAnalysis;
+  aiAnalysis?: AIAnalysisSummary;
   createdAt: string;
 }
 
@@ -54,7 +54,17 @@ export interface StepResult {
 }
 
 // AI Analysis types
-export interface AIAnalysis {
+
+// Summary embedded in TaskResultResponse (from AIAnalysisSummary schema)
+export interface AIAnalysisSummary {
+  codeQuality?: number;
+  issueCount?: number;
+  complexity?: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
+  explanation?: string;
+}
+
+// Full analysis from /api/v1/ai-analysis/{submissionId}
+export interface AIAnalysisFull {
   codeQuality: number;
   issues: CodeIssue[];
   recommendations: string[];
@@ -62,10 +72,13 @@ export interface AIAnalysis {
   complexity: 'LOW' | 'MEDIUM' | 'HIGH' | 'VERY_HIGH';
 }
 
+// Legacy alias kept for api.ts compatibility
+export type AIAnalysis = AIAnalysisFull;
+
 export interface CodeIssue {
   type: 'BUG' | 'CODE_SMELL' | 'SECURITY' | 'PERFORMANCE' | 'STYLE';
   severity: 'BLOCKER' | 'CRITICAL' | 'MAJOR' | 'MINOR' | 'INFO';
-  line?: number;
+  line?: number | null;
   message: string;
   suggestion: string;
 }

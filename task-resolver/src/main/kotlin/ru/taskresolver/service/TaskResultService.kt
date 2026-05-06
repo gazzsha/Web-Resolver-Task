@@ -99,5 +99,7 @@ class TaskResultService(
                     .explanation(ai.explanation)
             })
             .createdAt(java.time.OffsetDateTime.ofInstant(entity.createdAt, java.time.ZoneOffset.UTC))
+            .code(entity.code)
+            .language(model.Lang.fromValue(entity.language))
     }
 }

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Task, Submission, SubmissionResult, AIAnalysis, UserStatistics } from '@/types';
+import type { Task, Submission, SubmissionResult, AIAnalysisFull, UserStatistics } from '@/types';
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -77,9 +77,14 @@ export const submissionService = {
 
 // AI Analysis services
 export const aiService = {
-  getAnalysis: async (taskId: string): Promise<AIAnalysis> => {
-    const response = await api.get<AIAnalysis>(`/ai-analysis/${taskId}`);
-    return response.data;
+  getAnalysis: async (submissionId: string): Promise<AIAnalysisFull | null> => {
+    try {
+      const response = await api.get<AIAnalysisFull>(`/ai-analysis/${submissionId}`);
+      return response.data;
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e) && e.response?.status === 404) return null;
+      throw e;
+    }
   },
 
   explainError: async (

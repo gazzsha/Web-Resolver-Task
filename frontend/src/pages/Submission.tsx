@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -21,8 +21,11 @@ import { toast } from 'react-toastify';
 const Submission = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [code, setCode] = useState<string>(getDefaultCode('java'));
-  const [language, setLanguage] = useState<'java' | 'kotlin' | 'python'>('java');
+  const location = useLocation();
+  const prefilled = location.state as { prefilledCode?: string; language?: 'java' | 'kotlin' | 'python' } | null;
+  const initialLang: 'java' | 'kotlin' | 'python' = prefilled?.language ?? 'java';
+  const [code, setCode] = useState<string>(prefilled?.prefilledCode ?? getDefaultCode(initialLang));
+  const [language, setLanguage] = useState<'java' | 'kotlin' | 'python'>(initialLang);
   const [submitting, setSubmitting] = useState(false);
 
   function getDefaultCode(lang: string): string {
