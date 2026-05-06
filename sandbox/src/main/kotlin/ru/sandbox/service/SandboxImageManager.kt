@@ -8,9 +8,11 @@ private val logger = KotlinLogging.logger {}
 class SandboxImageManager {
 
     private val knownImages = setOf(
+        // Memory is measured via /proc/$pid/status polling — works on any
+        // Linux image (alpine or debian).
         "eclipse-temurin:21-jdk-alpine",
         "python:3.11-alpine",
-        "gradle:8.5-jdk21"
+        "zenika/kotlin:latest"
     )
 
     /**
@@ -23,7 +25,7 @@ class SandboxImageManager {
         for (image in knownImages) {
             logger.info { "Pre-warming image: $image" }
             try {
-                val process = ProcessBuilder("docker", "pull", image)
+                val process = ProcessBuilder("docker", "pull", "--platform", "linux/amd64", image)
                     .redirectErrorStream(true)
                     .start()
                 val finished = process.waitFor(180, TimeUnit.SECONDS)
@@ -51,16 +53,22 @@ class SandboxImageManager {
     }
 
     private fun isImageLocal(image: String): Boolean {
+        // We force linux/amd64 at runtime, so check that the amd64 variant
+        // is the one stored locally. `docker image inspect` matches by tag,
+        // not platform, so we additionally verify the manifest architecture.
         return try {
-            val process = ProcessBuilder("docker", "image", "inspect", image)
-                .redirectErrorStream(true)
-                .start()
+            val process = ProcessBuilder(
+                "docker", "image", "inspect", "--format={{.Architecture}}", image
+            ).redirectErrorStream(true).start()
             val finished = process.waitFor(10, TimeUnit.SECONDS)
             if (!finished) {
                 process.destroyForcibly()
                 false
+            } else if (process.exitValue() != 0) {
+                false
             } else {
-                process.exitValue() == 0
+                val arch = process.inputStream.bufferedReader().readText().trim()
+                arch == "amd64"
             }
         } catch (e: Exception) {
             logger.warn(e) { "docker image inspect failed for $image" }
@@ -70,7 +78,7 @@ class SandboxImageManager {
 
     private fun pullImage(image: String): Boolean {
         return try {
-            val process = ProcessBuilder("docker", "pull", image)
+            val process = ProcessBuilder("docker", "pull", "--platform", "linux/amd64", image)
                 .redirectErrorStream(true)
                 .start()
             val finished = process.waitFor(120, TimeUnit.SECONDS)

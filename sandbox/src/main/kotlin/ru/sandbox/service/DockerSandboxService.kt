@@ -105,7 +105,7 @@ class DockerSandboxService(
             } else null
 
             return runResult.copy(
-                executionTimeMs = endTime - startTime,
+                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
                 verdict = verdict
             )
         } finally {
@@ -150,7 +150,7 @@ class DockerSandboxService(
             } else null
 
             return runResult.copy(
-                executionTimeMs = endTime - startTime,
+                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
                 verdict = verdict
             )
         } finally {
@@ -180,7 +180,7 @@ class DockerSandboxService(
             val runResult = runInDocker(
                 requestId = request.requestId,
                 requestDir = requestDir,
-                image = "gradle:8.5-jdk21",
+                image = "zenika/kotlin:latest",
                 command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar < input.txt"),
                 timeoutSeconds = request.timeoutSeconds * 3,
                 memoryLimitMb = request.memoryLimitMb,
@@ -194,7 +194,7 @@ class DockerSandboxService(
             } else null
 
             return runResult.copy(
-                executionTimeMs = endTime - startTime,
+                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
                 verdict = verdict
             )
         } finally {
@@ -228,6 +228,10 @@ class DockerSandboxService(
                 add("docker")
                 add("run")
                 add("--rm")
+                // Pin amd64 so docker doesn't print a "platform mismatch" warning
+                // into stdout on Apple Silicon hosts (the warning would otherwise
+                // get appended to the program output and break compareOutput).
+                add("--platform=linux/amd64")
                 add("--network=none")
                 add("--read-only")
                 add("--tmpfs")
@@ -256,8 +260,8 @@ class DockerSandboxService(
 
             val finished = process.waitFor(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
 
-            val output = if (finished) {
-                process.inputStream.bufferedReader().readText().trim()
+            val rawOutput = if (finished) {
+                process.inputStream.bufferedReader().readText()
             } else {
                 process.destroyForcibly()
                 ""
@@ -272,13 +276,22 @@ class DockerSandboxService(
                 else -> ExecutionStatus.RUNTIME_ERROR
             }
 
+            // Extract markers emitted by memoryWrapper() inside the container.
+            val memMarker = Regex("__MEM_KB__(\\d+)__END__").find(rawOutput)
+            val memoryKb = memMarker?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+            val timeMarker = Regex("__TIME_MS__(\\d+)__END__").find(rawOutput)
+            val elapsedMs = timeMarker?.groupValues?.get(1)?.toLongOrNull() ?: 0L
+            val output = rawOutput
+                .replace(Regex("__(MEM_KB|TIME_MS)__\\d+__END__\\s*"), "")
+                .trim()
+
             return SandboxExecutionResult(
                 requestId = requestId,
                 status = status,
                 output = output,
                 error = null,
-                executionTimeMs = 0,
-                memoryUsedKb = 0
+                executionTimeMs = elapsedMs,
+                memoryUsedKb = memoryKb
             )
         } catch (e: Exception) {
             logger.error(e) { "Docker execution failed" }
@@ -293,6 +306,40 @@ class DockerSandboxService(
         }
     }
     
+    /**
+     * Wraps a runner command so we can extract:
+     *   - peak RSS sampled from /proc/$pid/status while the child is alive
+     *   - wall-clock execution time taken from /proc/uptime around the run
+     *
+     * Both are emitted to stderr (merged with stdout via redirectErrorStream)
+     * as trailer markers parsed by runInDocker:
+     *   __MEM_KB__<peak-kb>__END__
+     *   __TIME_MS__<elapsed-ms>__END__
+     *
+     * /proc is present in every Linux container — works on alpine + debian.
+     */
+    private fun memoryWrapper(innerCmd: String): String = buildString {
+        // Run the program in background, sample VmHWM (peak RSS) once per
+        // second from /proc/$pid/status while it lives. VmHWM is monotonic,
+        // so the last successful sample is the true peak. Wall time comes
+        // from /proc/uptime deltas. Works on any Linux container (alpine,
+        // debian) — no GNU `time` needed.
+        append("START=\$(awk '{print \$1}' /proc/uptime); ")
+        append(innerCmd)
+        append(" & P=\$!; PEAK=0; ")
+        append("while kill -0 \$P 2>/dev/null; do ")
+        append("M=\$(awk '/VmHWM/ {print \$2}' /proc/\$P/status 2>/dev/null); ")
+        append("[ -n \"\$M\" ] && [ \"\$M\" -gt \"\$PEAK\" ] && PEAK=\$M; ")
+        append("sleep 1; ")
+        append("done; ")
+        append("wait \$P; RC=\$?; ")
+        append("END=\$(awk '{print \$1}' /proc/uptime); ")
+        append("ELAPSED_MS=\$(awk -v s=\$START -v e=\$END 'BEGIN{printf \"%d\", (e - s) * 1000}'); ")
+        append("echo \"__MEM_KB__\${PEAK}__END__\" >&2; ")
+        append("echo \"__TIME_MS__\${ELAPSED_MS}__END__\" >&2; ")
+        append("exit \$RC")
+    }
+
     private fun extractClassName(code: String): String? {
         val classPattern = Regex("""(?:public\s+)?class\s+(\w+)""")
         return classPattern.find(code)?.groupValues?.get(1)

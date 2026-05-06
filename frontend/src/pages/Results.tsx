@@ -309,7 +309,7 @@ const Results = () => {
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               {[
                 { icon: <TimerIcon />, value: `${result.totalExecutionTimeMs} мс`, label: 'Время' },
-                { icon: <MemoryIcon />, value: `${result.memoryUsedKb} КБ`, label: 'Память' },
+                { icon: <MemoryIcon />, value: result.memoryUsedKb > 0 ? `${result.memoryUsedKb} КБ` : '—', label: 'Память' },
                 { icon: <CodeIcon />, value: `${result.passedTests}/${result.totalTests}`, label: 'Тесты' },
               ].map((m, i) => (
                 <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -396,7 +396,7 @@ const Results = () => {
                   </TableCell>
                   <TableCell align="right">
                     <Typography variant="caption" sx={{ fontFamily: '"JetBrains Mono", monospace' }}>
-                      {test.memoryUsedKb} КБ
+                      {test.memoryUsedKb > 0 ? `${test.memoryUsedKb} КБ` : '—'}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -449,7 +449,7 @@ const Results = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <MemoryIcon fontSize="small" sx={{ color: 'text.disabled', fontSize: 14 }} />
                   <Typography variant="caption" sx={{ fontFamily: '"JetBrains Mono", monospace' }}>
-                    {test.memoryUsedKb} КБ
+                    {test.memoryUsedKb > 0 ? `${test.memoryUsedKb} КБ` : '—'}
                   </Typography>
                 </Box>
               </Box>
