@@ -443,6 +443,19 @@ const Results = () => {
       ))}
 
       {/* AI Analysis Block */}
+      {!hasAIBlock && (
+        <Paper sx={{ p: 3, mb: 3 }} variant="outlined">
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
+            AI-анализ кода
+          </Typography>
+          <Alert severity="info" icon={<InfoIcon />}>
+            AI-анализ для этого решения недоступен. Возможные причины: не задан
+            <code style={{ margin: '0 4px' }}>GIGACHAT_AUTH_KEY</code>в окружении,
+            истёк токен или временно недоступен внешний сервис. Базовая проверка
+            тестов прошла нормально — посмотри таблицу выше.
+          </Alert>
+        </Paper>
+      )}
       {hasAIBlock && (
         <Paper sx={{ p: 3, mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>

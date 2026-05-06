@@ -2,11 +2,17 @@ package ru.taskresolver.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import ru.db.entity.AIAnalysisEntity
+import ru.db.entity.CodeComplexity
+import ru.db.entity.CodeIssueJson
+import ru.db.entity.IssueType
 import ru.db.entity.ScenarioResultJson
+import ru.db.entity.Severity
 import ru.db.entity.StepResultJson
 import ru.db.entity.TaskResultEntity
 import ru.db.entity.TestResultJson
 import ru.db.entity.SubmissionStatus
+import ru.db.repository.AIAnalysisRepository
 import ru.db.repository.SubmissionRepository
 import ru.db.repository.TaskResultRepository
 import ru.worker.model.TaskStatus
@@ -18,7 +24,8 @@ import java.util.*
 @Service
 class TaskResultSaveService(
     private val taskResultRepository: TaskResultRepository,
-    private val submissionRepository: SubmissionRepository
+    private val submissionRepository: SubmissionRepository,
+    private val aiAnalysisRepository: AIAnalysisRepository
 ) {
 
     @Transactional
@@ -28,7 +35,8 @@ class TaskResultSaveService(
         testId: UUID,
         code: String,
         language: String,
-        testResults: List<TestExecutionResult>
+        testResults: List<TestExecutionResult>,
+        aiAnalysis: AIAnalysisInput? = null
     ): TaskResultEntity {
         val passedTests = testResults.count { it.status == TestStatus.PASSED }
         val totalTests = testResults.size
@@ -62,7 +70,25 @@ class TaskResultSaveService(
             submissionRepository.save(submission)
         }
 
-        return taskResultRepository.save(entity)
+        val saved = taskResultRepository.save(entity)
+
+        if (aiAnalysis != null) {
+            val aiEntity = AIAnalysisEntity(
+                taskResultId = saved.id,
+                codeQualityScore = aiAnalysis.codeQuality,
+                issues = aiAnalysis.issues,
+                recommendations = aiAnalysis.recommendations,
+                explanation = aiAnalysis.explanation,
+                complexity = aiAnalysis.complexity,
+                modelVersion = aiAnalysis.modelVersion,
+                createdAt = Instant.now()
+            )
+            val savedAi = aiAnalysisRepository.save(aiEntity)
+            saved.aiAnalysis = savedAi
+            taskResultRepository.save(saved)
+        }
+
+        return saved
     }
 
     @Transactional(readOnly = true)
@@ -101,3 +127,12 @@ data class TestExecutionResult(
         )
     }
 }
+
+data class AIAnalysisInput(
+    val codeQuality: Int,
+    val issues: List<CodeIssueJson>,
+    val recommendations: List<String>,
+    val explanation: String,
+    val complexity: CodeComplexity,
+    val modelVersion: String
+)

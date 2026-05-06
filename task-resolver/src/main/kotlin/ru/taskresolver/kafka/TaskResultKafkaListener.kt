@@ -6,6 +6,11 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
+import ru.db.entity.CodeComplexity
+import ru.db.entity.CodeIssueJson
+import ru.db.entity.IssueType
+import ru.db.entity.Severity
+import ru.taskresolver.service.AIAnalysisInput
 import ru.taskresolver.service.TaskResultSaveService
 import ru.taskresolver.service.TestExecutionResult
 import ru.worker.model.TestStatus
@@ -51,13 +56,36 @@ class TaskResultKafkaListener(
                 )
             }
 
+            val aiAnalysisNode = jsonNode.get("aiAnalysis")
+            val aiAnalysis = if (aiAnalysisNode != null && !aiAnalysisNode.isNull) {
+                AIAnalysisInput(
+                    codeQuality = aiAnalysisNode.get("codeQuality")?.asInt() ?: 0,
+                    issues = aiAnalysisNode.get("issues")?.map { issue ->
+                        CodeIssueJson(
+                            type = IssueType.valueOf(issue.get("type").asText()),
+                            severity = Severity.valueOf(issue.get("severity").asText()),
+                            line = issue.get("line")?.takeIf { !it.isNull }?.asInt(),
+                            message = issue.get("message").asText(),
+                            suggestion = issue.get("suggestion").asText()
+                        )
+                    } ?: emptyList(),
+                    recommendations = aiAnalysisNode.get("recommendations")?.map { it.asText() } ?: emptyList(),
+                    explanation = aiAnalysisNode.get("explanation")?.asText("") ?: "",
+                    complexity = CodeComplexity.valueOf(aiAnalysisNode.get("complexity")?.asText() ?: "MEDIUM"),
+                    modelVersion = aiAnalysisNode.get("modelVersion")?.asText("rule-based") ?: "rule-based"
+                )
+            } else {
+                null
+            }
+
             val savedResult = taskResultSaveService.saveResult(
                 submissionId = submissionId,
                 taskId = taskId,
                 testId = testId,
                 code = code,
                 language = language,
-                testResults = testResults
+                testResults = testResults,
+                aiAnalysis = aiAnalysis
             )
 
             logger.info { "Saved result for submission $submissionId with status $statusStr" }
