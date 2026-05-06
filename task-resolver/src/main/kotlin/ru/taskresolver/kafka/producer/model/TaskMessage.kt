@@ -17,36 +17,18 @@ data class TestCase(
     val expectedOutput: String
 )
 
+// Tests in test_resolve.tests are stored as a flat JSONB list
+// of {input: String, expectedOutput: String} (see V4/V5 migrations).
 fun parseTestCasesFromJson(testsJson: String, objectMapper: ObjectMapper): List<TestCase> {
     val testsNode = objectMapper.readTree(testsJson)
-    return testsNode.map { node ->
-        val inputNode = node.get("input")
-        val outputNode = node.get("output")
-        
-        // Convert input map to string format: "nums=[2,7,11,15]\ntarget=9"
-        val inputString = inputNode.fields().asSequence().joinToString("\n") { field ->
-            val value = field.value
-            val formattedValue = if (value.isArray) {
-                value.joinToString(",") { it.asInt().toString() }
-            } else {
-                value.asText()
-            }
-            "${field.key}=[$formattedValue]"
-        }
-        
-        // Convert output to string
-        val outputString = outputNode.fields().asSequence().firstOrNull()?.let { field ->
-            if (field.value.isArray) {
-                field.value.joinToString(",") { it.asInt().toString() }
-            } else {
-                field.value.asText()
-            }
-        } ?: ""
-        
+    if (!testsNode.isArray) return emptyList()
+    return testsNode.mapNotNull { node ->
+        val input = node.get("input")?.asText() ?: return@mapNotNull null
+        val expected = node.get("expectedOutput")?.asText() ?: return@mapNotNull null
         TestCase(
             testId = UUID.randomUUID(),
-            input = inputString,
-            expectedOutput = outputString
+            input = input,
+            expectedOutput = expected
         )
     }
 }

@@ -2,6 +2,10 @@ server:
   port: ${SERVER_PORT:8080}
 
 spring:
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
   datasource:
     url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:web_resolver}
     username: ${POSTGRES_USER:postgres}

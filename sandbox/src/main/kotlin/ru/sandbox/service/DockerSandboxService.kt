@@ -124,16 +124,20 @@ class DockerSandboxService(
             val pyFile = requestDir.resolve("solution.py")
             Files.writeString(pyFile, request.code)
 
+            // Write test input to stdin file
+            val inputFile = requestDir.resolve("input.txt")
+            Files.writeString(inputFile, request.testInput)
+
             // Write expected output
             val expectedFile = requestDir.resolve("expected.txt")
             Files.writeString(expectedFile, request.expectedOutput)
 
-            // Run Python code in container with internal registry
+            // Run Python code in container; pipe input.txt → stdin
             val runResult = runInDocker(
                 requestId = request.requestId,
                 requestDir = requestDir,
                 image = "python:3.11-alpine",
-                command = listOf("python", "solution.py"),
+                command = listOf("sh", "-c", "python solution.py < input.txt"),
                 timeoutSeconds = request.timeoutSeconds,
                 memoryLimitMb = request.memoryLimitMb,
                 cpuLimit = request.cpuLimit
@@ -164,16 +168,20 @@ class DockerSandboxService(
             val ktFile = requestDir.resolve("$className.kt")
             Files.writeString(ktFile, request.code)
 
+            // Write test input to stdin file
+            val inputFile = requestDir.resolve("input.txt")
+            Files.writeString(inputFile, request.testInput)
+
             // Write expected output
             val expectedFile = requestDir.resolve("expected.txt")
             Files.writeString(expectedFile, request.expectedOutput)
 
-            // Compile and run Kotlin code in container with internal registry
+            // Compile and run Kotlin code in container; pipe input.txt → stdin
             val runResult = runInDocker(
                 requestId = request.requestId,
                 requestDir = requestDir,
                 image = "gradle:8.5-jdk21",
-                command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar"),
+                command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar < input.txt"),
                 timeoutSeconds = request.timeoutSeconds * 3,
                 memoryLimitMb = request.memoryLimitMb,
                 cpuLimit = request.cpuLimit

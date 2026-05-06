@@ -2,6 +2,7 @@ package ru.aianalyzer.config
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -30,6 +31,7 @@ class AiAnalyzerConfig {
     fun aiAnalyzerObjectMapper(): ObjectMapper = jacksonObjectMapper()
         .findAndRegisterModules()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     @Bean(name = ["gigaChatWebClient"])
     fun gigaChatWebClient(
