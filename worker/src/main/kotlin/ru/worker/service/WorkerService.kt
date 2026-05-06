@@ -23,10 +23,33 @@ class WorkerService(
         val scenarioResults = mutableListOf<ru.scenarioplayer.ScenarioResult>()
 
         try {
-            // 1. Run test cases using TestEngine with Docker Sandbox
-            for (testCase in message.testCases) {
+            // 1. Run test cases using TestEngine with Docker Sandbox.
+            // Early-stop on the first failure (LeetCode-style) so the user
+            // gets feedback within the time of one failed test, not N×timeout.
+            // Remaining tests are recorded as SKIPPED so the UI keeps
+            // showing «passed/total» of the full task, not just the slice
+            // that actually ran.
+            var stopped = false
+            for ((index, testCase) in message.testCases.withIndex()) {
+                if (stopped) {
+                    testResults.add(
+                        TestResult(
+                            testId = testCase.testId,
+                            status = TestStatus.SKIPPED,
+                            verdict = Verdict.WRONG_ANSWER,
+                            output = null,
+                            error = "Пропущено — первый невалидный тест уже прерывает проверку",
+                            executionTimeMs = 0,
+                            memoryUsedKb = 0
+                        )
+                    )
+                    continue
+                }
                 val result = testEngine.runTest(message.code, message.language, testCase)
                 testResults.add(result)
+                if (result.status != TestStatus.PASSED && index < message.testCases.size - 1) {
+                    stopped = true
+                }
             }
 
             // 2. Run scenario tests if present

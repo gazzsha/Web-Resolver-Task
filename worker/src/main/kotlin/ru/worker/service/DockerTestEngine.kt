@@ -33,7 +33,11 @@ class DockerTestEngine(
                 expectedOutput = testCase.expectedOutput,
                 className = extractClassName(code) ?: "Solution",
                 timeoutSeconds = 10L,
-                memoryLimitMb = 256,
+                // 512m gives the JVM (Java/Kotlin) headroom for runtime + stdlib;
+                // 256 was tripping MEMORY_LIMIT_EXCEEDED on Kotlin 2.x even for
+                // trivial user code because the kotlin-stdlib baseline RSS alone
+                // exceeded that.
+                memoryLimitMb = 512,
                 cpuLimit = 1.0
             )
 

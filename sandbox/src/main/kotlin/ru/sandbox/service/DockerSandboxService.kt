@@ -180,7 +180,7 @@ class DockerSandboxService(
             val runResult = runInDocker(
                 requestId = request.requestId,
                 requestDir = requestDir,
-                image = "zenika/kotlin:latest",
+                image = "web-resolver/kotlin:1.9.22",
                 command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar < input.txt"),
                 timeoutSeconds = request.timeoutSeconds * 3,
                 memoryLimitMb = request.memoryLimitMb,
