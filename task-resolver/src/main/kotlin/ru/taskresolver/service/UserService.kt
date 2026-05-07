@@ -24,6 +24,7 @@ class UserService(
         email: String,
         rawPassword: String,
         role: UserRole = UserRole.STUDENT,
+        username: String,
     ): UserEntity {
         if (userRepository.existsByEmail(email)) {
             logger.warn { "Registration attempt with already taken email: $email" }
@@ -33,6 +34,7 @@ class UserService(
             email = email,
             passwordHash = passwordEncoder.encode(rawPassword),
             role = role,
+            username = username,
         )
         return userRepository.save(entity).also {
             logger.info { "Registered new user: id=${it.id}, role=${it.role}" }

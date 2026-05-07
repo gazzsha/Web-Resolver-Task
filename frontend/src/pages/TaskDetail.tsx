@@ -44,14 +44,16 @@ const TaskDetail = () => {
   const isDark = theme.palette.mode === 'dark';
   const [loading, setLoading] = useState(true);
   const [task, setTask] = useState<Task | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const fetchTask = async () => {
       try {
         const data = await taskService.getById(id || '');
         setTask(data);
-      } catch (error) {
-        console.error('Failed to fetch task:', error);
+      } catch (err) {
+        console.error('Failed to fetch task:', err);
+        setError(true);
       } finally {
         setLoading(false);
       }
@@ -64,8 +66,24 @@ const TaskDetail = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
-        <CircularProgress />
+      <Box display="flex" flexDirection="column" alignItems="center" gap={2} sx={{ minHeight: 400, justifyContent: 'center' }}>
+        <CircularProgress aria-label="Загрузка задачи" />
+        <Typography variant="body2" color="text.secondary">
+          Загрузка задачи…
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', mt: 8, textAlign: 'center' }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Не удалось загрузить задачу
+        </Alert>
+        <Button variant="contained" onClick={() => navigate('/tasks')}>
+          Вернуться к списку задач
+        </Button>
       </Box>
     );
   }
@@ -73,7 +91,7 @@ const TaskDetail = () => {
   if (!task) {
     return (
       <Box sx={{ maxWidth: 600, mx: 'auto', mt: 8, textAlign: 'center' }}>
-        <Alert severity="warning" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           Задача не найдена или была удалена.
         </Alert>
         <Button variant="contained" onClick={() => navigate('/tasks')}>
@@ -149,6 +167,7 @@ const TaskDetail = () => {
 
           <Typography
             variant="h3"
+            component="h1"
             sx={{
               fontWeight: 700,
               mb: 2.5,

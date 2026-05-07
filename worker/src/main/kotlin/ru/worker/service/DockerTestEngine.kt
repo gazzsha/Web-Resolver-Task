@@ -65,6 +65,10 @@ class DockerTestEngine(
                 Verdict.OK -> ru.worker.model.Verdict.OK
                 Verdict.WRONG_ANSWER -> ru.worker.model.Verdict.WRONG_ANSWER
                 Verdict.PRESENTATION_ERROR -> ru.worker.model.Verdict.PRESENTATION_ERROR
+                Verdict.RUNTIME_ERROR -> ru.worker.model.Verdict.RUNTIME_ERROR
+                Verdict.TIME_LIMIT_EXCEEDED -> ru.worker.model.Verdict.TIME_LIMIT_EXCEEDED
+                Verdict.MEMORY_LIMIT_EXCEEDED -> ru.worker.model.Verdict.MEMORY_LIMIT_EXCEEDED
+                Verdict.COMPILATION_ERROR -> ru.worker.model.Verdict.COMPILATION_ERROR
                 null -> when (executionResult.status) {
                     ru.sandbox.model.ExecutionStatus.COMPILATION_ERROR -> ru.worker.model.Verdict.COMPILATION_ERROR
                     ru.sandbox.model.ExecutionStatus.RUNTIME_ERROR -> ru.worker.model.Verdict.RUNTIME_ERROR

@@ -9,10 +9,12 @@ import {
   Link,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
 import AuthLayout from '@/components/auth/AuthLayout';
+import { authInputSx } from '@/styles/authInputSx';
 
 const DEMO_ACCOUNTS: ReadonlyArray<{ email: string; password: string; role: string }> = [
   { email: 'student1@diplom.local', password: 'Student123!', role: 'STUDENT' },
@@ -20,32 +22,11 @@ const DEMO_ACCOUNTS: ReadonlyArray<{ email: string; password: string; role: stri
   { email: 'teacher@diplom.local', password: 'Teacher123!', role: 'TEACHER' },
 ];
 
-const inputSx = {
-  '& .MuiOutlinedInput-root': {
-    background: 'rgba(13, 17, 41, 0.5)',
-    color: '#f5f7fb',
-    fontFamily: '"JetBrains Mono", monospace',
-    fontSize: 14,
-    transition: 'all 0.2s ease',
-    '& fieldset': { borderColor: 'rgba(255,255,255,0.12)' },
-    '&:hover fieldset': { borderColor: 'rgba(125,211,252,0.4)' },
-    '&.Mui-focused fieldset': {
-      borderColor: '#7dd3fc',
-      boxShadow: '0 0 0 4px rgba(125,211,252,0.12)',
-    },
-  },
-  '& .MuiInputLabel-root': { color: '#8a92b8', fontSize: 13 },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#7dd3fc' },
-  '& input:-webkit-autofill': {
-    WebkitBoxShadow: '0 0 0 1000px #11163a inset',
-    WebkitTextFillColor: '#f5f7fb',
-    caretColor: '#f5f7fb',
-  },
-} as const;
-
 const LoginPage: React.FC = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const inputSx = authInputSx(theme);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -116,7 +97,14 @@ const LoginPage: React.FC = () => {
       </Box>
 
       <Box sx={{ mt: 3, pt: 2.5, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <Box onClick={() => setDemoOpen(!demoOpen)} sx={{ cursor: 'pointer' }}>
+        <Box
+          onClick={() => setDemoOpen(!demoOpen)}
+          role="button"
+          tabIndex={0}
+          aria-expanded={demoOpen}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDemoOpen(!demoOpen); } }}
+          sx={{ cursor: 'pointer' }}
+        >
           <Typography sx={{ fontSize: 11, fontFamily: '"JetBrains Mono", monospace', color: '#7dd3fc', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             // demo accounts {demoOpen ? '▾' : '▸'}
           </Typography>
@@ -127,6 +115,10 @@ const LoginPage: React.FC = () => {
               <Box
                 key={acc.email}
                 onClick={() => fillDemo(acc)}
+                role="button"
+                tabIndex={0}
+                aria-label={'Заполнить аккаунтом ' + acc.email}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fillDemo(acc); } }}
                 sx={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   background: 'rgba(13,17,41,0.4)', border: '1px solid rgba(255,255,255,0.06)',

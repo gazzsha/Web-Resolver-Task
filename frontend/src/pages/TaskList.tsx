@@ -133,7 +133,7 @@ const TaskList = () => {
     <Box sx={{ width: '100%', maxWidth: 1400 }}>
       {/* Page header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 0.5 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 0.5 }}>
           Задачи
         </Typography>
         <Typography variant="body1" color="text.secondary">
@@ -218,14 +218,29 @@ const TaskList = () => {
             </Grid>
           ))}
         </Grid>
-      ) : filteredTasks.length === 0 ? (
+      ) : filteredTasks.length === 0 && tasks.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 10, color: 'text.secondary' }}>
           <Typography variant="h6" sx={{ mb: 1 }}>
             Задачи не найдены
           </Typography>
           <Typography variant="body2">
+            Список задач пуст. Обратитесь к преподавателю.
+          </Typography>
+        </Box>
+      ) : filteredTasks.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 10, color: 'text.secondary' }}>
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            По вашему запросу ничего не найдено
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 3 }}>
             Попробуйте изменить поисковый запрос или фильтр по сложности
           </Typography>
+          <Button
+            variant="outlined"
+            onClick={() => { setSearchTerm(''); setDifficultyFilter('all'); }}
+          >
+            Сбросить фильтры
+          </Button>
         </Box>
       ) : (
         <Grid container spacing={3}>

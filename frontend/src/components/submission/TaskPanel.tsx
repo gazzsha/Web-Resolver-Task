@@ -7,6 +7,7 @@ import {
   Tooltip,
   Divider,
   Button,
+  Alert,
   alpha,
   useTheme,
   Skeleton,
@@ -41,7 +42,7 @@ const TaskPanel: React.FC<TaskPanelProps> = ({ task, loading, onBack, onResetCod
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
-  const borderColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
+  const borderColor = theme.palette.divider;
   const panelBg = isDark ? theme.palette.background.paper : '#f8f9fc';
 
   const diffColor = task?.difficulty ? DIFFICULTY_COLORS[task.difficulty] : undefined;
@@ -145,7 +146,11 @@ const TaskPanel: React.FC<TaskPanelProps> = ({ task, loading, onBack, onResetCod
             <Skeleton width="85%" height={18} sx={{ mb: 1 }} />
             <Skeleton width="60%" height={18} />
           </>
-        ) : task ? (
+        ) : !task ? (
+          <Alert severity="warning" sx={{ m: 1 }}>
+            Задача не найдена
+          </Alert>
+        ) : (
           <>
             {/* Description section */}
             <Typography
@@ -284,7 +289,7 @@ const TaskPanel: React.FC<TaskPanelProps> = ({ task, loading, onBack, onResetCod
               ))}
             </Box>
           </>
-        ) : null}
+        )}
       </Box>
 
       {/* Sticky footer — reset button */}

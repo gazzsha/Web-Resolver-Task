@@ -266,7 +266,7 @@ const StatisticsPage = () => {
               filter: isDark ? `drop-shadow(0 0 6px ${alpha(brand.rose, 0.6)})` : 'none',
             }}
           />
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
             Статистика
           </Typography>
         </Box>

@@ -9,10 +9,13 @@ import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 import { useAppStore } from './store/appStore';
 import { lightThemeResponsive, darkThemeResponsive } from './theme/theme';
+import { ThemeModeProvider } from './theme/ThemeModeContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AppWrapper />
+    <ThemeModeProvider>
+      <AppWrapper />
+    </ThemeModeProvider>
   </React.StrictMode>
 );
 

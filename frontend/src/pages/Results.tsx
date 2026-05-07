@@ -25,6 +25,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Skeleton,
   alpha,
   useTheme,
 } from '@mui/material';
@@ -124,6 +125,7 @@ const Results = () => {
 
   const [result, setResult] = useState<SubmissionResult | null>(null);
   const [aiFullAnalysis, setAiFullAnalysis] = useState<AIAnalysisFull | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [timedOut, setTimedOut] = useState(false);
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -158,8 +160,13 @@ const Results = () => {
           stopPolling();
           setResult(data);
           setLoading(false);
-          const full = await aiService.getAnalysis(id);
-          setAiFullAnalysis(full);
+          setAiLoading(true);
+          try {
+            const full = await aiService.getAnalysis(id);
+            setAiFullAnalysis(full);
+          } finally {
+            setAiLoading(false);
+          }
         }
       } catch (err: unknown) {
         const status = (err as any)?.response?.status;
@@ -185,7 +192,7 @@ const Results = () => {
   if (loading) {
     return (
       <Box sx={{ maxWidth: 640, mx: 'auto', mt: 8 }}>
-        <Card>
+        <Card role="status" aria-live="polite" aria-label="Ожидание результатов">
           <CardContent sx={{ textAlign: 'center', py: 6, px: 4 }}>
             <Box sx={{ mb: 3, position: 'relative', display: 'inline-block' }}>
               <CircularProgress size={72} thickness={3.5} />
@@ -268,7 +275,7 @@ const Results = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 1200 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
+      <Typography variant="h4" component="h1" sx={{ fontWeight: 700, mb: 4 }}>
         Результаты решения
       </Typography>
 
@@ -280,18 +287,18 @@ const Results = () => {
           border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`,
           boxShadow: 'none',
           background: isDark
-            ? alpha(isSuccess ? '#22c55e' : '#ef4444', 0.06)
-            : alpha(isSuccess ? '#22c55e' : '#ef4444', 0.04),
-          borderColor: alpha(isSuccess ? '#22c55e' : '#ef4444', isDark ? 0.25 : 0.18),
+            ? alpha(isSuccess ? theme.palette.success.main : theme.palette.error.main, 0.06)
+            : alpha(isSuccess ? theme.palette.success.main : theme.palette.error.main, 0.04),
+          borderColor: alpha(isSuccess ? theme.palette.success.main : theme.palette.error.main, isDark ? 0.25 : 0.18),
         }}
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item xs={12} sm={6}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               {isSuccess ? (
-                <CheckCircleIcon sx={{ color: '#22c55e', fontSize: 52 }} />
+                <CheckCircleIcon sx={{ color: theme.palette.success.main, fontSize: 52 }} />
               ) : (
-                <ErrorIcon sx={{ color: '#ef4444', fontSize: 52 }} />
+                <ErrorIcon sx={{ color: theme.palette.error.main, fontSize: 52 }} />
               )}
               <Box>
                 <Chip
@@ -498,7 +505,10 @@ const Results = () => {
 
       {/* ──── AI analysis block ──── */}
       <Box sx={{ mt: 3 }}>
-        {!hasAIBlock ? (
+        {aiLoading ? (
+          /* result arrived but AI analysis still in flight */
+          <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+        ) : !hasAIBlock ? (
           <Paper
             sx={{
               p: 3,

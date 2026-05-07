@@ -42,18 +42,21 @@ class AuthControllerTest {
 
     private val testUserId = UUID.randomUUID()
     private val testEmail = "unit-test@diplom.local"
+    private val testUsername = "test_user"
     private val testAccess = "access.token.stub"
     private val testRefresh = "refresh.token.stub"
 
     private fun userEntity(
         id: UUID = testUserId,
         email: String = testEmail,
+        username: String = testUsername,
         role: UserRole = UserRole.STUDENT,
     ) = UserEntity(
         id = id,
         email = email,
         passwordHash = "hash",
         role = role,
+        username = username,
         createdAt = Instant.now(),
     )
 
@@ -64,35 +67,67 @@ class AuthControllerTest {
     @Test
     fun `register valid body returns 200 with jwt response`() {
         val user = userEntity()
-        given(userService.register(anyString(), anyString(), eqNonNull(UserRole.STUDENT))).willReturn(user)
-        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT)).willReturn(testAccess)
+        given(userService.register(anyString(), anyString(), eqNonNull(UserRole.STUDENT), anyString())).willReturn(user)
+        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT, testUsername)).willReturn(testAccess)
         given(jwtTokenProvider.generateRefresh(testUserId)).willReturn(testRefresh)
 
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!", "username" to testUsername))),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.accessToken").value(testAccess))
             .andExpect(jsonPath("$.refreshToken").value(testRefresh))
             .andExpect(jsonPath("$.role").value("STUDENT"))
             .andExpect(jsonPath("$.email").value(testEmail))
+            .andExpect(jsonPath("$.username").value(testUsername))
 
-        verify(userService).register(anyString(), anyString(), eqNonNull(UserRole.STUDENT))
+        verify(userService).register(anyString(), anyString(), eqNonNull(UserRole.STUDENT), anyString())
     }
 
     @Test
     fun `register with already taken email returns 409`() {
-        given(userService.register(anyString(), anyString(), eqNonNull(UserRole.STUDENT)))
+        given(userService.register(anyString(), anyString(), eqNonNull(UserRole.STUDENT), anyString()))
             .willThrow(EmailAlreadyTakenException("Email already taken: $testEmail"))
 
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!", "username" to testUsername))),
         )
             .andExpect(status().isConflict)
+    }
+
+    @Test
+    fun `register username too short returns 400`() {
+        mvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!", "username" to "ab"))),
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `register username too long returns 400`() {
+        val longUsername = "a".repeat(33) // 33 chars — exceeds max 32
+        mvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!", "username" to longUsername))),
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun `register username with invalid chars returns 400`() {
+        mvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapOf("email" to testEmail, "password" to "Pass1234!", "username" to "bad-name!"))),
+        )
+            .andExpect(status().isBadRequest)
     }
 
     // -------------------------------------------------------------------------
@@ -103,7 +138,7 @@ class AuthControllerTest {
     fun `login valid credentials returns 200`() {
         val user = userEntity()
         given(userService.authenticate(testEmail, "Pass1234!")).willReturn(user)
-        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT)).willReturn(testAccess)
+        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT, testUsername)).willReturn(testAccess)
         given(jwtTokenProvider.generateRefresh(testUserId)).willReturn(testRefresh)
 
         mvc.perform(
@@ -144,7 +179,7 @@ class AuthControllerTest {
         )
         given(jwtTokenProvider.parseAndValidate("good.refresh.token")).willReturn(refreshClaims)
         given(userService.findById(testUserId)).willReturn(userEntity())
-        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT)).willReturn("new.access")
+        given(jwtTokenProvider.generateAccess(testUserId, testEmail, UserRole.STUDENT, testUsername)).willReturn("new.access")
         given(jwtTokenProvider.generateRefresh(testUserId)).willReturn("new.refresh")
 
         mvc.perform(

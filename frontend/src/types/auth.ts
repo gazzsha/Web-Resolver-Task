@@ -3,6 +3,7 @@ export type Role = 'STUDENT' | 'TEACHER';
 export interface RegisterRequest {
   email: string;
   password: string;
+  username: string;
 }
 
 export interface LoginRequest {
@@ -19,9 +20,11 @@ export interface JwtResponse {
   refreshToken: string;
   role: Role;
   email: string;
+  username: string;
 }
 
 export interface AuthUser {
   email: string;
   role: Role;
+  username: string;
 }

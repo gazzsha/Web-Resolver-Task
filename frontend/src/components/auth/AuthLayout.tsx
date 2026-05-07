@@ -103,7 +103,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ title, subtitle, children, foot
         </Box>
 
         {/* title */}
-        <Typography sx={{ fontSize: 28, fontWeight: 700, color: '#f5f7fb', mb: 0.5, letterSpacing: '-0.5px' }}>
+        <Typography variant="h3" sx={{ fontWeight: 700, color: '#f5f7fb', mb: 0.5, letterSpacing: '-0.5px' }}>
           {title}
           <span className="wrt-cursor" />
         </Typography>

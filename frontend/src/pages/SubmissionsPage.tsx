@@ -201,7 +201,7 @@ const SubmissionsPage = () => {
               filter: isDark ? `drop-shadow(0 0 6px ${alpha(brand.indigo, 0.6)})` : 'none',
             }}
           />
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
             Мои решения
           </Typography>
         </Box>

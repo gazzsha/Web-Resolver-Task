@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":worker"))
 
     implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.validation)
     implementation(libs.postgres)
     implementation("io.github.oshai:kotlin-logging:7.0.14")
 

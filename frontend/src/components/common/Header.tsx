@@ -45,6 +45,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ mobileMenuButton }) => {
   const { toggleSidebar, darkMode, toggleDarkMode } = useAppStore();
   const userEmail = useAuthStore((s) => s.user?.email);
+  const username = useAuthStore((s) => s.username);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,8 +64,15 @@ const Header: React.FC<HeaderProps> = ({ mobileMenuButton }) => {
     navigate('/login');
   };
 
-  // Avatar initials
-  const initials = userEmail ? userEmail[0].toUpperCase() : '?';
+  // Avatar initials: first 1-2 chars of username, fallback to first char of email
+  const initials = username
+    ? username.slice(0, 2).toUpperCase()
+    : userEmail
+    ? userEmail[0].toUpperCase()
+    : '?';
+
+  // Display label in header: username preferred, fallback to email
+  const displayName = username ?? userEmail ?? null;
 
   return (
     <Toolbar
@@ -140,6 +148,7 @@ const Header: React.FC<HeaderProps> = ({ mobileMenuButton }) => {
             onClick={toggleDarkMode}
             size="medium"
             sx={{ color: 'text.secondary' }}
+            aria-label={darkMode ? 'Включить светлую тему' : 'Включить тёмную тему'}
           >
             {darkMode ? <Brightness7Icon fontSize="small" /> : <Brightness4Icon fontSize="small" />}
           </IconButton>
@@ -147,35 +156,43 @@ const Header: React.FC<HeaderProps> = ({ mobileMenuButton }) => {
 
         {userEmail && (
           <>
-            <Typography
-              variant="body2"
-              sx={{
-                display: { xs: 'none', lg: 'block' },
-                color: 'text.secondary',
-                maxWidth: 220,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                mx: 0.5,
-              }}
-            >
-              {userEmail}
-            </Typography>
-
             <Tooltip title="Аккаунт">
-              <IconButton onClick={handleMenuOpen} size="small" sx={{ ml: 0.5 }}>
+              <IconButton
+                onClick={handleMenuOpen}
+                size="small"
+                sx={{ ml: 0.5, display: 'flex', alignItems: 'center', gap: 1, borderRadius: 2, px: 1 }}
+                aria-label="Меню пользователя"
+              >
                 <Avatar
                   sx={{
                     width: 34,
                     height: 34,
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     fontWeight: 700,
-                    background: `linear-gradient(135deg, ${brand.indigo} 0%, ${brand.rose} 100%)`,
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
                     boxShadow: `0 2px 8px ${alpha(brand.indigo, 0.4)}`,
+                    flexShrink: 0,
                   }}
                 >
                   {initials}
                 </Avatar>
+                {displayName && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      display: { xs: 'none', lg: 'block' },
+                      color: 'text.primary',
+                      fontWeight: 600,
+                      maxWidth: 160,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {displayName}
+                  </Typography>
+                )}
               </IconButton>
             </Tooltip>
 
@@ -197,11 +214,13 @@ const Header: React.FC<HeaderProps> = ({ mobileMenuButton }) => {
               }}
             >
               <Box sx={{ px: 2, py: 1.5 }}>
-                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                {username && (
+                  <Typography variant="subtitle2" noWrap sx={{ fontWeight: 600 }}>
+                    {username}
+                  </Typography>
+                )}
+                <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
                   {userEmail}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Пользователь
                 </Typography>
               </Box>
               <Divider />

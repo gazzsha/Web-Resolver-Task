@@ -8,11 +8,10 @@ private val logger = KotlinLogging.logger {}
 class SandboxImageManager {
 
     private val knownImages = setOf(
+        // DockerSandboxService currently supports java + python only.
+        // Kotlin support was dropped (host-side metrics rewrite in Phase 14).
         "eclipse-temurin:21-jdk-alpine",
-        "python:3.11-alpine",
-        // Custom image (sandbox/docker/kotlin/Dockerfile). Build once with:
-        //   docker build --platform=linux/amd64 -t web-resolver/kotlin:2.0.21 sandbox/docker/kotlin/
-        "web-resolver/kotlin:1.9.22"
+        "python:3.11-alpine"
     )
 
     /**

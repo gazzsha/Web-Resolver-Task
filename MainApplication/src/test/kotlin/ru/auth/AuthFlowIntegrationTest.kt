@@ -20,6 +20,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import ru.security.JwtTokenProvider
+import java.util.Base64
 import java.util.UUID
 
 /**
@@ -59,6 +61,7 @@ class AuthFlowIntegrationTest {
         // the duplicate-email scenario deterministically.
         private val SHARED_EMAIL = "flow-test-${UUID.randomUUID()}@diplom.local"
         private val SHARED_PASSWORD = "TestPass99!"
+        private val SHARED_USERNAME = "flow_tester"
 
         @JvmStatic
         @DynamicPropertySource
@@ -86,17 +89,23 @@ class AuthFlowIntegrationTest {
     @Autowired
     lateinit var om: ObjectMapper
 
+    @Autowired
+    lateinit var jwtTokenProvider: JwtTokenProvider
+
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
 
-    private fun registerBody(email: String = SHARED_EMAIL, password: String = SHARED_PASSWORD): String =
-        om.writeValueAsString(mapOf("email" to email, "password" to password))
+    private fun registerBody(
+        email: String = SHARED_EMAIL,
+        password: String = SHARED_PASSWORD,
+        username: String = SHARED_USERNAME,
+    ): String = om.writeValueAsString(mapOf("email" to email, "password" to password, "username" to username))
 
     private fun loginBody(email: String = SHARED_EMAIL, password: String = SHARED_PASSWORD): String =
         om.writeValueAsString(mapOf("email" to email, "password" to password))
 
-    /** Registers SHARED_EMAIL and returns the access token. Idempotent within one test run. */
+    /** Registers SHARED_EMAIL and returns the access token. */
     private fun registerAndGetAccess(): String {
         val result = mvc.perform(
             post("/auth/register")
@@ -132,13 +141,14 @@ class AuthFlowIntegrationTest {
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to uniqueEmail, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to uniqueEmail, "password" to "Pass1234!", "username" to "reglogin_user"))),
         )
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.accessToken").isNotEmpty)
             .andExpect(jsonPath("$.refreshToken").isNotEmpty)
             .andExpect(jsonPath("$.role").value("STUDENT"))
             .andExpect(jsonPath("$.email").value(uniqueEmail))
+            .andExpect(jsonPath("$.username").value("reglogin_user"))
 
         // Step 2 — login with same credentials
         mvc.perform(
@@ -149,6 +159,7 @@ class AuthFlowIntegrationTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.accessToken").isNotEmpty)
             .andExpect(jsonPath("$.email").value(uniqueEmail))
+            .andExpect(jsonPath("$.username").value("reglogin_user"))
     }
 
     @Test
@@ -159,14 +170,14 @@ class AuthFlowIntegrationTest {
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to duplicateEmail, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to duplicateEmail, "password" to "Pass1234!", "username" to "dup_user"))),
         ).andExpect(status().isOk)
 
         // Second registration with the same email must be rejected.
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to duplicateEmail, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to duplicateEmail, "password" to "Pass1234!", "username" to "dup_user2"))),
         ).andExpect(status().isConflict)
     }
 
@@ -178,7 +189,7 @@ class AuthFlowIntegrationTest {
         mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to email, "password" to "CorrectPw1!"))),
+                .content(om.writeValueAsString(mapOf("email" to email, "password" to "CorrectPw1!", "username" to "wrongpw_user"))),
         ).andExpect(status().isOk)
 
         // Attempt login with incorrect password.
@@ -202,7 +213,7 @@ class AuthFlowIntegrationTest {
         val registerResult = mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to email, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to email, "password" to "Pass1234!", "username" to "access_ok_user"))),
         )
             .andExpect(status().isOk)
             .andReturn()
@@ -230,7 +241,7 @@ class AuthFlowIntegrationTest {
         val registerResult = mvc.perform(
             post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to email, "password" to "Pass1234!"))),
+                .content(om.writeValueAsString(mapOf("email" to email, "password" to "Pass1234!", "username" to "refresh_user"))),
         )
             .andExpect(status().isOk)
             .andReturn()
@@ -264,9 +275,9 @@ class AuthFlowIntegrationTest {
 
     @Test
     fun `seed teacher user can login`() {
-        // This test verifies that the Flyway V3 migration bcrypt hashes
+        // This test verifies that the Flyway V7 migration bcrypt hashes
         // produced by pgcrypto's blowfish are compatible with Spring's BCryptPasswordEncoder.
-        // The teacher seed is inserted by V3__seed_users.sql when the test container starts
+        // The teacher seed is inserted by V7__add_username.sql when the test container starts
         // (Flyway runs automatically on first connect via spring.flyway.enabled=true).
         mvc.perform(
             post("/auth/login")
@@ -277,5 +288,34 @@ class AuthFlowIntegrationTest {
             .andExpect(jsonPath("$.accessToken").isNotEmpty)
             .andExpect(jsonPath("$.role").value("TEACHER"))
             .andExpect(jsonPath("$.email").value("teacher@diplom.local"))
+            .andExpect(jsonPath("$.username").isNotEmpty)
+    }
+
+    @Test
+    fun `register then jwt contains username claim matching response`() {
+        val email = "jwt-claim-${UUID.randomUUID()}@diplom.local"
+        val usernameValue = "claim_checker"
+
+        val registerResult = mvc.perform(
+            post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(mapOf("email" to email, "password" to "Pass1234!", "username" to usernameValue))),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.username").value(usernameValue))
+            .andReturn()
+
+        val responseTree = om.readTree(registerResult.response.contentAsString)
+        val accessToken = responseTree.get("accessToken").asText()
+        val responseUsername = responseTree.get("username").asText()
+
+        // Parse the JWT and verify the username claim matches what was returned in the response body.
+        val jwtClaims = jwtTokenProvider.parseAndValidate(accessToken)
+        assert(jwtClaims.username == usernameValue) {
+            "Expected JWT username claim '$usernameValue', got '${jwtClaims.username}'"
+        }
+        assert(jwtClaims.username == responseUsername) {
+            "JWT username claim '${jwtClaims.username}' does not match JwtResponse.username '$responseUsername'"
+        }
     }
 }

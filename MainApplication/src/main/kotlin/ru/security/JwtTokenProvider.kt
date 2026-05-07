@@ -29,12 +29,13 @@ class JwtTokenProvider(
         Keys.hmacShaKeyFor(devSecret.toByteArray(Charsets.UTF_8))
     }
 
-    fun generateAccess(userId: UUID, email: String, role: UserRole): String {
+    fun generateAccess(userId: UUID, email: String, role: UserRole, username: String): String {
         val now = System.currentTimeMillis()
         return Jwts.builder()
             .subject(userId.toString())
             .claim("email", email)
             .claim("role", role.name)
+            .claim("username", username)
             .claim("typ", "access")
             .issuedAt(Date(now))
             .expiration(Date(now + accessTtlMinutes * 60 * 1000))
@@ -65,6 +66,7 @@ class JwtTokenProvider(
             typ = claims.get("typ", String::class.java) ?: throw JwtException("Missing typ claim"),
             email = claims.get("email", String::class.java),
             role = claims.get("role", String::class.java)?.let { runCatching { UserRole.valueOf(it) }.getOrNull() },
+            username = claims.get("username", String::class.java),
         )
     }
 }
@@ -74,4 +76,5 @@ data class JwtClaims(
     val typ: String,
     val email: String?,
     val role: UserRole?,
+    val username: String? = null,
 )

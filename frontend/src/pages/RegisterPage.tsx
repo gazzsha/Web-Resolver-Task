@@ -8,34 +8,22 @@ import {
   Link,
   TextField,
   Typography,
+  useTheme,
 } from '@mui/material';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
 import AuthLayout from '@/components/auth/AuthLayout';
+import { authInputSx as buildAuthInputSx } from '@/styles/authInputSx';
 
-const inputSx = {
-  '& .MuiOutlinedInput-root': {
-    background: 'rgba(13, 17, 41, 0.5)',
-    color: '#f5f7fb',
-    fontFamily: '"JetBrains Mono", monospace',
-    fontSize: 14,
-    transition: 'all 0.2s ease',
-    '& fieldset': { borderColor: 'rgba(255,255,255,0.12)' },
-    '&:hover fieldset': { borderColor: 'rgba(125,211,252,0.4)' },
-    '&.Mui-focused fieldset': {
-      borderColor: '#7dd3fc',
-      boxShadow: '0 0 0 4px rgba(125,211,252,0.12)',
-    },
-  },
-  '& .MuiInputLabel-root': { color: '#8a92b8', fontSize: 13 },
-  '& .MuiInputLabel-root.Mui-focused': { color: '#7dd3fc' },
-  '& input:-webkit-autofill': {
-    WebkitBoxShadow: '0 0 0 1000px #11163a inset',
-    WebkitTextFillColor: '#f5f7fb',
-    caretColor: '#f5f7fb',
-  },
-  '& .MuiFormHelperText-root': { color: '#8a92b8' },
-} as const;
+const USERNAME_REGEX = /^[a-zA-Z0-9_]+$/;
+
+function validateUsername(value: string): string | null {
+  if (value.length === 0) return 'Поле обязательно';
+  if (value.length < 3) return 'Минимум 3 символа';
+  if (value.length > 32) return 'Максимум 32 символа';
+  if (!USERNAME_REGEX.test(value)) return 'Только латиница, цифры и _';
+  return null;
+}
 
 function passwordScore(pwd: string): number {
   let s = 0;
@@ -50,12 +38,20 @@ function passwordScore(pwd: string): number {
 const RegisterPage: React.FC = () => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const inputSx = {
+    ...buildAuthInputSx(theme),
+    '& .MuiFormHelperText-root': { color: '#8a92b8' },
+  };
 
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameBlurred, setUsernameBlurred] = useState(false);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   if (isAuthenticated) return <Navigate to="/tasks" replace />;
 
@@ -65,8 +61,16 @@ const RegisterPage: React.FC = () => {
 
   const mismatchVisible = confirm.length > 0 && confirm !== password;
 
+  const usernameError = validateUsername(username);
+  const showUsernameError = usernameError !== null && (usernameBlurred || submitAttempted);
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSubmitAttempted(true);
+    if (usernameError) {
+      setErrorMsg(usernameError);
+      return;
+    }
     if (password.length < 8) {
       setErrorMsg('Пароль должен содержать минимум 8 символов');
       return;
@@ -78,7 +82,7 @@ const RegisterPage: React.FC = () => {
     setErrorMsg(null);
     setLoading(true);
     try {
-      const resp = await authService.register({ email, password });
+      const resp = await authService.register({ email, password, username });
       useAuthStore.getState().setSession(resp);
       navigate('/tasks');
     } catch (err) {
@@ -109,6 +113,26 @@ const RegisterPage: React.FC = () => {
 
       <Box component="form" onSubmit={submit} noValidate sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required fullWidth autoComplete="email" autoFocus sx={inputSx} />
+
+        <TextField
+          label="Имя пользователя"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          onBlur={() => setUsernameBlurred(true)}
+          required
+          fullWidth
+          autoComplete="username"
+          inputProps={{ maxLength: 32 }}
+          error={showUsernameError}
+          helperText={showUsernameError ? usernameError : '3–32 символа: латиница, цифры, _'}
+          sx={{
+            ...inputSx,
+            '& .MuiFormHelperText-root': showUsernameError
+              ? { color: '#f87171' }
+              : { color: '#8a92b8' },
+          }}
+        />
 
         <Box>
           <TextField

@@ -241,8 +241,8 @@ const lightTheme = createTheme({
     },
     text: {
       primary: '#111827',
-      secondary: '#6b7280',
-      disabled: '#9ca3af',
+      secondary: '#4b5563',
+      disabled: '#5b6472',
     },
     divider: 'rgba(0,0,0,0.08)',
   },

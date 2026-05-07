@@ -11,6 +11,7 @@ import Submission from './pages/Submission';
 import Results from './pages/Results';
 import SubmissionsPage from './pages/SubmissionsPage';
 import StatisticsPage from './pages/StatisticsPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                   <Route path="/results/:id" element={<Results />} />
                   <Route path="/submissions" element={<SubmissionsPage />} />
                   <Route path="/statistics" element={<StatisticsPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
                 </Routes>
               </Layout>
             </RequireAuth>

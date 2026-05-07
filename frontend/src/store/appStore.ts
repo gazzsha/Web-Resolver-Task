@@ -1,6 +1,18 @@
 import { create } from 'zustand';
 import type { Task, SubmissionResult } from '@/types';
 
+// Resolve initial dark mode: localStorage → prefers-color-scheme → light
+function resolveInitialDarkMode(): boolean {
+  try {
+    const stored = localStorage.getItem('themeMode');
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+  } catch {
+    // localStorage unavailable (e.g. SSR or private mode)
+  }
+  return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
 interface AppState {
   // Tasks
   tasks: Task[];
@@ -35,7 +47,7 @@ export const useAppStore = create<AppState>((set) => ({
   error: null,
   currentSubmission: null,
   submissionHistory: [],
-  darkMode: false,
+  darkMode: resolveInitialDarkMode(),
   sidebarOpen: true,
 
   // Actions
@@ -47,7 +59,16 @@ export const useAppStore = create<AppState>((set) => ({
       submissionHistory: [submission, ...state.submissionHistory],
       currentSubmission: submission,
     })),
-  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+  toggleDarkMode: () =>
+    set((state) => {
+      const next = !state.darkMode;
+      try {
+        localStorage.setItem('themeMode', next ? 'dark' : 'light');
+      } catch {
+        // ignore
+      }
+      return { darkMode: next };
+    }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),

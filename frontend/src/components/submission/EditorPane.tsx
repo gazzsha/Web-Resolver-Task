@@ -5,6 +5,7 @@ import {
   Chip,
   Select,
   MenuItem,
+  InputLabel,
   Button,
   CircularProgress,
   Tooltip,
@@ -150,11 +151,14 @@ const EditorPane: React.FC<EditorPaneProps> = ({
             </Tooltip>
           )}
 
+          <InputLabel id="lang-select-label" sx={{ display: 'none' }}>Язык</InputLabel>
           <Select
             value={language}
             onChange={(e) => onLanguageChange(e.target.value as Language)}
             size="small"
             variant="outlined"
+            labelId="lang-select-label"
+            inputProps={{ 'aria-label': 'Язык программирования' }}
             sx={{
               minWidth: 100,
               fontSize: '0.8125rem',

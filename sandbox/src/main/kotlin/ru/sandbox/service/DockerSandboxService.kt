@@ -4,44 +4,71 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.sandbox.model.*
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.Instant
+import java.time.Duration
 import java.util.UUID
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicLong
 
 private val logger = KotlinLogging.logger {}
 
 /**
- * Sandbox service for secure code execution using Docker containers
- * 
+ * Sandbox service for secure code execution using Docker containers.
+ *
+ * Metrics are measured entirely on the host — no program-internal markers,
+ * no stdout/stderr scraping for timing data:
+ *
+ *   wallTimeMs      — docker inspect .State.StartedAt / .FinishedAt delta
+ *   peakMemoryBytes — 100 ms docker stats polling; running maximum in AtomicLong
+ *   exitCode        — docker wait return value
+ *
+ * Containers are NOT started with --rm so we can inspect them post-exit.
+ * Cleanup (docker rm -f) is always performed in the finally block.
+ *
  * Security features:
  * - Isolated Docker containers
  * - CPU and memory limits
  * - Network disabled
- * - Read-only filesystem
- * - Timeout protection
+ * - Read-only filesystem with noexec tmpfs
+ * - Timeout protection with SIGKILL
+ * - Capability drop (ALL)
  */
 class DockerSandboxService(
     private val imageManager: SandboxImageManager
 ) {
-    
+
     private val workDir = Paths.get("/tmp/web-resolver-sandbox")
 
+    /**
+     * Shared scheduled thread pool for memory-polling tasks.
+     * One poll task per running container; tasks are cancelled on container exit.
+     */
+    private val pollScheduler: ScheduledExecutorService =
+        Executors.newScheduledThreadPool(4)
+
     init {
-        // Create work directory
         Files.createDirectories(workDir)
         logger.info { "DockerSandboxService initialized" }
     }
-    
+
+    // -----------------------------------------------------------------------
+    // Public API
+    // -----------------------------------------------------------------------
+
     /**
-     * Execute user code in isolated Docker container
+     * Execute user code in isolated Docker container.
+     * Supported languages: java, python.
      */
     fun execute(request: SandboxExecutionRequest): SandboxExecutionResult {
         logger.info { "Executing code for request ${request.requestId}, language: ${request.language}" }
-        
+
         return try {
             when (request.language.lowercase()) {
                 "java" -> executeJavaCode(request)
                 "python" -> executePythonCode(request)
-                "kotlin" -> executeKotlinCode(request)
                 else -> SandboxExecutionResult(
                     requestId = request.requestId,
                     status = ExecutionStatus.INTERNAL_ERROR,
@@ -63,32 +90,22 @@ class DockerSandboxService(
             )
         }
     }
-    
+
+    // -----------------------------------------------------------------------
+    // Language-specific launchers
+    // -----------------------------------------------------------------------
+
     private fun executeJavaCode(request: SandboxExecutionRequest): SandboxExecutionResult {
-        val startTime = System.currentTimeMillis()
         val requestDir = workDir.resolve(request.requestId.toString())
         Files.createDirectories(requestDir)
-
         try {
-            // Extract class name from code or use provided
             val className = extractClassName(request.code) ?: request.className
-            
-            // Write user code (full code with main method)
-            val javaFile = requestDir.resolve("$className.java")
-            Files.writeString(javaFile, request.code)
+            Files.writeString(requestDir.resolve("$className.java"), request.code)
+            Files.writeString(requestDir.resolve("input.txt"), request.testInput)
 
-            // Write test input to stdin file
-            val inputFile = requestDir.resolve("input.txt")
-            Files.writeString(inputFile, request.testInput)
-
-            // Write expected output for comparison
-            val expectedFile = requestDir.resolve("expected.txt")
-            Files.writeString(expectedFile, request.expectedOutput)
-
-            // Compile and execute using Docker with JDK
-            // User code should have main method that reads from stdin
             val runResult = runInDocker(
                 requestId = request.requestId,
+                language = "java",
                 requestDir = requestDir,
                 image = "eclipse-temurin:21-jdk-alpine",
                 command = listOf("sh", "-c", "javac $className.java && java $className < input.txt"),
@@ -97,44 +114,30 @@ class DockerSandboxService(
                 cpuLimit = request.cpuLimit
             )
 
-            val endTime = System.currentTimeMillis()
-
-            // Compare output with expected
-            val verdict = if (runResult.status == ExecutionStatus.SUCCESS) {
+            // Only compare output when execution succeeded with no error signals
+            val finalVerdict = if (runResult.status == ExecutionStatus.SUCCESS) {
                 compareOutput(runResult.output ?: "", request.expectedOutput)
-            } else null
+            } else {
+                // Preserve the execution-failure verdict already set in runResult
+                runResult.verdict
+            }
 
-            return runResult.copy(
-                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
-                verdict = verdict
-            )
+            return runResult.copy(verdict = finalVerdict)
         } finally {
-            // Cleanup
             requestDir.toFile().deleteRecursively()
         }
     }
-    
+
     private fun executePythonCode(request: SandboxExecutionRequest): SandboxExecutionResult {
-        val startTime = System.currentTimeMillis()
         val requestDir = workDir.resolve(request.requestId.toString())
         Files.createDirectories(requestDir)
-
         try {
-            // Write Python code
-            val pyFile = requestDir.resolve("solution.py")
-            Files.writeString(pyFile, request.code)
+            Files.writeString(requestDir.resolve("solution.py"), request.code)
+            Files.writeString(requestDir.resolve("input.txt"), request.testInput)
 
-            // Write test input to stdin file
-            val inputFile = requestDir.resolve("input.txt")
-            Files.writeString(inputFile, request.testInput)
-
-            // Write expected output
-            val expectedFile = requestDir.resolve("expected.txt")
-            Files.writeString(expectedFile, request.expectedOutput)
-
-            // Run Python code in container; pipe input.txt → stdin
             val runResult = runInDocker(
                 requestId = request.requestId,
+                language = "python",
                 requestDir = requestDir,
                 image = "python:3.11-alpine",
                 command = listOf("sh", "-c", "python solution.py < input.txt"),
@@ -143,67 +146,42 @@ class DockerSandboxService(
                 cpuLimit = request.cpuLimit
             )
 
-            val endTime = System.currentTimeMillis()
-
-            val verdict = if (runResult.status == ExecutionStatus.SUCCESS) {
+            val finalVerdict = if (runResult.status == ExecutionStatus.SUCCESS) {
                 compareOutput(runResult.output ?: "", request.expectedOutput)
-            } else null
+            } else {
+                runResult.verdict
+            }
 
-            return runResult.copy(
-                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
-                verdict = verdict
-            )
+            return runResult.copy(verdict = finalVerdict)
         } finally {
             requestDir.toFile().deleteRecursively()
         }
     }
-    
-    private fun executeKotlinCode(request: SandboxExecutionRequest): SandboxExecutionResult {
-        val startTime = System.currentTimeMillis()
-        val requestDir = workDir.resolve(request.requestId.toString())
-        Files.createDirectories(requestDir)
 
-        try {
-            val className = extractClassName(request.code) ?: "Solution"
-            val ktFile = requestDir.resolve("$className.kt")
-            Files.writeString(ktFile, request.code)
+    // -----------------------------------------------------------------------
+    // Core Docker runner — host-side metrics only
+    // -----------------------------------------------------------------------
 
-            // Write test input to stdin file
-            val inputFile = requestDir.resolve("input.txt")
-            Files.writeString(inputFile, request.testInput)
-
-            // Write expected output
-            val expectedFile = requestDir.resolve("expected.txt")
-            Files.writeString(expectedFile, request.expectedOutput)
-
-            // Compile and run Kotlin code in container; pipe input.txt → stdin
-            val runResult = runInDocker(
-                requestId = request.requestId,
-                requestDir = requestDir,
-                image = "web-resolver/kotlin:1.9.22",
-                command = listOf("sh", "-c", "kotlinc $className.kt -include-runtime -d solution.jar && java -jar solution.jar < input.txt"),
-                timeoutSeconds = request.timeoutSeconds * 3,
-                memoryLimitMb = request.memoryLimitMb,
-                cpuLimit = request.cpuLimit
-            )
-
-            val endTime = System.currentTimeMillis()
-
-            val verdict = if (runResult.status == ExecutionStatus.SUCCESS) {
-                compareOutput(runResult.output ?: "", request.expectedOutput)
-            } else null
-
-            return runResult.copy(
-                executionTimeMs = if (runResult.executionTimeMs > 0) runResult.executionTimeMs else (endTime - startTime),
-                verdict = verdict
-            )
-        } finally {
-            requestDir.toFile().deleteRecursively()
-        }
-    }
-    
+    /**
+     * Runs user code in a Docker container and returns execution results with
+     * host-measured metrics (wall time, peak memory, exit code).
+     *
+     * Container lifecycle:
+     *   1. docker run -d (detached, no --rm) → container id
+     *   2. background poll: docker stats every 100 ms → peakMemoryBytes
+     *   3. docker wait <id> (blocking, with host-side timeout guard)
+     *   4. docker inspect <id> → StartedAt/FinishedAt → wallTimeMs; OOMKilled flag
+     *   5. docker logs <id> → separate stdout / stderr streams
+     *   6. docker rm -f <id>  (always, in finally block)
+     *
+     * The returned [SandboxExecutionResult.verdict] reflects execution outcome only
+     * (RUNTIME_ERROR / TIME_LIMIT_EXCEEDED / MEMORY_LIMIT_EXCEEDED or null when
+     * successful). The language launchers overwrite it with an output-comparison
+     * verdict (OK / WRONG_ANSWER / PRESENTATION_ERROR) when status == SUCCESS.
+     */
     private fun runInDocker(
         requestId: UUID,
+        language: String,
         requestDir: java.nio.file.Path,
         image: String,
         command: List<String>,
@@ -211,6 +189,9 @@ class DockerSandboxService(
         memoryLimitMb: Int,
         cpuLimit: Double
     ): SandboxExecutionResult {
+
+        var containerId: String? = null
+
         try {
             if (!imageManager.ensureImage(image)) {
                 return SandboxExecutionResult(
@@ -223,75 +204,124 @@ class DockerSandboxService(
                 )
             }
 
-            // Build Docker run command
-            val dockerCmd = buildList {
-                add("docker")
-                add("run")
-                add("--rm")
-                // Pin amd64 so docker doesn't print a "platform mismatch" warning
-                // into stdout on Apple Silicon hosts (the warning would otherwise
-                // get appended to the program output and break compareOutput).
+            // ---- Step 1: start container in detached mode (no --rm) ----
+            val dockerRunCmd = buildList {
+                add("docker"); add("run"); add("-d")
                 add("--platform=linux/amd64")
                 add("--network=none")
                 add("--read-only")
-                add("--tmpfs")
-                add("/tmp:rw,noexec,nosuid,nodev,size=64m")
+                add("--tmpfs"); add("/tmp:rw,noexec,nosuid,nodev,size=128m")
                 add("--cap-drop=ALL")
                 add("--security-opt=no-new-privileges:true")
                 add("--pids-limit=64")
-                add("-m")
-                add("${memoryLimitMb}m")
-                add("--cpus")
-                add("$cpuLimit")
-                add("-v")
-                add("${requestDir.toAbsolutePath()}:/app")
-                add("-w")
-                add("/app")
+                add("-m"); add("${memoryLimitMb}m")
+                add("--cpus"); add("$cpuLimit")
+                add("-v"); add("${requestDir.toAbsolutePath()}:/app")
+                add("-w"); add("/app")
                 add(image)
                 addAll(command)
             }
 
-            logger.debug { "Executing: ${dockerCmd.joinToString(" ")}" }
+            logger.debug { "docker run: ${dockerRunCmd.joinToString(" ")}" }
 
-            val process = ProcessBuilder(dockerCmd)
-                .directory(requestDir.toFile())
+            val runProc = ProcessBuilder(dockerRunCmd)
                 .redirectErrorStream(true)
                 .start()
-
-            val finished = process.waitFor(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)
-
-            val rawOutput = if (finished) {
-                process.inputStream.bufferedReader().readText()
-            } else {
-                process.destroyForcibly()
-                ""
+            val runFinished = runProc.waitFor(15, TimeUnit.SECONDS)
+            if (!runFinished) {
+                runProc.destroyForcibly()
+                return SandboxExecutionResult(
+                    requestId = requestId,
+                    status = ExecutionStatus.INTERNAL_ERROR,
+                    output = null,
+                    error = "docker run did not respond within 15 s (image pull or daemon issue)",
+                    executionTimeMs = 0,
+                    memoryUsedKb = 0
+                )
             }
 
-            val exitCode = if (finished) process.exitValue() else 124
-
-            val status = when {
-                exitCode == 0 -> ExecutionStatus.SUCCESS
-                exitCode == 137 -> ExecutionStatus.MEMORY_LIMIT_EXCEEDED
-                exitCode == 124 -> ExecutionStatus.TIME_LIMIT_EXCEEDED
-                else -> ExecutionStatus.RUNTIME_ERROR
+            val runStdout = runProc.inputStream.bufferedReader().readText().trim()
+            if (runProc.exitValue() != 0) {
+                logger.error { "docker run failed (exit ${runProc.exitValue()}): $runStdout" }
+                return SandboxExecutionResult(
+                    requestId = requestId,
+                    status = ExecutionStatus.INTERNAL_ERROR,
+                    output = null,
+                    error = "docker run failed: $runStdout",
+                    executionTimeMs = 0,
+                    memoryUsedKb = 0
+                )
             }
 
-            // Extract markers emitted by memoryWrapper() inside the container.
-            val memMarker = Regex("__MEM_KB__(\\d+)__END__").find(rawOutput)
-            val memoryKb = memMarker?.groupValues?.get(1)?.toLongOrNull() ?: 0L
-            val timeMarker = Regex("__TIME_MS__(\\d+)__END__").find(rawOutput)
-            val elapsedMs = timeMarker?.groupValues?.get(1)?.toLongOrNull() ?: 0L
-            val output = rawOutput
-                .replace(Regex("__(MEM_KB|TIME_MS)__\\d+__END__\\s*"), "")
-                .trim()
+            containerId = runStdout.lines().lastOrNull { it.isNotBlank() } ?: runStdout
+            logger.debug { "Container started: $containerId" }
+
+            // ---- Step 2: start background memory sampler (100 ms interval) ----
+            val peakMemoryBytes = AtomicLong(0L)
+            val pollFuture: Future<*> = pollScheduler.scheduleAtFixedRate(
+                { pollMemory(containerId, peakMemoryBytes) },
+                0L, 100L, TimeUnit.MILLISECONDS
+            )
+
+            // ---- Step 3: wait for container exit with host-side timeout guard ----
+            val exitCode: Int
+            val timedOut: Boolean
+
+            try {
+                val waitProc = ProcessBuilder("docker", "wait", containerId)
+                    .redirectErrorStream(true)
+                    .start()
+
+                // Add 5 s of grace beyond user timeout to allow compile time overhead.
+                // If docker wait still hasn't returned by then we kill the container.
+                val waitFinished = waitProc.waitFor(timeoutSeconds + 5, TimeUnit.SECONDS)
+
+                if (!waitFinished) {
+                    waitProc.destroyForcibly()
+                    killContainer(containerId)
+                    timedOut = true
+                    exitCode = 124
+                } else {
+                    timedOut = false
+                    val waitOut = waitProc.inputStream.bufferedReader().readText().trim()
+                    exitCode = waitOut.toIntOrNull() ?: -1
+                }
+            } finally {
+                pollFuture.cancel(true)
+            }
+
+            // ---- Step 4: inspect for wall time and OOMKilled flag ----
+            val inspectResult = inspectContainer(containerId)
+            val wallTimeMs = inspectResult.wallTimeMs
+            val oomKilled = inspectResult.oomKilled
+
+            // ---- Step 5: collect stdout and stderr separately ----
+            val stdout = dockerLogs(containerId, stderr = false).trim()
+            val stderr = dockerLogs(containerId, stderr = true).trim()
+
+            logger.debug {
+                "Container $containerId finished: exit=$exitCode oom=$oomKilled " +
+                "wall=${wallTimeMs}ms peak=${peakMemoryBytes.get()}B"
+            }
+
+            // ---- Step 6: resolve verdict from host signals ----
+            val verdict = resolveVerdict(
+                exitCode = exitCode,
+                oomKilled = oomKilled,
+                timedOut = timedOut,
+                stderr = stderr,
+                language = language
+            )
+            val status = verdictToExecutionStatus(verdict)
 
             return SandboxExecutionResult(
                 requestId = requestId,
                 status = status,
-                output = output,
-                error = null,
-                executionTimeMs = elapsedMs,
-                memoryUsedKb = memoryKb
+                output = stdout.ifBlank { null },
+                error = stderr.ifBlank { null },
+                executionTimeMs = wallTimeMs,
+                memoryUsedKb = peakMemoryBytes.get() / 1024,
+                verdict = verdict
             )
         } catch (e: Exception) {
             logger.error(e) { "Docker execution failed" }
@@ -303,56 +333,251 @@ class DockerSandboxService(
                 executionTimeMs = 0,
                 memoryUsedKb = 0
             )
+        } finally {
+            // Always remove the container (we did NOT use --rm)
+            containerId?.let { removeContainer(it) }
         }
     }
-    
+
+    // -----------------------------------------------------------------------
+    // Verdict resolution (Stage B fail-fast signals)
+    // -----------------------------------------------------------------------
+
     /**
-     * Wraps a runner command so we can extract:
-     *   - peak RSS sampled from /proc/$pid/status while the child is alive
-     *   - wall-clock execution time taken from /proc/uptime around the run
+     * Resolves the canonical execution verdict from host-observable signals only.
      *
-     * Both are emitted to stderr (merged with stdout via redirectErrorStream)
-     * as trailer markers parsed by runInDocker:
-     *   __MEM_KB__<peak-kb>__END__
-     *   __TIME_MS__<elapsed-ms>__END__
+     * Priority (highest to lowest):
+     *   1. OOMKilled flag from docker inspect   → MEMORY_LIMIT_EXCEEDED
+     *   2. exit code 137 (SIGKILL, often OOM)   → MEMORY_LIMIT_EXCEEDED
+     *   3. Host-side timeout / exit 124          → TIME_LIMIT_EXCEEDED
+     *   4. exit code 139 (SIGSEGV)               → RUNTIME_ERROR (segfault)
+     *   5. exit code != 0                        → RUNTIME_ERROR
+     *   6. stderr matches per-language pattern   → RUNTIME_ERROR
+     *   7. Otherwise                             → OK (placeholder; overwritten by
+     *                                              compareOutput in language launchers)
      *
-     * /proc is present in every Linux container — works on alpine + debian.
+     * Note: WRONG_ANSWER / PRESENTATION_ERROR are output-comparison verdicts set
+     * by compareOutput(), not by this method.
      */
-    private fun memoryWrapper(innerCmd: String): String = buildString {
-        // Run the program in background, sample VmHWM (peak RSS) once per
-        // second from /proc/$pid/status while it lives. VmHWM is monotonic,
-        // so the last successful sample is the true peak. Wall time comes
-        // from /proc/uptime deltas. Works on any Linux container (alpine,
-        // debian) — no GNU `time` needed.
-        append("START=\$(awk '{print \$1}' /proc/uptime); ")
-        append(innerCmd)
-        append(" & P=\$!; PEAK=0; ")
-        append("while kill -0 \$P 2>/dev/null; do ")
-        append("M=\$(awk '/VmHWM/ {print \$2}' /proc/\$P/status 2>/dev/null); ")
-        append("[ -n \"\$M\" ] && [ \"\$M\" -gt \"\$PEAK\" ] && PEAK=\$M; ")
-        append("sleep 1; ")
-        append("done; ")
-        append("wait \$P; RC=\$?; ")
-        append("END=\$(awk '{print \$1}' /proc/uptime); ")
-        append("ELAPSED_MS=\$(awk -v s=\$START -v e=\$END 'BEGIN{printf \"%d\", (e - s) * 1000}'); ")
-        append("echo \"__MEM_KB__\${PEAK}__END__\" >&2; ")
-        append("echo \"__TIME_MS__\${ELAPSED_MS}__END__\" >&2; ")
-        append("exit \$RC")
+    private fun resolveVerdict(
+        exitCode: Int,
+        oomKilled: Boolean,
+        timedOut: Boolean,
+        stderr: String,
+        language: String
+    ): Verdict = when {
+        oomKilled                                          -> Verdict.MEMORY_LIMIT_EXCEEDED
+        exitCode == 137                                    -> Verdict.MEMORY_LIMIT_EXCEEDED
+        timedOut || exitCode == 124                        -> Verdict.TIME_LIMIT_EXCEEDED
+        exitCode == 139                                    -> Verdict.RUNTIME_ERROR   // SIGSEGV
+        exitCode != 0                                      -> Verdict.RUNTIME_ERROR
+        LanguageErrorPattern.stderrIndicatesError(language, stderr) -> Verdict.RUNTIME_ERROR
+        else                                               -> Verdict.OK
     }
+
+    /**
+     * Maps execution verdict to [ExecutionStatus] for the result DTO.
+     * Output-comparison verdicts (OK / WRONG_ANSWER / PRESENTATION_ERROR)
+     * all map to SUCCESS — the caller decides if output matched.
+     */
+    private fun verdictToExecutionStatus(verdict: Verdict): ExecutionStatus = when (verdict) {
+        Verdict.OK, Verdict.WRONG_ANSWER, Verdict.PRESENTATION_ERROR -> ExecutionStatus.SUCCESS
+        Verdict.RUNTIME_ERROR                                         -> ExecutionStatus.RUNTIME_ERROR
+        Verdict.TIME_LIMIT_EXCEEDED                                   -> ExecutionStatus.TIME_LIMIT_EXCEEDED
+        Verdict.MEMORY_LIMIT_EXCEEDED                                 -> ExecutionStatus.MEMORY_LIMIT_EXCEEDED
+        Verdict.COMPILATION_ERROR                                     -> ExecutionStatus.COMPILATION_ERROR
+    }
+
+    // -----------------------------------------------------------------------
+    // Docker helper calls
+    // -----------------------------------------------------------------------
+
+    /** Send SIGKILL to a running container. */
+    private fun killContainer(id: String) {
+        try {
+            ProcessBuilder("docker", "kill", "--signal=SIGKILL", id)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor(5, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            logger.warn(e) { "docker kill failed for $id" }
+        }
+    }
+
+    /** Force-remove a container. Always called in finally. */
+    private fun removeContainer(id: String) {
+        try {
+            ProcessBuilder("docker", "rm", "-f", id)
+                .redirectErrorStream(true)
+                .start()
+                .waitFor(10, TimeUnit.SECONDS)
+        } catch (e: Exception) {
+            logger.warn(e) { "docker rm -f failed for $id" }
+        }
+    }
+
+    /**
+     * Collect stdout or stderr from a stopped container via docker logs.
+     * [stderr] = true  → returns only stderr stream
+     * [stderr] = false → returns only stdout stream
+     *
+     * Note: docker logs sends stdout to its own stdout and stderr to its own
+     * stderr, so we must NOT use redirectErrorStream here.
+     */
+    /**
+     * `docker logs <id>` writes the container's stdout to the docker process's
+     * stdout, and the container's stderr to the docker process's stderr (with
+     * --tty unset, which is our case). So a single invocation captures both —
+     * we just read the right stream. The previous version used `--stdout=true
+     * --stderr=false` flags that don't exist in docker CLI and silently
+     * produced empty output.
+     */
+    private fun dockerLogs(id: String, stderr: Boolean): String {
+        return try {
+            val proc = ProcessBuilder("docker", "logs", id)
+                .redirectErrorStream(false)
+                .start()
+            // Read both streams to drain the pipe before waitFor.
+            val out = proc.inputStream.bufferedReader().readText()
+            val err = proc.errorStream.bufferedReader().readText()
+            proc.waitFor(10, TimeUnit.SECONDS)
+            if (stderr) err else out
+        } catch (e: Exception) {
+            logger.warn(e) { "docker logs failed for $id (stderr=$stderr)" }
+            ""
+        }
+    }
+
+    /**
+     * Inspect a (stopped) container for wall-clock time and OOMKilled flag.
+     * Uses a single docker inspect call with a combined format string.
+     *
+     * Expected output format: "2025-05-07T10:00:00.123456789Z 2025-05-07T10:00:02.456789012Z false"
+     */
+    private data class InspectResult(val wallTimeMs: Long, val oomKilled: Boolean)
+
+    private fun inspectContainer(id: String): InspectResult {
+        return try {
+            val proc = ProcessBuilder(
+                "docker", "inspect",
+                "--format={{.State.StartedAt}} {{.State.FinishedAt}} {{.State.OOMKilled}}",
+                id
+            ).redirectErrorStream(true).start()
+            proc.waitFor(10, TimeUnit.SECONDS)
+            val line = proc.inputStream.bufferedReader().readText().trim()
+
+            val parts = line.split(" ")
+            val startedAt = parts.getOrNull(0)?.let { runCatching { Instant.parse(it) }.getOrNull() }
+            val finishedAt = parts.getOrNull(1)?.let { runCatching { Instant.parse(it) }.getOrNull() }
+            val oomKilled = parts.getOrNull(2)?.trim()?.lowercase() == "true"
+
+            val wallMs = if (startedAt != null && finishedAt != null && finishedAt > startedAt) {
+                Duration.between(startedAt, finishedAt).toMillis()
+            } else {
+                0L
+            }
+
+            InspectResult(wallTimeMs = wallMs, oomKilled = oomKilled)
+        } catch (e: Exception) {
+            logger.warn(e) { "docker inspect failed for $id" }
+            InspectResult(wallTimeMs = 0L, oomKilled = false)
+        }
+    }
+
+    /**
+     * Polls peak memory for a running container via `docker stats --no-stream`.
+     *
+     * Parses the MemUsage field (e.g. "42.3MiB / 256MiB") and updates [peak]
+     * atomically if the current sample exceeds the stored maximum.
+     *
+     * Called from [pollScheduler] every 100 ms. Must not throw — exceptions
+     * are swallowed (container may have exited between scheduling and execution).
+     *
+     * macOS / Docker Desktop caveat: Docker Desktop on macOS runs containers
+     * inside a hidden Linux VM. docker stats communicates with the Docker daemon
+     * over the VM socket and reflects the container's cgroup memory inside the
+     * VM. Numbers match what a native Linux host would report. The 100 ms
+     * granularity is sufficient for thesis-grade peak-memory measurement; rapid
+     * sub-10 ms allocation spikes will not be captured.
+     */
+    private fun pollMemory(containerId: String, peak: AtomicLong) {
+        try {
+            val proc = ProcessBuilder(
+                "docker", "stats", "--no-stream",
+                "--format={{.MemUsage}}",
+                containerId
+            ).redirectErrorStream(true).start()
+
+            val finished = proc.waitFor(2, TimeUnit.SECONDS)
+            if (!finished) {
+                proc.destroyForcibly()
+                return
+            }
+            val line = proc.inputStream.bufferedReader().readText().trim()
+            // line looks like: "42.3MiB / 256MiB"
+            val usedPart = line.substringBefore("/").trim()
+            val bytes = parseMemoryString(usedPart)
+            if (bytes > 0L) {
+                // Atomically update maximum
+                var cur = peak.get()
+                while (bytes > cur) {
+                    if (peak.compareAndSet(cur, bytes)) break
+                    cur = peak.get()
+                }
+            }
+        } catch (_: Exception) {
+            // Container may have stopped between poll cycles — ignore silently
+        }
+    }
+
+    /**
+     * Parses a Docker memory string into bytes.
+     * Handles: GiB, MiB, KiB, GB, MB, KB, B
+     * Returns 0 on parse failure or blank/dash input.
+     */
+    private fun parseMemoryString(s: String): Long {
+        if (s.isBlank() || s == "--") return 0L
+        return try {
+            when {
+                s.endsWith("GiB") -> (s.removeSuffix("GiB").toDouble() * 1024L * 1024L * 1024L).toLong()
+                s.endsWith("MiB") -> (s.removeSuffix("MiB").toDouble() * 1024L * 1024L).toLong()
+                s.endsWith("KiB") -> (s.removeSuffix("KiB").toDouble() * 1024L).toLong()
+                s.endsWith("GB")  -> (s.removeSuffix("GB").toDouble()  * 1_000_000_000L).toLong()
+                s.endsWith("MB")  -> (s.removeSuffix("MB").toDouble()  * 1_000_000L).toLong()
+                s.endsWith("KB")  -> (s.removeSuffix("KB").toDouble()  * 1_000L).toLong()
+                s.endsWith("B")   -> s.removeSuffix("B").toDouble().toLong()
+                else              -> 0L
+            }
+        } catch (_: NumberFormatException) {
+            0L
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Utilities
+    // -----------------------------------------------------------------------
 
     private fun extractClassName(code: String): String? {
         val classPattern = Regex("""(?:public\s+)?class\s+(\w+)""")
         return classPattern.find(code)?.groupValues?.get(1)
     }
-    
+
+    /**
+     * Compares actual container stdout against the expected output.
+     * Both sides are trimmed and consecutive whitespace collapsed to a single
+     * space before comparison (normalised comparison).
+     */
     private fun compareOutput(actual: String, expected: String): Verdict {
         val normalizedActual = actual.trim().replace(Regex("\\s+"), " ")
         val normalizedExpected = expected.trim().replace(Regex("\\s+"), " ")
-        
+
         return when {
-            normalizedActual == normalizedExpected -> Verdict.OK
-            normalizedActual.replace(" ", "") == normalizedExpected.replace(" ", "") -> Verdict.PRESENTATION_ERROR
-            else -> Verdict.WRONG_ANSWER
+            normalizedActual == normalizedExpected ->
+                Verdict.OK
+            normalizedActual.replace(" ", "") == normalizedExpected.replace(" ", "") ->
+                Verdict.PRESENTATION_ERROR
+            else ->
+                Verdict.WRONG_ANSWER
         }
     }
 }

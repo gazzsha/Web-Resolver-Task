@@ -7,6 +7,7 @@ import {
   Typography,
   Box,
   Button,
+  Alert,
   Chip,
   alpha,
   useTheme,
@@ -55,12 +56,13 @@ const Dashboard = () => {
   const userEmail = useAuthStore((s) => s.user?.email);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<UserStats | null>(null);
+  const [statsError, setStatsError] = useState(false);
 
   useEffect(() => {
     meService
       .getStats()
       .then((data) => setStats(data))
-      .catch(() => setStats(null))
+      .catch(() => { setStats(null); setStatsError(true); })
       .finally(() => setLoading(false));
   }, []);
 
@@ -151,6 +153,7 @@ const Dashboard = () => {
           </Typography>
           <Typography
             variant="h3"
+            component="h1"
             sx={{
               fontWeight: 700,
               mb: 1,
@@ -193,6 +196,13 @@ const Dashboard = () => {
           </Button>
         </Box>
       </Box>
+
+      {/* ──────────── Stats error ──────────── */}
+      {!loading && statsError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          Не удалось загрузить статистику. Попробуйте обновить страницу.
+        </Alert>
+      )}
 
       {/* ──────────── Stat cards ──────────── */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
