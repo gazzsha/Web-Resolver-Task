@@ -35,6 +35,21 @@ class GigaChatAnalyzer(
         language: String,
         executionResults: List<SandboxExecutionResult>,
         scenarioResults: List<ScenarioResult>?
+    ): AIAnalysisResult = analyzeWithExtraContext(code, language, executionResults, scenarioResults, extraContext = null)
+
+    /**
+     * Variant of [analyze] that injects additional context (e.g. AST facts) into the user prompt.
+     * Used by [ru.aianalyzer.service.AstHybridAnalyzer] to feed deterministic AST data alongside code.
+     *
+     * When [extraContext] is non-null it is used as the user prompt verbatim instead of the standard
+     * [ru.aianalyzer.prompt.AnalyzerPrompts.userPrompt].
+     */
+    fun analyzeWithExtraContext(
+        code: String,
+        language: String,
+        executionResults: List<SandboxExecutionResult>,
+        scenarioResults: List<ScenarioResult>? = null,
+        extraContext: String?
     ): AIAnalysisResult {
         val normalized = InputSanitizer.normalizeUnicode(code)
         val sanitized = runCatching { InputSanitizer.enforceSizeLimit(normalized) }
@@ -52,7 +67,7 @@ class GigaChatAnalyzer(
             return it
         }
 
-        val result = analyzeWithRetry(sanitized, language, executionResults)
+        val result = analyzeWithRetry(sanitized, language, executionResults, extraContext)
             ?: fallback.analyze(sanitized, language, executionResults, scenarioResults)
 
         cache.put(cacheKey, result)
@@ -62,13 +77,14 @@ class GigaChatAnalyzer(
     private fun analyzeWithRetry(
         code: String,
         language: String,
-        executionResults: List<SandboxExecutionResult>
+        executionResults: List<SandboxExecutionResult>,
+        extraContext: String? = null
     ): AIAnalysisResult? {
         return try {
-            callAndParse(code, language, executionResults, retryHint = null)
+            callAndParse(code, language, executionResults, retryHint = null, extraContext = extraContext)
         } catch (schemaErr: SchemaValidationException) {
             logger.warn { "GigaChat schema invalid, retrying once: ${schemaErr.message}" }
-            runCatching { callAndParse(code, language, executionResults, retryHint = schemaErr.message ?: "schema mismatch") }
+            runCatching { callAndParse(code, language, executionResults, retryHint = schemaErr.message ?: "schema mismatch", extraContext = extraContext) }
                 .onFailure { logger.warn(it) { "GigaChat retry failed, falling back to rule-based" } }
                 .getOrNull()
         } catch (e: Exception) {
@@ -87,12 +103,13 @@ class GigaChatAnalyzer(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        retryHint: String?
+        retryHint: String?,
+        extraContext: String? = null
     ): AIAnalysisResult {
-        val userPrompt = if (retryHint != null) {
-            AnalyzerPrompts.userPromptRetry(code, language, retryHint)
-        } else {
-            AnalyzerPrompts.userPrompt(code, language)
+        val userPrompt = when {
+            retryHint != null -> AnalyzerPrompts.userPromptRetry(code, language, retryHint)
+            extraContext != null -> extraContext
+            else -> AnalyzerPrompts.userPrompt(code, language)
         }
         val raw = client.chatCompletion(
             systemPrompt = AnalyzerPrompts.systemPrompt(),

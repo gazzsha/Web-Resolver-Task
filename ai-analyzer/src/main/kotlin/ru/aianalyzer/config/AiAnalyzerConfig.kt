@@ -16,10 +16,12 @@ import org.springframework.context.annotation.Primary
 import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.netty.http.client.HttpClient
+import ru.aianalyzer.ast.AstMetricsService
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatClientConfig
 import ru.aianalyzer.service.AIAnalyzer
 import ru.aianalyzer.service.AIAnalysisResult
+import ru.aianalyzer.service.AstHybridAnalyzer
 import ru.aianalyzer.service.GigaChatAnalyzer
 import ru.aianalyzer.service.SimpleRuleBasedAnalyzer
 import ru.aianalyzer.validation.SchemaValidator
@@ -120,4 +122,19 @@ class AiAnalyzerConfig {
     @Primary
     @ConditionalOnProperty(name = ["ai.analyzer.provider"], havingValue = "rule-based")
     fun primaryRuleBased(ruleBasedAnalyzer: SimpleRuleBasedAnalyzer): AIAnalyzer = ruleBasedAnalyzer
+
+    @Bean
+    fun astMetricsService(): AstMetricsService = AstMetricsService()
+
+    @Bean(name = ["astHybridAnalyzer"])
+    fun astHybridAnalyzer(
+        gigaChatAnalyzer: GigaChatAnalyzer,
+        astMetricsService: AstMetricsService,
+        fallback: SimpleRuleBasedAnalyzer
+    ): AstHybridAnalyzer = AstHybridAnalyzer(gigaChatAnalyzer, astMetricsService, fallback)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty(name = ["ai.analyzer.provider"], havingValue = "ast-hybrid")
+    fun primaryAstHybrid(astHybridAnalyzer: AstHybridAnalyzer): AIAnalyzer = astHybridAnalyzer
 }

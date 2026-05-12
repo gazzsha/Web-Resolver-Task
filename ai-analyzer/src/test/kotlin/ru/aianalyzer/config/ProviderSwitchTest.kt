@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.boot.autoconfigure.AutoConfigurations
 import org.springframework.boot.test.context.runner.ApplicationContextRunner
 import ru.aianalyzer.service.AIAnalyzer
+import ru.aianalyzer.service.AstHybridAnalyzer
 import ru.aianalyzer.service.GigaChatAnalyzer
 import ru.aianalyzer.service.SimpleRuleBasedAnalyzer
 
@@ -38,6 +39,15 @@ class ProviderSwitchTest {
             assertThat(ctx).hasNotFailed()
             assertThat(ctx.getBean(AIAnalyzer::class.java))
                 .isInstanceOf(SimpleRuleBasedAnalyzer::class.java)
+        }
+    }
+
+    @Test
+    fun `provider ast-hybrid selects AstHybridAnalyzer`() {
+        runner.withPropertyValues("ai.analyzer.provider=ast-hybrid").run { ctx ->
+            assertThat(ctx).hasNotFailed()
+            assertThat(ctx.getBean(AIAnalyzer::class.java))
+                .isInstanceOf(AstHybridAnalyzer::class.java)
         }
     }
 }

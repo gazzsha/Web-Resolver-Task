@@ -20,6 +20,9 @@ dependencies {
     // Optional: AST parsing for code analysis
     implementation("com.github.javaparser:javaparser-core:3.26.2")
 
+    // Kotlin AST for AstMetricsService (Phase 3 neuro-symbolic hybrid)
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.21")
+
     // JSON Schema validation for hardening LLM responses (Phase 2)
     implementation("com.networknt:json-schema-validator:1.4.0")
 

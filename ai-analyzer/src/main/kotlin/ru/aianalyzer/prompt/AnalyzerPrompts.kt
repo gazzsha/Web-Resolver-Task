@@ -34,6 +34,9 @@ object AnalyzerPrompts {
         - explanation: 2-4 предложения с обучающим разбором — что делает код, что сделано хорошо, что можно улучшить.
         - complexity: оценка алгоритмической/структурной сложности.
 
+        AST-ФАКТЫ:
+        Если в user-сообщении присутствует блок <AST_FACTS>...</AST_FACTS> — это авторитетные структурные факты о коде, вычисленные детерминированно статическим анализатором. Считай их истинными и опирайся на них в объяснении. Они имеют приоритет над твоими собственными структурными наблюдениями.
+
         Отвечай на русском языке.
     """.trimIndent()
 
@@ -47,6 +50,17 @@ object AnalyzerPrompts {
             append(InputSanitizer.spotlightCode(code, safeLanguage))
         }
     }
+
+    fun userPromptWithAst(code: String, language: String, astJson: String): String =
+        buildString {
+            val safeLanguage = language.lowercase().filter { it.isLetterOrDigit() || it == '+' || it == '-' }
+            appendLine("Язык программирования: $safeLanguage")
+            appendLine("Детерминированные AST-факты (вычислены статически, считаются авторитетными):")
+            appendLine(astJson)
+            appendLine()
+            appendLine("Код студента для анализа:")
+            append(InputSanitizer.spotlightCode(code, safeLanguage))
+        }
 
     fun userPromptRetry(code: String, language: String, validationError: String): String =
         buildString {
