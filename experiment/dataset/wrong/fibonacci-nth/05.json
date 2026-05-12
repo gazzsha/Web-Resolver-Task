@@ -1,0 +1,12 @@
+{
+  "code": "def fib(N):\n    A=0;B=1\n    i=0\n    while i<N:A,B=B,A+B;i=i+1\n    return A\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "верхний регистр",
+    "for"
+  ],
+  "id": "fibonacci-nth-style-01",
+  "taskId": "fibonacci-nth"
+}

@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution {\n    public boolean isValid(String s) {\n        // O(n^2): repeated replace until stable\n        String prev;\n        do { prev = s; s = s.replace(\"()\", \"\").replace(\"[]\", \"\").replace(\"{}\", \"\"); } while (!s.equals(prev));\n        return s.isEmpty();\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "replace",
+    "повтор",
+    "стек",
+    "O(n)"
+  ],
+  "id": "valid-parentheses-tle-01",
+  "taskId": "valid-parentheses"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def fib(n: int) -> int:\n    return [0, 1][n]  # IndexError на n>=2\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "IndexError",
+    "выход за границы",
+    "список"
+  ],
+  "id": "fibonacci-nth-rte-01",
+  "taskId": "fibonacci-nth"
+}

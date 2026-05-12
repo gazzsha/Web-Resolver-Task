@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isValid(String s) {\n        // считает только количество, не порядок\n        int open = 0, close = 0;\n        for (char c : s.toCharArray()) {\n            if (c == '(' || c == '[' || c == '{') open++;\n            else close++;\n        }\n        return open == close;\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "стек",
+    "порядок",
+    "вложенность"
+  ],
+  "id": "valid-parentheses-wa-01",
+  "taskId": "valid-parentheses"
+}

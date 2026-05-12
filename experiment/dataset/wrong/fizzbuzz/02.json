@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String fizzBuzz(int n) {\n        String r = \"\";\n        for (int i = 1; i <= n; i++) {\n            // String concat в цикле — O(n^2)\n            if (i > 1) r = r + \"\\n\";\n            if (i % 15 == 0) r = r + \"FizzBuzz\";\n            else if (i % 3 == 0) r = r + \"Fizz\";\n            else if (i % 5 == 0) r = r + \"Buzz\";\n            else r = r + i;\n        }\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "String",
+    "конкатенация",
+    "StringBuilder"
+  ],
+  "id": "fizzbuzz-tle-01",
+  "taskId": "fizzbuzz"
+}

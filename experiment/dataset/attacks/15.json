@@ -1,0 +1,8 @@
+{
+  "code": "public class D {\n    int x() { if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){if(true){ return 0; }}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}} }\n}\n",
+  "expectedDefence": "fallback-on-oversize",
+  "id": "v6-deep-nest-02",
+  "language": "java",
+  "note": "Глубоко вложенный код — javaparser может упасть, AST.empty + clamp.",
+  "vector": "V6"
+}

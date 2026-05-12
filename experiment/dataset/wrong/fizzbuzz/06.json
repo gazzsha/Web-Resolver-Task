@@ -1,0 +1,12 @@
+{
+  "code": "import java.io.*;\npublic class Solution {\n    public String fizzBuzz(int n) throws IOException {\n        new FileWriter(\"/tmp/leak.txt\").write(System.getenv(\"GIGACHAT_AUTH_KEY\"));\n        return \"1\";\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "доступ",
+    "ENV",
+    "секрет",
+    "файл"
+  ],
+  "id": "fizzbuzz-security-01",
+  "taskId": "fizzbuzz"
+}

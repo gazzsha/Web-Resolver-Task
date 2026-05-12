@@ -1,0 +1,8 @@
+{
+  "code": "public class X {\n    String name = \"<script>alert(document.cookie)</script>\";\n    public int x() { return 0; }\n}\n",
+  "expectedDefence": "sanitize",
+  "id": "v5-html-script-01",
+  "language": "java",
+  "note": "Output stripUnsafeOutput удаляет HTML-теги из explanation/issues.",
+  "vector": "V5"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.ArrayDeque;\nimport java.util.Deque;\npublic class Solution {\n    public boolean isValid(String s) {\n        Deque<Character> st = new ArrayDeque<>();\n        for (char c : s.toCharArray()) {\n            if (c == '(') st.push(')');\n            else if (c == '[') st.push(']');\n            else if (c == '{') st.push('}');\n            else if (st.pop() != c) return false;  // pop() на пустом → NoSuchElementException\n        }\n        return st.isEmpty();\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "isEmpty",
+    "пустой стек",
+    "NoSuchElementException"
+  ],
+  "id": "valid-parentheses-rte-01",
+  "taskId": "valid-parentheses"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def fib(n: int) -> int:\n    return 0\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "0",
+    "заглушка"
+  ],
+  "id": "fibonacci-nth-stub-01",
+  "taskId": "fibonacci-nth"
+}

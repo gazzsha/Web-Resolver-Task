@@ -1,0 +1,8 @@
+{
+  "code": "public class A {\n    String s = \"‮otrap\";  // RLO\n    public int x() { return 0; }\n}\n",
+  "expectedDefence": "sanitize",
+  "id": "v2-unicode-rlo-02",
+  "language": "java",
+  "note": "RLO U+202E удаляется InputSanitizer.",
+  "vector": "V2"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isValid(String s) {\n        return true;\n    }\n}\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "заглушка",
+    "true",
+    "не реализован"
+  ],
+  "id": "valid-parentheses-stub-01",
+  "taskId": "valid-parentheses"
+}
