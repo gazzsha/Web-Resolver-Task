@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GigaChatAnalysisPayload",
+  "description": "Strict shape expected from the LLM. Extras are tolerated by Jackson but unknown TOP-LEVEL keys are blocked here to catch injection attempts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["codeQuality", "issues", "recommendations", "explanation", "complexity"],
+  "properties": {
+    "codeQuality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "explanation": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "VERY_HIGH"]
+    }
+  }
+}

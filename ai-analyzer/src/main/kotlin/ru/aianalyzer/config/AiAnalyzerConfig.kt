@@ -9,6 +9,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -21,6 +22,7 @@ import ru.aianalyzer.service.AIAnalyzer
 import ru.aianalyzer.service.AIAnalysisResult
 import ru.aianalyzer.service.GigaChatAnalyzer
 import ru.aianalyzer.service.SimpleRuleBasedAnalyzer
+import ru.aianalyzer.validation.SchemaValidator
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
@@ -93,13 +95,29 @@ class AiAnalyzerConfig {
     fun ruleBasedAnalyzer(): SimpleRuleBasedAnalyzer = SimpleRuleBasedAnalyzer()
 
     @Bean
-    @Primary
+    fun schemaValidator(
+        @org.springframework.beans.factory.annotation.Qualifier("aiAnalyzerObjectMapper")
+        objectMapper: ObjectMapper
+    ): SchemaValidator = SchemaValidator(objectMapper)
+
+    @Bean(name = ["gigaChatAnalyzer"])
     fun gigaChatAnalyzer(
         client: GigaChatClient,
         @org.springframework.beans.factory.annotation.Qualifier("aiAnalyzerObjectMapper")
         objectMapper: ObjectMapper,
         fallback: SimpleRuleBasedAnalyzer,
         @org.springframework.beans.factory.annotation.Qualifier("aiAnalysisCache")
-        cache: Cache<String, AIAnalysisResult>
-    ): AIAnalyzer = GigaChatAnalyzer(client, objectMapper, fallback, cache)
+        cache: Cache<String, AIAnalysisResult>,
+        schemaValidator: SchemaValidator
+    ): GigaChatAnalyzer = GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty(name = ["ai.analyzer.provider"], havingValue = "gigachat", matchIfMissing = true)
+    fun primaryGigaChat(gigaChatAnalyzer: GigaChatAnalyzer): AIAnalyzer = gigaChatAnalyzer
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty(name = ["ai.analyzer.provider"], havingValue = "rule-based")
+    fun primaryRuleBased(ruleBasedAnalyzer: SimpleRuleBasedAnalyzer): AIAnalyzer = ruleBasedAnalyzer
 }

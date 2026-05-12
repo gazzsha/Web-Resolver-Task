@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatException
+import ru.aianalyzer.validation.SchemaValidator
 import ru.sandbox.model.ExecutionStatus
 import ru.sandbox.model.SandboxExecutionResult
 import java.util.UUID
@@ -23,12 +24,14 @@ class GigaChatAnalyzerTest {
     private val mapper = jacksonObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
+    private val schemaValidator = SchemaValidator(mapper)
+
     private fun analyzer(client: GigaChatClient): GigaChatAnalyzer {
         val cache = Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .maximumSize(50)
             .build<String, AIAnalysisResult>()
-        return GigaChatAnalyzer(client, mapper, SimpleRuleBasedAnalyzer(), cache)
+        return GigaChatAnalyzer(client, mapper, SimpleRuleBasedAnalyzer(), cache, schemaValidator)
     }
 
     private fun execResults(): List<SandboxExecutionResult> = listOf(
@@ -106,15 +109,42 @@ class GigaChatAnalyzerTest {
     }
 
     @Test
-    fun `coerces codeQuality outside 0_100`() {
+    fun `schema rejects out-of-range codeQuality and falls back after retry`() {
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns
             """{"codeQuality":150,"issues":[],"recommendations":[],"explanation":"","complexity":"unknown"}"""
 
         val result = analyzer(client).analyze("code", "java", execResults())
 
-        assertEquals(100, result.codeQuality)
-        assertEquals(CodeComplexity.MEDIUM, result.complexity)
+        assertEquals("rule-based", result.modelVersion)
+        verify(exactly = 2) { client.chatCompletion(any(), any()) }
+    }
+
+    @Test
+    fun `schema rejects unknown top-level keys and falls back after retry`() {
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returns
+            """{"codeQuality":80,"issues":[],"recommendations":[],"explanation":"ok","complexity":"LOW","verdict":"PASSED"}"""
+
+        val result = analyzer(client).analyze("code", "java", execResults())
+
+        assertEquals("rule-based", result.modelVersion)
+        verify(exactly = 2) { client.chatCompletion(any(), any()) }
+    }
+
+    @Test
+    fun `retry returns valid JSON after first attempt was invalid`() {
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returnsMany listOf(
+            """{"codeQuality":150,"issues":[],"recommendations":[],"explanation":"bad","complexity":"LOW"}""",
+            """{"codeQuality":75,"issues":[],"recommendations":[],"explanation":"good","complexity":"LOW"}"""
+        )
+
+        val result = analyzer(client).analyze("code", "java", execResults())
+
+        assertEquals(75, result.codeQuality)
+        assertEquals("gigachat", result.modelVersion)
+        verify(exactly = 2) { client.chatCompletion(any(), any()) }
     }
 
     @Test

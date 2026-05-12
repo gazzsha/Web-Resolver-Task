@@ -8,6 +8,8 @@ import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.prompt.AnalyzerPrompts
 import ru.aianalyzer.sanitize.InputSanitizer
 import ru.aianalyzer.sanitize.InputTooLargeException
+import ru.aianalyzer.validation.SchemaValidationException
+import ru.aianalyzer.validation.SchemaValidator
 import ru.sandbox.model.ExecutionStatus
 import ru.sandbox.model.SandboxExecutionResult
 import java.security.MessageDigest
@@ -24,7 +26,8 @@ class GigaChatAnalyzer(
     private val client: GigaChatClient,
     private val objectMapper: ObjectMapper,
     private val fallback: AIAnalyzer,
-    private val cache: Cache<String, AIAnalysisResult>
+    private val cache: Cache<String, AIAnalysisResult>,
+    private val schemaValidator: SchemaValidator
 ) : AIAnalyzer {
 
     override fun analyze(
@@ -49,13 +52,29 @@ class GigaChatAnalyzer(
             return it
         }
 
-        val result = runCatching { callAndParse(sanitized, language, executionResults) }
-            .onFailure { logger.warn(it) { "GigaChat analyze failed, falling back to rule-based" } }
-            .getOrNull()
+        val result = analyzeWithRetry(sanitized, language, executionResults)
             ?: fallback.analyze(sanitized, language, executionResults, scenarioResults)
 
         cache.put(cacheKey, result)
         return result
+    }
+
+    private fun analyzeWithRetry(
+        code: String,
+        language: String,
+        executionResults: List<SandboxExecutionResult>
+    ): AIAnalysisResult? {
+        return try {
+            callAndParse(code, language, executionResults, retryHint = null)
+        } catch (schemaErr: SchemaValidationException) {
+            logger.warn { "GigaChat schema invalid, retrying once: ${schemaErr.message}" }
+            runCatching { callAndParse(code, language, executionResults, retryHint = schemaErr.message ?: "schema mismatch") }
+                .onFailure { logger.warn(it) { "GigaChat retry failed, falling back to rule-based" } }
+                .getOrNull()
+        } catch (e: Exception) {
+            logger.warn(e) { "GigaChat analyze failed, falling back to rule-based" }
+            null
+        }
     }
 
     override fun explainError(code: String, language: String, error: String, testInput: String): String =
@@ -67,13 +86,20 @@ class GigaChatAnalyzer(
     private fun callAndParse(
         code: String,
         language: String,
-        executionResults: List<SandboxExecutionResult>
+        executionResults: List<SandboxExecutionResult>,
+        retryHint: String?
     ): AIAnalysisResult {
+        val userPrompt = if (retryHint != null) {
+            AnalyzerPrompts.userPromptRetry(code, language, retryHint)
+        } else {
+            AnalyzerPrompts.userPrompt(code, language)
+        }
         val raw = client.chatCompletion(
             systemPrompt = AnalyzerPrompts.systemPrompt(),
-            userPrompt = AnalyzerPrompts.userPrompt(code, language)
+            userPrompt = userPrompt
         )
         val cleaned = stripJsonFences(raw)
+        schemaValidator.parseAndValidate(cleaned)
         val payload = objectMapper.readValue(cleaned, GigaChatAnalysisPayload::class.java)
         return mapPayload(payload, executionResults)
     }

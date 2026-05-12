@@ -47,4 +47,12 @@ object AnalyzerPrompts {
             append(InputSanitizer.spotlightCode(code, safeLanguage))
         }
     }
+
+    fun userPromptRetry(code: String, language: String, validationError: String): String =
+        buildString {
+            appendLine("Твой предыдущий ответ не прошёл JSON-schema валидацию: $validationError")
+            appendLine("Верни ответ строго по схеме: codeQuality(0..100), issues(array of strings ≤500 chars, ≤20 items), recommendations(array, те же ограничения), explanation(string ≤4000 chars), complexity(LOW|MEDIUM|HIGH|VERY_HIGH). БЕЗ markdown-обёрток, БЕЗ лишних полей.")
+            appendLine()
+            append(userPrompt(code, language))
+        }
 }
