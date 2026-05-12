@@ -6,8 +6,17 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.aianalyzer.client.GigaChatAnalysisPayload
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.prompt.AnalyzerPrompts
+import ru.aianalyzer.sanitize.InputSanitizer
+import ru.aianalyzer.sanitize.InputTooLargeException
+import ru.sandbox.model.ExecutionStatus
 import ru.sandbox.model.SandboxExecutionResult
 import java.security.MessageDigest
+
+/**
+ * If sandbox already proved the code is broken, LLM may not raise codeQuality above this.
+ * Защита от V4 (JSON-injection «codeQuality:100» при провальных тестах).
+ */
+private const val FAILED_CODE_QUALITY_CAP = 60
 
 private val logger = KotlinLogging.logger {}
 
@@ -24,16 +33,26 @@ class GigaChatAnalyzer(
         executionResults: List<SandboxExecutionResult>,
         scenarioResults: List<ScenarioResult>?
     ): AIAnalysisResult {
-        val cacheKey = cacheKey(code, language)
+        val normalized = InputSanitizer.normalizeUnicode(code)
+        val sanitized = runCatching { InputSanitizer.enforceSizeLimit(normalized) }
+            .onFailure { e ->
+                if (e is InputTooLargeException) {
+                    logger.warn { "GigaChat analyze skipped: ${e.message}" }
+                    return fallback.analyze(code, language, executionResults, scenarioResults)
+                }
+            }
+            .getOrNull() ?: return fallback.analyze(code, language, executionResults, scenarioResults)
+
+        val cacheKey = cacheKey(sanitized, language)
         cache.getIfPresent(cacheKey)?.let {
             logger.debug { "GigaChat analyze cache hit key=${cacheKey.take(12)}" }
             return it
         }
 
-        val result = runCatching { callAndParse(code, language) }
+        val result = runCatching { callAndParse(sanitized, language, executionResults) }
             .onFailure { logger.warn(it) { "GigaChat analyze failed, falling back to rule-based" } }
             .getOrNull()
-            ?: fallback.analyze(code, language, executionResults, scenarioResults)
+            ?: fallback.analyze(sanitized, language, executionResults, scenarioResults)
 
         cache.put(cacheKey, result)
         return result
@@ -45,24 +64,33 @@ class GigaChatAnalyzer(
     override fun assessCodeQuality(code: String, language: String): CodeQualityAssessment =
         fallback.assessCodeQuality(code, language)
 
-    private fun callAndParse(code: String, language: String): AIAnalysisResult {
+    private fun callAndParse(
+        code: String,
+        language: String,
+        executionResults: List<SandboxExecutionResult>
+    ): AIAnalysisResult {
         val raw = client.chatCompletion(
             systemPrompt = AnalyzerPrompts.systemPrompt(),
             userPrompt = AnalyzerPrompts.userPrompt(code, language)
         )
         val cleaned = stripJsonFences(raw)
         val payload = objectMapper.readValue(cleaned, GigaChatAnalysisPayload::class.java)
-        return mapPayload(payload)
+        return mapPayload(payload, executionResults)
     }
 
-    private fun mapPayload(payload: GigaChatAnalysisPayload): AIAnalysisResult {
-        val quality = payload.codeQuality.coerceIn(0, 100)
+    private fun mapPayload(
+        payload: GigaChatAnalysisPayload,
+        executionResults: List<SandboxExecutionResult>
+    ): AIAnalysisResult {
+        val rawQuality = payload.codeQuality.coerceIn(0, 100)
+        val hasFailure = executionResults.any { it.status != ExecutionStatus.SUCCESS }
+        val quality = if (hasFailure) minOf(rawQuality, FAILED_CODE_QUALITY_CAP) else rawQuality
         val issues = payload.issues.take(20).map { msg ->
             CodeIssue(
                 type = IssueType.CODE_SMELL,
                 severity = Severity.MINOR,
                 line = null,
-                message = msg,
+                message = InputSanitizer.stripUnsafeOutput(msg),
                 suggestion = ""
             )
         }
@@ -71,8 +99,8 @@ class GigaChatAnalyzer(
         return AIAnalysisResult(
             codeQuality = quality,
             issues = issues,
-            recommendations = payload.recommendations.take(20),
-            explanation = payload.explanation,
+            recommendations = payload.recommendations.take(20).map(InputSanitizer::stripUnsafeOutput),
+            explanation = InputSanitizer.stripUnsafeOutput(payload.explanation),
             complexity = complexity,
             modelVersion = "gigachat"
         )

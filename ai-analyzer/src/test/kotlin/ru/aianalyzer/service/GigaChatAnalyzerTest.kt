@@ -7,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -36,6 +37,17 @@ class GigaChatAnalyzerTest {
             status = ExecutionStatus.SUCCESS,
             output = "ok",
             error = null,
+            executionTimeMs = 10,
+            memoryUsedKb = 1024
+        )
+    )
+
+    private fun failedExecResults(): List<SandboxExecutionResult> = listOf(
+        SandboxExecutionResult(
+            requestId = UUID.randomUUID(),
+            status = ExecutionStatus.RUNTIME_ERROR,
+            output = "",
+            error = "ArrayIndexOutOfBoundsException",
             executionTimeMs = 10,
             memoryUsedKb = 1024
         )
@@ -117,5 +129,52 @@ class GigaChatAnalyzerTest {
         a.analyze("public class A {}", "java", execResults())
 
         verify(exactly = 1) { client.chatCompletion(any(), any()) }
+    }
+
+    @Test
+    fun `clamps codeQuality to 60 when sandbox shows failure (V4 cross-check)`() {
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returns
+            """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
+
+        val result = analyzer(client).analyze("code", "java", failedExecResults())
+
+        assertEquals(60, result.codeQuality)
+    }
+
+    @Test
+    fun `does not clamp codeQuality when all tests pass`() {
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returns
+            """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
+
+        val result = analyzer(client).analyze("code", "java", execResults())
+
+        assertEquals(95, result.codeQuality)
+    }
+
+    @Test
+    fun `strips HTML script from explanation (V5 output sanitization)`() {
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returns
+            """{"codeQuality":80,"issues":["<b>broken</b>"],"recommendations":["click [here](javascript:alert(1))"],"explanation":"All good <script>alert(1)</script> done","complexity":"LOW"}"""
+
+        val result = analyzer(client).analyze("code", "java", execResults())
+
+        assertFalse(result.explanation.contains("<script>"))
+        assertFalse(result.explanation.contains("</script>"))
+        assertFalse(result.issues.first().message.contains("<b>"))
+        assertFalse(result.recommendations.first().contains("javascript:"))
+    }
+
+    @Test
+    fun `oversized code triggers fallback without calling chatCompletion`() {
+        val client = mockk<GigaChatClient>()
+        val oversized = "a".repeat(16385)
+
+        val result = analyzer(client).analyze(oversized, "java", execResults())
+
+        assertNotNull(result)
+        verify(exactly = 0) { client.chatCompletion(any(), any()) }
     }
 }
