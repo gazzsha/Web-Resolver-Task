@@ -19,6 +19,7 @@ import reactor.netty.http.client.HttpClient
 import ru.aianalyzer.ast.AstMetricsService
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatClientConfig
+import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.service.AIAnalyzer
 import ru.aianalyzer.service.AIAnalysisResult
 import ru.aianalyzer.service.AstHybridAnalyzer
@@ -110,8 +111,15 @@ class AiAnalyzerConfig {
         fallback: SimpleRuleBasedAnalyzer,
         @org.springframework.beans.factory.annotation.Qualifier("aiAnalysisCache")
         cache: Cache<String, AIAnalysisResult>,
-        schemaValidator: SchemaValidator
-    ): GigaChatAnalyzer = GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator)
+        schemaValidator: SchemaValidator,
+        @Value("\${ai.prompt.variant:zero-shot}") promptVariantProp: String
+    ): GigaChatAnalyzer {
+        val variant = when (promptVariantProp.lowercase().trim()) {
+            "few-shot", "few_shot", "fewshot" -> PromptVariant.FEW_SHOT
+            else -> PromptVariant.ZERO_SHOT
+        }
+        return GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator, variant)
+    }
 
     @Bean
     @Primary

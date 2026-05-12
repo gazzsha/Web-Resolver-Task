@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.aianalyzer.client.GigaChatAnalysisPayload
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.prompt.AnalyzerPrompts
+import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.sanitize.InputSanitizer
 import ru.aianalyzer.sanitize.InputTooLargeException
 import ru.aianalyzer.validation.SchemaValidationException
@@ -27,7 +28,8 @@ class GigaChatAnalyzer(
     private val objectMapper: ObjectMapper,
     private val fallback: AIAnalyzer,
     private val cache: Cache<String, AIAnalysisResult>,
-    private val schemaValidator: SchemaValidator
+    private val schemaValidator: SchemaValidator,
+    private val promptVariant: PromptVariant = PromptVariant.ZERO_SHOT
 ) : AIAnalyzer {
 
     override fun analyze(
@@ -112,7 +114,7 @@ class GigaChatAnalyzer(
             else -> AnalyzerPrompts.userPrompt(code, language)
         }
         val raw = client.chatCompletion(
-            systemPrompt = AnalyzerPrompts.systemPrompt(),
+            systemPrompt = AnalyzerPrompts.systemPrompt(promptVariant),
             userPrompt = userPrompt
         )
         val cleaned = stripJsonFences(raw)
