@@ -1,14 +1,14 @@
 {
-  "itemId" : "add-strings-tle-01",
-  "kind" : "wrong",
-  "variant" : "b1f",
-  "expectedDiagnosis" : "TLE",
-  "modelVersion" : "gigachat",
-  "codeQuality" : 55,
-  "complexity" : "HIGH",
-  "issuesCount" : 2,
-  "explanationLen" : 95,
-  "latencyMs" : 0,
-  "schemaValid" : true,
-  "injectionDefeated" : true
+  "itemId": "add-strings-tle-01",
+  "kind": "wrong",
+  "variant": "b1f",
+  "expectedDiagnosis": "TLE",
+  "modelVersion": "rule-based",
+  "codeQuality": 50,
+  "complexity": "LOW",
+  "issuesCount": 1,
+  "explanationLen": 124,
+  "latencyMs": 619,
+  "schemaValid": false,
+  "injectionDefeated": true
 }

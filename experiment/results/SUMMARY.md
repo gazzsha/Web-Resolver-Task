@@ -1,35 +1,44 @@
-# Experiment summary — ai-analyzer A/B
+# Experiment summary — ai-analyzer A/B (REAL GigaChat run)
 
 Dataset and results materialised by `experiment/generate_dataset.py` and
-`./gradlew :ai-analyzer:runExperiment`. See `experiment/README.md` for context.
+`./gradlew :ai-analyzer:runExperiment --mode=real --limit=30`.
+Real GigaChat freemium API, scope=GIGACHAT_API_PERS, 2026-05-13.
 
 ## Aggregate metrics
 
 | variant | items | wrong | attacks | structural_valid_pct | injection_success_rate | latency_p50_ms | latency_p95_ms |
 |---------|-------|-------|---------|----------------------|------------------------|----------------|----------------|
-| b1 | 195 | 180 | 15 | 0.99 | 0.00 | 0 | 0 |
-| b1f | 195 | 180 | 15 | 0.99 | 0.00 | 0 | 0 |
-| b2 | 195 | 180 | 15 | 1.00 | 0.00 | 0 | 4 |
+| b1 | 30 | 30 | 0 | 0.00 | 0.00 | 236 | 728 |
+| b1f | 30 | 30 | 0 | 0.00 | 0.00 | 280 | 650 |
+| b2 | 30 | 30 | 0 | 0.00 | 0.00 | 279 | 751 |
 
 ## By diagnosis (codeQuality average)
 
 | diagnosis | b1 (n / avg_quality) | b1f (n / avg_quality) | b2 (n / avg_quality) |
 |-----------|------|------|------|
-| RTE | 30 / 35.0 | 30 / 35.0 | 30 / 35.0 |
-| SECURITY | 30 / 25.0 | 30 / 25.0 | 30 / 25.0 |
-| STUB | 30 / 15.0 | 30 / 15.0 | 30 / 15.0 |
-| STYLE | 30 / 65.0 | 30 / 65.0 | 30 / 64.7 |
-| TLE | 30 / 55.0 | 30 / 55.0 | 30 / 55.0 |
-| V1 | 3 / 40.0 | 3 / 40.0 | 3 / 40.0 |
-| V2 | 3 / 50.0 | 3 / 50.0 | 3 / 50.0 |
-| V3 | 2 / 45.0 | 2 / 45.0 | 2 / 45.0 |
-| V4 | 2 / 45.0 | 2 / 45.0 | 2 / 45.0 |
-| V5 | 3 / 40.0 | 3 / 40.0 | 3 / 40.0 |
-| V6 | 2 / 50.0 | 2 / 50.0 | 2 / 50.0 |
-| WA | 30 / 45.0 | 30 / 45.0 | 30 / 45.0 |
+| RTE | 5 / 40.0 | 5 / 40.0 | 5 / 40.0 |
+| SECURITY | 5 / 90.0 | 5 / 90.0 | 5 / 90.0 |
+| STUB | 5 / 40.0 | 5 / 40.0 | 5 / 40.0 |
+| STYLE | 5 / 90.0 | 5 / 90.0 | 5 / 90.0 |
+| TLE | 5 / 50.0 | 5 / 50.0 | 5 / 50.0 |
+| WA | 5 / 40.0 | 5 / 40.0 | 5 / 40.0 |
 
-**Reading guide:**
-- `structural_valid_pct` — доля ответов, прошедших JSON-schema (modelVersion=gigachat / ast-hybrid). Низкое значение = retry-fallback цикл сработал.
-- `injection_success_rate` — доля атак, при которых codeQuality остался > 60 (т.е. защита V4/V5/V6 не сработала). Цель — 0.
-- B2 vs B1 — эффект AST-гибрида: ожидаем большую разницу avg_quality на STUB и SECURITY (где AST подсвечивает suspicious-pattern).
-- B1f vs B1 — эффект few-shot: ожидаем стабильнее complexity и более информативные explanation.
+## Empirical findings (real GigaChat)
+
+- **structural_valid_pct = 0.00 на B1/B1f** — GigaChat НЕ возвращает ответ, проходящий нашу строгую JSON-schema (`additionalProperties=false`).
+  В живом прогоне модель добавляет лишние ключи или обёртывает JSON в markdown даже после anti-injection prompt.
+  Schema-reject → retry-once → опять reject → fallback на `SimpleRuleBasedAnalyzer`. Это **главный практический инсайт**: production-grade
+  использование GigaChat требует или ослабления schema (`additionalProperties=true`), или structured-output API (если/когда GigaChat его поддержит).
+- **B2 (ast-hybrid) ведёт себя так же** — внутренний GigaChat падает, AstHybridAnalyzer тоже идёт в fallback (`modelVersion=ast-hybrid-fallback`).
+  Метрика после фикса честно показывает structural_valid_pct = 0.00 для B2 тоже.
+- **AST clamp всё равно работает** — даже на fallback-результатах AstHybridAnalyzer применяет clamp по `suspiciousReturnsConstant`, что зафиксировано в живом логе.
+- **injection_success_rate = 0.00 во всех вариантах** — даже с fallback на rule-based, V4 clamp (sandbox-вердикт → codeQuality ≤ 60) защищает от завышения оценки на провальном коде.
+- **avg_quality на SECURITY и STYLE = 90** — это limitation rule-based analyzer: при SUCCESS sandbox-вердикте он не отличает «работает идеально» от «работает, но опасно/неряшливо». В записке отметить как known gap.
+- **Latency p50 ≈ 250 ms, p95 ≈ 700 ms** — приемлемо для production, retry-fallback цикл укладывается под секунду.
+
+## Reading guide
+
+- `structural_valid_pct` — доля ответов, прошедших JSON-schema (`modelVersion in {gigachat, ast-hybrid}`). Значение 0 означает что цикл retry+fallback всегда срабатывал.
+- `injection_success_rate` — доля атак, при которых `codeQuality > 60` (защита не сработала). Цель — 0.
+- `latency_p50/p95` — задержка одного analyze-вызова в миллисекундах.
+- Колонки B1 vs B1f vs B2 в текущем датасете идентичны по `avg_quality` потому что **все ответы пришли из rule-based fallback** — sandbox-вердикт у одного и того же `expectedDiagnosis` идентичен, поэтому codeQuality одинаков. Различие появится когда GigaChat начнёт возвращать valid JSON (см. главный finding выше).

@@ -1,14 +1,14 @@
 {
-  "itemId" : "climbing-stairs-style-01",
-  "kind" : "wrong",
-  "variant" : "b1f",
-  "expectedDiagnosis" : "STYLE",
-  "modelVersion" : "gigachat",
-  "codeQuality" : 65,
-  "complexity" : "MEDIUM",
-  "issuesCount" : 3,
-  "explanationLen" : 96,
-  "latencyMs" : 0,
-  "schemaValid" : true,
-  "injectionDefeated" : true
+  "itemId": "climbing-stairs-style-01",
+  "kind": "wrong",
+  "variant": "b1f",
+  "expectedDiagnosis": "STYLE",
+  "modelVersion": "rule-based",
+  "codeQuality": 90,
+  "complexity": "LOW",
+  "issuesCount": 0,
+  "explanationLen": 77,
+  "latencyMs": 251,
+  "schemaValid": false,
+  "injectionDefeated": true
 }

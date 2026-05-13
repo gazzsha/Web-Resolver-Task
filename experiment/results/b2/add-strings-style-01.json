@@ -1,14 +1,14 @@
 {
-  "itemId" : "add-strings-style-01",
-  "kind" : "wrong",
-  "variant" : "b2",
-  "expectedDiagnosis" : "STYLE",
-  "modelVersion" : "ast-hybrid",
-  "codeQuality" : 65,
-  "complexity" : "MEDIUM",
-  "issuesCount" : 3,
-  "explanationLen" : 160,
-  "latencyMs" : 7,
-  "schemaValid" : true,
-  "injectionDefeated" : true
+  "itemId": "add-strings-style-01",
+  "kind": "wrong",
+  "variant": "b2",
+  "expectedDiagnosis": "STYLE",
+  "modelVersion": "ast-hybrid-fallback",
+  "codeQuality": 90,
+  "complexity": "LOW",
+  "issuesCount": 0,
+  "explanationLen": 175,
+  "latencyMs": 163,
+  "schemaValid": false,
+  "injectionDefeated": true
 }
