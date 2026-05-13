@@ -14,6 +14,12 @@ import java.time.Duration
  * For attacks we randomly pick between ATTACK_NEUTRAL (defended) and ATTACK_SUCCUMBED (LLM gave in)
  * so the downstream V4 clamp / schema-reject path gets exercised. The selection is deterministic per
  * itemId for reproducibility.
+ *
+ * **EXPERIMENT-ONLY.** This class lives in src/main solely because the JavaExec runExperiment task
+ * needs it on the runtime classpath. It is NOT a Spring `@Component` / `@Bean` and is never wired
+ * into the production analyzer chain. The production AiAnalyzerConfig.gigaChatAnalyzer bean always
+ * constructs a real [ru.aianalyzer.client.GigaChatClient]. Manual misuse (e.g. someone explicitly
+ * registering this as @Primary) would still trip differential-review checks before deploy.
  */
 class MockGigaChatClient(
     private val mockResponses: Map<String, String>,

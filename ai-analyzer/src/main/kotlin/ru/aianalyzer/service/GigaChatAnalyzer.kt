@@ -63,7 +63,7 @@ class GigaChatAnalyzer(
             }
             .getOrNull() ?: return fallback.analyze(code, language, executionResults, scenarioResults)
 
-        val cacheKey = cacheKey(sanitized, language)
+        val cacheKey = cacheKey(sanitized, language, executionResults, extraContext)
         cache.getIfPresent(cacheKey)?.let {
             logger.debug { "GigaChat analyze cache hit key=${cacheKey.take(12)}" }
             return it
@@ -159,11 +159,33 @@ class GigaChatAnalyzer(
         return (if (end >= 0) withoutOpen.substring(0, end) else withoutOpen).trim()
     }
 
-    private fun cacheKey(code: String, language: String): String {
+    /**
+     * Cache key includes everything that can change the analysis outcome:
+     *   - language + sanitized code (the obvious inputs);
+     *   - sandbox verdict fingerprint, because V4 clamp depends on it — without
+     *     this two submissions with same code but different sandbox results
+     *     would share a cached AIAnalysisResult and the clamp would be bypassed;
+     *   - promptVariant, so a B1f run doesn't pollute the B1 cache and vice versa;
+     *   - presence/absence of AST extraContext, so the ast-hybrid path is keyed
+     *     separately from a plain gigachat call on the same code.
+     */
+    private fun cacheKey(
+        code: String,
+        language: String,
+        executionResults: List<SandboxExecutionResult>,
+        extraContext: String?
+    ): String {
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update(language.lowercase().toByteArray(Charsets.UTF_8))
         digest.update(0)
         digest.update(code.toByteArray(Charsets.UTF_8))
+        digest.update(0)
+        digest.update(promptVariant.name.toByteArray(Charsets.UTF_8))
+        digest.update(0)
+        digest.update((if (extraContext != null) "withAst" else "plain").toByteArray(Charsets.UTF_8))
+        digest.update(0)
+        val verdictFp = executionResults.joinToString(",") { it.status.name }
+        digest.update(verdictFp.toByteArray(Charsets.UTF_8))
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }
