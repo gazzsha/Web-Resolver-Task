@@ -1,0 +1,21 @@
+{
+  "description": "Подсчитать количество гласных (a, e, i, o, u — латиница, регистр любой) в строке.",
+  "id": "count-vowels",
+  "language": "python",
+  "reference_solution": "def count_vowels(s: str) -> int:\n    return sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "tests": [
+    {
+      "expected": "2",
+      "input": "hello"
+    },
+    {
+      "expected": "1",
+      "input": "WORLD"
+    },
+    {
+      "expected": "0",
+      "input": "rhythm"
+    }
+  ],
+  "title": "Count Vowels"
+}

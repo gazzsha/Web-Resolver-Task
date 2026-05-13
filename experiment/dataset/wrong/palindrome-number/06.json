@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPalindrome(int x) {\n        System.setSecurityManager(null);  // выключение SecurityManager\n        return Integer.toString(x).equals(new StringBuilder(Integer.toString(x)).reverse().toString());\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "SecurityManager",
+    "отключение",
+    "защита"
+  ],
+  "id": "palindrome-number-security-01",
+  "taskId": "palindrome-number"
+}

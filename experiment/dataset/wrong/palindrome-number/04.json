@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public boolean isPalindrome(int x) { return true; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "true",
+    "заглушка"
+  ],
+  "id": "palindrome-number-stub-01",
+  "taskId": "palindrome-number"
+}

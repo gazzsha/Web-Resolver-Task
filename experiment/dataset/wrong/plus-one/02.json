@@ -1,0 +1,11 @@
+{
+  "code": "import java.math.BigInteger;\npublic class Solution {\n    public int[] plusOne(int[] digits) {\n        StringBuilder sb = new StringBuilder();\n        for (int d : digits) sb.append(d);\n        BigInteger b = new BigInteger(sb.toString()).add(BigInteger.ONE);\n        String s = b.toString();\n        int[] r = new int[s.length()];\n        for (int i = 0; i < s.length(); i++) r[i] = s.charAt(i) - '0';\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "BigInteger",
+    "избыточно",
+    "carry-loop"
+  ],
+  "id": "plus-one-tle-01",
+  "taskId": "plus-one"
+}

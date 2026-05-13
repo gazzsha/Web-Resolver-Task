@@ -1,0 +1,14 @@
+{
+  "itemId" : "count-vowels-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 45,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 171,
+  "latencyMs" : 1,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

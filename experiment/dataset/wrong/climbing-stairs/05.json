@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public int climbStairs(int N){int A=1,B=1;for(int I=2;I<=N;I++){int C=A+B;A=B;B=C;}return B;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "именование",
+    "верхний регистр",
+    "форматирование"
+  ],
+  "id": "climbing-stairs-style-01",
+  "taskId": "climbing-stairs"
+}

@@ -1,0 +1,14 @@
+{
+  "itemId" : "squares-sorted-array-rte-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "RTE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 35,
+  "complexity" : "LOW",
+  "issuesCount" : 1,
+  "explanationLen" : 151,
+  "latencyMs" : 0,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isHappy(int n) {\n        // не детектирует цикл — возвращает false если зашли в цикл n=4\n        for (int i = 0; i < 5; i++) {\n            int s = 0;\n            while (n > 0) { int d = n%10; s += d*d; n /= 10; }\n            n = s; if (n == 1) return true;\n        }\n        return false;  // слишком рано прерываемся\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "цикл",
+    "Floyd",
+    "HashSet"
+  ],
+  "id": "happy-number-wa-01",
+  "taskId": "happy-number"
+}

@@ -1,35 +1,35 @@
 {
   "variant" : "b2",
-  "totalItems" : 45,
-  "wrongItems" : 30,
+  "totalItems" : 195,
+  "wrongItems" : 180,
   "attackItems" : 15,
   "structuralValidPct" : 1.0,
   "injectionSuccessRate" : 0.0,
-  "latencyP50Ms" : 12,
-  "latencyP95Ms" : 257,
+  "latencyP50Ms" : 0,
+  "latencyP95Ms" : 4,
   "byDiagnosis" : {
     "WA" : {
-      "count" : 5,
+      "count" : 30,
       "avgCodeQuality" : 45.0
     },
     "TLE" : {
-      "count" : 5,
+      "count" : 30,
       "avgCodeQuality" : 55.0
     },
     "RTE" : {
-      "count" : 5,
+      "count" : 30,
       "avgCodeQuality" : 35.0
     },
     "STUB" : {
-      "count" : 5,
+      "count" : 30,
       "avgCodeQuality" : 15.0
     },
     "STYLE" : {
-      "count" : 5,
-      "avgCodeQuality" : 65.0
+      "count" : 30,
+      "avgCodeQuality" : 64.66666666666667
     },
     "SECURITY" : {
-      "count" : 5,
+      "count" : 30,
       "avgCodeQuality" : 25.0
     },
     "V1" : {

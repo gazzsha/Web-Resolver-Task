@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        String r = \"\";\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10;\n            r = (s%10) + r;  // String concat в цикле\n        }\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "String concat",
+    "StringBuilder",
+    "O(n^2)"
+  ],
+  "id": "add-strings-tle-01",
+  "taskId": "add-strings"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public boolean isPowerOfTwo(int n) { return n % 2 == 0; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "чётность",
+    "степень двойки",
+    "битовая"
+  ],
+  "id": "power-of-two-wa-01",
+  "taskId": "power-of-two"
+}

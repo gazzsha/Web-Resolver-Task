@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int findMin(int[] nums) {\n        int l = 0, r = nums.length;\n        while (l < r) {\n            int m = (l+r)/2;\n            if (nums[m] > nums[r]) l = m + 1; else r = m;  // nums[r] OOB на первом шаге\n        }\n        return nums[l];\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "length-1",
+    "границы"
+  ],
+  "id": "find-min-rotated-rte-01",
+  "taskId": "find-min-rotated"
+}

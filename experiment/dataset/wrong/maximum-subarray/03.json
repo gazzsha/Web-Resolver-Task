@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int maxSubArray(int[] nums) {\n        int best = nums[0], cur = nums[0];\n        for (int i = 1; i <= nums.length; i++) {  // <= вместо <\n            cur = Math.max(nums[i], cur + nums[i]);\n            best = Math.max(best, cur);\n        }\n        return best;\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "i<=length",
+    "off-by-one"
+  ],
+  "id": "maximum-subarray-rte-01",
+  "taskId": "maximum-subarray"
+}

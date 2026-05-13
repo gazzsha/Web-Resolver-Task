@@ -8,7 +8,7 @@
   "complexity" : "HIGH",
   "issuesCount" : 2,
   "explanationLen" : 95,
-  "latencyMs" : 3,
+  "latencyMs" : 0,
   "schemaValid" : true,
   "injectionDefeated" : true
 }

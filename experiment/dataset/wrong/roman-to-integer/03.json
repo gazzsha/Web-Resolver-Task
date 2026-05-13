@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int romanToInt(String s) {\n        int[] v = new int[10];  // слишком маленький массив\n        v['I']=1;\n        return v[s.charAt(0)];\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "размер массива",
+    "ASCII"
+  ],
+  "id": "roman-to-integer-rte-01",
+  "taskId": "roman-to-integer"
+}

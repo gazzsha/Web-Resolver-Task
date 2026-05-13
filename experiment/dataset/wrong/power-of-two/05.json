@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public boolean isPowerOfTwo(int N){return N>0&&(N&(N-1))==0;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "именование",
+    "верхний регистр",
+    "пробелы"
+  ],
+  "id": "power-of-two-style-01",
+  "taskId": "power-of-two"
+}

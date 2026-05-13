@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int findMin(int[] nums) { return 0; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "find-min-rotated-stub-01",
+  "taskId": "find-min-rotated"
+}

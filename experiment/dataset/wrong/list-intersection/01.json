@@ -1,0 +1,11 @@
+{
+  "code": "def intersect(a, b):\n    return list(set(a) & set(b))  # порядок не гарантирован\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "сортировка",
+    "порядок",
+    "sorted"
+  ],
+  "id": "list-intersection-wa-01",
+  "taskId": "list-intersection"
+}

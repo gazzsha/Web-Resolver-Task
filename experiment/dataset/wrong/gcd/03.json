@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(a, b):\n    while a != b:  # бесконечный цикл при a=0\n        if a > b: a -= b\n        else: b -= a\n    return a\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "бесконечный цикл",
+    "a=0",
+    "edge case"
+  ],
+  "id": "gcd-rte-01",
+  "taskId": "gcd"
+}

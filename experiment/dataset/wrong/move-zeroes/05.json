@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public void moveZeroes(int[]a){int w=0;for(int x:a)if(x!=0)a[w++]=x;while(w<a.length)a[w++]=0;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "пробелы",
+    "однобуквенные"
+  ],
+  "id": "move-zeroes-style-01",
+  "taskId": "move-zeroes"
+}

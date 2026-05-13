@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(s):\n    import importlib\n    importlib.import_module(s)  # импорт произвольного модуля по user input\n    return -1\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "import_module",
+    "user input",
+    "RCE"
+  ],
+  "id": "first-uniq-char-security-01",
+  "taskId": "first-uniq-char"
+}

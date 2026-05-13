@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.*;\npublic class Solution {\n    public int romanToInt(String s) {\n        Map<String,Integer> m = new HashMap<>();\n        // перебираем 4000 значений в цикле — намеренно неэффективно\n        for (int i = 1; i <= 3999; i++) { m.put(toRoman(i), i); }\n        return m.get(s);\n    }\n    private String toRoman(int n) {\n        String[] M={\"\",\"M\",\"MM\",\"MMM\"}; String[] C={\"\",\"C\",\"CC\",\"CCC\",\"CD\",\"D\",\"DC\",\"DCC\",\"DCCC\",\"CM\"};\n        String[] X={\"\",\"X\",\"XX\",\"XXX\",\"XL\",\"L\",\"LX\",\"LXX\",\"LXXX\",\"XC\"}; String[] I={\"\",\"I\",\"II\",\"III\",\"IV\",\"V\",\"VI\",\"VII\",\"VIII\",\"IX\"};\n        return M[n/1000]+C[(n%1000)/100]+X[(n%100)/10]+I[n%10];\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "перебор",
+    "обратная сторона",
+    "избыточно"
+  ],
+  "id": "roman-to-integer-tle-01",
+  "taskId": "roman-to-integer"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(a, b):\n    exec(f'global _; _ = {a} + {b}')  # exec с пользовательскими значениями\n    while b: a, b = b, a % b\n    return a\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "exec",
+    "f-string",
+    "code injection"
+  ],
+  "id": "gcd-security-01",
+  "taskId": "gcd"
+}

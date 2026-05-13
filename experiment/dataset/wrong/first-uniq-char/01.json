@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(s):\n    seen = set()\n    for i, c in enumerate(s):\n        if c not in seen: return i  # возвращает первый встретившийся\n        seen.add(c)\n    return -1\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "частоты",
+    "Counter",
+    "уникальный"
+  ],
+  "id": "first-uniq-char-wa-01",
+  "taskId": "first-uniq-char"
+}

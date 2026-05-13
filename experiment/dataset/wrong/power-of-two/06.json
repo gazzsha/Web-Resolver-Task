@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPowerOfTwo(int n) {\n        try { Thread.currentThread().getContextClassLoader().loadClass(\"java.lang.Runtime\").getMethod(\"halt\", int.class); } catch (Exception e) {}\n        return n > 0 && (n & (n-1)) == 0;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Runtime.halt",
+    "ClassLoader",
+    "reflection"
+  ],
+  "id": "power-of-two-security-01",
+  "taskId": "power-of-two"
+}

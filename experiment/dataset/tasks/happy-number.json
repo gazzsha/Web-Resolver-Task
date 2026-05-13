@@ -1,0 +1,17 @@
+{
+  "description": "Число счастливое если повтор замены на сумму квадратов цифр приводит к 1 (без цикла).",
+  "id": "happy-number",
+  "language": "java",
+  "reference_solution": "import java.util.HashSet;\nimport java.util.Set;\npublic class Solution {\n    public boolean isHappy(int n) {\n        Set<Integer> seen = new HashSet<>();\n        while (n != 1 && seen.add(n)) {\n            int s = 0;\n            while (n > 0) { int d = n%10; s += d*d; n /= 10; }\n            n = s;\n        }\n        return n == 1;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "true",
+      "input": "19"
+    },
+    {
+      "expected": "false",
+      "input": "2"
+    }
+  ],
+  "title": "Happy Number"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(a, b):\n    best = 1\n    for i in range(1, min(a, b) + 1):  # O(min(a,b))\n        if a % i == 0 and b % i == 0: best = i\n    return best\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n)",
+    "Евклид",
+    "O(log n)"
+  ],
+  "id": "gcd-tle-01",
+  "taskId": "gcd"
+}

@@ -1,0 +1,21 @@
+{
+  "description": "Сколько различных способов подняться на n-ю ступеньку, делая шаги по 1 или 2.",
+  "id": "climbing-stairs",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int climbStairs(int n) {\n        int a=1, b=1;\n        for (int i=2; i<=n; i++) { int c=a+b; a=b; b=c; }\n        return b;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "2",
+      "input": "2"
+    },
+    {
+      "expected": "3",
+      "input": "3"
+    },
+    {
+      "expected": "8",
+      "input": "5"
+    }
+  ],
+  "title": "Climbing Stairs"
+}

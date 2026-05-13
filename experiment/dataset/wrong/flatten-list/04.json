@@ -1,0 +1,11 @@
+{
+  "code": "def flatten(x):\n    return []\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустой список",
+    "константа",
+    "заглушка"
+  ],
+  "id": "flatten-list-stub-01",
+  "taskId": "flatten-list"
+}

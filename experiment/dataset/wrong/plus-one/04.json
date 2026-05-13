@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int[] plusOne(int[] digits) { return new int[]{0}; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "массив",
+    "заглушка"
+  ],
+  "id": "plus-one-stub-01",
+  "taskId": "plus-one"
+}

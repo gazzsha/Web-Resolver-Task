@@ -1,0 +1,21 @@
+{
+  "description": "Вернуть true если n — степень двойки. n >= 0.",
+  "id": "power-of-two",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public boolean isPowerOfTwo(int n) { return n > 0 && (n & (n-1)) == 0; }\n}\n",
+  "tests": [
+    {
+      "expected": "true",
+      "input": "1"
+    },
+    {
+      "expected": "true",
+      "input": "16"
+    },
+    {
+      "expected": "false",
+      "input": "3"
+    }
+  ],
+  "title": "Power of Two"
+}

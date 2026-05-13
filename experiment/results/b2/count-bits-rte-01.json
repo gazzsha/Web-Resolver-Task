@@ -1,0 +1,14 @@
+{
+  "itemId" : "count-bits-rte-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "RTE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 35,
+  "complexity" : "LOW",
+  "issuesCount" : 1,
+  "explanationLen" : 150,
+  "latencyMs" : 2,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

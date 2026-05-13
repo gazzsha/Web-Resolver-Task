@@ -1,0 +1,17 @@
+{
+  "description": "Дан отсортированный массив (может содержать отрицательные). Вернуть отсортированный массив квадратов за O(n).",
+  "id": "squares-sorted-array",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int[] sortedSquares(int[] nums) {\n        int n = nums.length;\n        int[] r = new int[n];\n        int l = 0, h = n-1, w = n-1;\n        while (l <= h) {\n            int sl = nums[l]*nums[l], sh = nums[h]*nums[h];\n            if (sl > sh) { r[w--] = sl; l++; } else { r[w--] = sh; h--; }\n        }\n        return r;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "[0,1,9,16,100]",
+      "input": "[-4,-1,0,3,10]"
+    },
+    {
+      "expected": "[4,9,9,49,121]",
+      "input": "[-7,-3,2,3,11]"
+    }
+  ],
+  "title": "Squares of a Sorted Array"
+}

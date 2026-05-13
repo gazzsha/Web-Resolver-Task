@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        // линейный поиск + неверная семантика: возвращает значение, а не индекс\n        for (int x : nums) if (x == target) return x;\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "индекс",
+    "значение",
+    "семантика"
+  ],
+  "id": "binary-search-wa-01",
+  "taskId": "binary-search"
+}

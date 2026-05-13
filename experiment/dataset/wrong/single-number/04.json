@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int singleNumber(int[] nums) { return 0; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "single-number-stub-01",
+  "taskId": "single-number"
+}

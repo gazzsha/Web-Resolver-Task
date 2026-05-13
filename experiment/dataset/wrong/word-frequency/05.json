@@ -1,0 +1,11 @@
+{
+  "code": "def most_common(T):\n    L=T.split();D={}\n    for W in L:D[W]=D.get(W,0)+1\n    return max(L,key=lambda x:D[x])\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "Counter"
+  ],
+  "id": "word-frequency-style-01",
+  "taskId": "word-frequency"
+}

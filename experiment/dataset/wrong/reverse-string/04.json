@@ -1,0 +1,10 @@
+{
+  "code": "public class Solution { public String reverseString(char[] s) { return \"\"; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустая строка",
+    "заглушка"
+  ],
+  "id": "reverse-string-stub-01",
+  "taskId": "reverse-string"
+}

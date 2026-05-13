@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(s):\n    return s.index(s[0]) / 0  # ZeroDivisionError\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ZeroDivisionError",
+    "деление",
+    "ноль"
+  ],
+  "id": "first-uniq-char-rte-01",
+  "taskId": "first-uniq-char"
+}

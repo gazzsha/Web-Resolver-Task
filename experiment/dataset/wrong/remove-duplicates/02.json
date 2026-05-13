@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int removeDuplicates(int[] nums) {\n        java.util.List<Integer> r = new java.util.ArrayList<>();\n        for (int x : nums) if (!r.contains(x)) r.add(x);  // O(n^2)\n        for (int i = 0; i < r.size(); i++) nums[i] = r.get(i);\n        return r.size();\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "List.contains",
+    "O(n^2)",
+    "two-pointer"
+  ],
+  "id": "remove-duplicates-tle-01",
+  "taskId": "remove-duplicates"
+}

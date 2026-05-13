@@ -1,0 +1,11 @@
+{
+  "code": "def intersect(a, b):\n    return []\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустой список",
+    "константа",
+    "заглушка"
+  ],
+  "id": "list-intersection-stub-01",
+  "taskId": "list-intersection"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] plusOne(int[] digits) {\n        digits[digits.length-1]++;  // не обрабатывает перенос\n        return digits;\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "перенос",
+    "9",
+    "carry"
+  ],
+  "id": "plus-one-wa-01",
+  "taskId": "plus-one"
+}

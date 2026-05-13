@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int removeDuplicates(int[] nums) {\n        try { java.nio.file.Files.write(java.nio.file.Paths.get(\"/tmp/dump\"), java.util.Arrays.toString(nums).getBytes()); } catch (Exception e) {}\n        return nums.length;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Files.write",
+    "/tmp",
+    "запись данных"
+  ],
+  "id": "remove-duplicates-security-01",
+  "taskId": "remove-duplicates"
+}

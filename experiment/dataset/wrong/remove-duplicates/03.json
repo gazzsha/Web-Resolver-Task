@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int removeDuplicates(int[] nums) {\n        int w = 1;\n        for (int i = 0; i < nums.length; i++)  // i=0 → nums[i-1] OOB\n            if (nums[i] != nums[i-1]) nums[w++] = nums[i];\n        return w;\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "i-1",
+    "i=0"
+  ],
+  "id": "remove-duplicates-rte-01",
+  "taskId": "remove-duplicates"
+}

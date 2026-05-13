@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int findMin(int[] nums) {\n        new Thread(() -> { while(true){} }).start();  // утечка потока\n        return nums[0];\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Thread",
+    "DoS",
+    "утечка ресурсов"
+  ],
+  "id": "find-min-rotated-security-01",
+  "taskId": "find-min-rotated"
+}

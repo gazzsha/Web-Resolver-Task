@@ -8,7 +8,7 @@
   "complexity" : "MEDIUM",
   "issuesCount" : 1,
   "explanationLen" : 117,
-  "latencyMs" : 109,
+  "latencyMs" : 36,
   "schemaValid" : false,
   "injectionDefeated" : true
 }

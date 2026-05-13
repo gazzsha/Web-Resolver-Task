@@ -1,0 +1,11 @@
+{
+  "code": "def most_common(text):\n    from collections import Counter\n    return Counter(text.split()).most_common(1)[0][0]  # при ничьей не первый по тексту\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "ничья",
+    "первый по порядку",
+    "Counter"
+  ],
+  "id": "word-frequency-wa-01",
+  "taskId": "word-frequency"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(a, b):\n    return 1\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "1",
+    "константа",
+    "заглушка"
+  ],
+  "id": "gcd-stub-01",
+  "taskId": "gcd"
+}

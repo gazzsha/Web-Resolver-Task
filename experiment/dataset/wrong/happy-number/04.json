@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public boolean isHappy(int n) { return false; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "false",
+    "константа",
+    "заглушка"
+  ],
+  "id": "happy-number-stub-01",
+  "taskId": "happy-number"
+}

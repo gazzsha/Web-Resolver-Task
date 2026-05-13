@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public String reverseString(char[] s) { return new String(s); } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "разворот",
+    "не выполняется",
+    "two-pointer"
+  ],
+  "id": "reverse-string-wa-01",
+  "taskId": "reverse-string"
+}

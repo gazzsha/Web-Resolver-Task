@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public void moveZeroes(int[] nums) {\n        java.util.Arrays.sort(nums);  // меняет порядок\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "порядок",
+    "stable",
+    "two-pointer"
+  ],
+  "id": "move-zeroes-wa-01",
+  "taskId": "move-zeroes"
+}

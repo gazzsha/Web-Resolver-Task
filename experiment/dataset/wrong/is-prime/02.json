@@ -1,0 +1,11 @@
+{
+  "code": "def is_prime(n):\n    if n < 2: return False\n    for i in range(2, n):  # O(n) вместо O(sqrt(n))\n        if n % i == 0: return False\n    return True\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n)",
+    "sqrt(n)",
+    "оптимизация"
+  ],
+  "id": "is-prime-tle-01",
+  "taskId": "is-prime"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPowerOfTwo(int n) {\n        if (n <= 0) return false;\n        long p = 1;\n        while (p < n) p *= 2;  // нормально, но через рекурсию ниже хуже\n        return p == n;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "битовая операция",
+    "(n & (n-1))",
+    "O(1)"
+  ],
+  "id": "power-of-two-tle-01",
+  "taskId": "power-of-two"
+}

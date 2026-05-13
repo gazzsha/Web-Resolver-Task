@@ -1,0 +1,14 @@
+{
+  "itemId" : "word-frequency-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 45,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 170,
+  "latencyMs" : 0,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

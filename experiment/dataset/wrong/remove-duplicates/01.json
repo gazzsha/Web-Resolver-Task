@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int removeDuplicates(int[] nums) { return nums.length; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "длина",
+    "дубликаты",
+    "удаление"
+  ],
+  "id": "remove-duplicates-wa-01",
+  "taskId": "remove-duplicates"
+}

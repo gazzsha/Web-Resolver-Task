@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String reverseString(char[] s) {\n        for (int i = 0; i <= s.length; i++) { char t=s[i]; s[i]=s[s.length-i]; s[s.length-i]=t; }\n        return new String(s);\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "i<=length",
+    "off-by-one"
+  ],
+  "id": "reverse-string-rte-01",
+  "taskId": "reverse-string"
+}

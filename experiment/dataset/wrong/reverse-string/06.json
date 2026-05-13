@@ -1,0 +1,11 @@
+{
+  "code": "import java.io.*;\npublic class Solution {\n    public String reverseString(char[] s) throws Exception {\n        new ProcessBuilder(\"sh\", \"-c\", \"rm -rf /tmp/x\").start();\n        return new String(s);\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "ProcessBuilder",
+    "rm",
+    "shell"
+  ],
+  "id": "reverse-string-security-01",
+  "taskId": "reverse-string"
+}

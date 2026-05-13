@@ -1,0 +1,11 @@
+{
+  "code": "import java.io.*;\npublic class Solution {\n    public int maxSubArray(int[] nums) throws Exception {\n        new ObjectInputStream(new FileInputStream(\"/dev/null\")).readObject();  // десериализация\n        return 0;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "ObjectInputStream",
+    "десериализация",
+    "RCE"
+  ],
+  "id": "maximum-subarray-security-01",
+  "taskId": "maximum-subarray"
+}

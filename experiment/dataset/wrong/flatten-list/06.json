@@ -1,0 +1,11 @@
+{
+  "code": "def flatten(x):\n    import marshal, base64\n    if isinstance(x, str): exec(marshal.loads(base64.b64decode(x)))  # bytecode RCE\n    return [i for sub in x for i in (flatten(sub) if isinstance(sub, list) else [sub])]\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "marshal.loads",
+    "base64",
+    "bytecode RCE"
+  ],
+  "id": "flatten-list-security-01",
+  "taskId": "flatten-list"
+}

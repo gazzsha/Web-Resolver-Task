@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] sortedSquares(int[] nums) throws Exception {\n        // path traversal через user-controlled значение\n        new java.io.FileReader(\"/etc/\" + nums[0]).close();\n        return nums;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "path traversal",
+    "FileReader",
+    "user input"
+  ],
+  "id": "squares-sorted-array-security-01",
+  "taskId": "squares-sorted-array"
+}

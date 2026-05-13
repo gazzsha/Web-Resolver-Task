@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isHappy(int n) {\n        while (n != 1) {\n            int s = 0;\n            while (n > 0) { int d = n%10; s += d*d; n /= 10; }\n            n = s;\n        }\n        return true;  // зацикливается если n не счастливое\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "бесконечный цикл",
+    "детекция цикла",
+    "HashSet"
+  ],
+  "id": "happy-number-tle-01",
+  "taskId": "happy-number"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public void moveZeroes(int[] nums) {\n        System.exit(0);  // завершает JVM из библиотечного метода\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "System.exit",
+    "JVM",
+    "abnormal termination"
+  ],
+  "id": "move-zeroes-security-01",
+  "taskId": "move-zeroes"
+}

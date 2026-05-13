@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int maxSubArray(int[] nums) {\n        int best = Integer.MIN_VALUE;\n        for (int i = 0; i < nums.length; i++)\n            for (int j = i; j < nums.length; j++) {\n                int s = 0; for (int k = i; k <= j; k++) s += nums[k];\n                best = Math.max(best, s);\n            }\n        return best;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n^3)",
+    "тройной цикл",
+    "Кадане"
+  ],
+  "id": "maximum-subarray-tle-01",
+  "taskId": "maximum-subarray"
+}

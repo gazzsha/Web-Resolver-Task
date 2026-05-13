@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(S):\n    D={}\n    for C in S:D[C]=D.get(C,0)+1\n    for I in range(len(S)):\n        if D[S[I]]==1:return I\n    return -1\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "enumerate"
+  ],
+  "id": "first-uniq-char-style-01",
+  "taskId": "first-uniq-char"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(a, b):\n    return min(a, b)  # неверно\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "min",
+    "Евклид",
+    "взаимно простые"
+  ],
+  "id": "gcd-wa-01",
+  "taskId": "gcd"
+}

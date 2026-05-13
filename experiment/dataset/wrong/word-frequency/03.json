@@ -1,0 +1,11 @@
+{
+  "code": "def most_common(text):\n    return text.split()[0].upper() + None  # TypeError\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "TypeError",
+    "None",
+    "конкатенация"
+  ],
+  "id": "word-frequency-rte-01",
+  "taskId": "word-frequency"
+}

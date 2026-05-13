@@ -1,0 +1,14 @@
+{
+  "itemId" : "is-prime-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 60,
+  "complexity" : "MEDIUM",
+  "issuesCount" : 3,
+  "explanationLen" : 195,
+  "latencyMs" : 0,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

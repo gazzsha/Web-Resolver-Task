@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int missingNumber(int[] nums) { return nums.length; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "сумма",
+    "Гаусс",
+    "не угадывает"
+  ],
+  "id": "missing-number-wa-01",
+  "taskId": "missing-number"
+}

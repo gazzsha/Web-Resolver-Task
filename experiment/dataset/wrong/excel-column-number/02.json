@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int titleToNumber(String s) {\n        int r = 0;\n        for (int i = 0; i < s.length(); i++)\n            r += (s.charAt(i)-'A'+1) * (int)Math.pow(26, s.length()-1-i);  // Math.pow + double\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "Math.pow",
+    "избыточно",
+    "Horner"
+  ],
+  "id": "excel-column-number-tle-01",
+  "taskId": "excel-column-number"
+}

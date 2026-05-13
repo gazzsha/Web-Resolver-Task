@@ -1,0 +1,12 @@
+{
+  "code": "def intersect(A,B):\n    R=set();SA=set(A);SB=set(B)\n    for X in SA:\n        if X in SB:R.add(X)\n    return sorted(R)\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "set intersection",
+    "&"
+  ],
+  "id": "list-intersection-style-01",
+  "taskId": "list-intersection"
+}
