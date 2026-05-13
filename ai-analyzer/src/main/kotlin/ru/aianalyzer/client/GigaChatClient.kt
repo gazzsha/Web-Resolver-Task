@@ -28,7 +28,7 @@ data class GigaChatClientConfig(
     val tokenTtl: Duration = Duration.ofMinutes(30)
 )
 
-class GigaChatClient(
+open class GigaChatClient(
     private val webClient: WebClient,
     private val config: GigaChatClientConfig
 ) {
@@ -37,7 +37,7 @@ class GigaChatClient(
 
     private val cachedToken = AtomicReference<CachedToken?>(null)
 
-    fun chatCompletion(systemPrompt: String, userPrompt: String): String {
+    open fun chatCompletion(systemPrompt: String, userPrompt: String): String {
         val token = obtainAccessToken()
         val request = GigaChatChatRequest(
             model = config.model,

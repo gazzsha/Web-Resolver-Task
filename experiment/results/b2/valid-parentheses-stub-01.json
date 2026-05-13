@@ -1,0 +1,14 @@
+{
+  "itemId" : "valid-parentheses-stub-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STUB",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 15,
+  "complexity" : "LOW",
+  "issuesCount" : 1,
+  "explanationLen" : 157,
+  "latencyMs" : 6,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

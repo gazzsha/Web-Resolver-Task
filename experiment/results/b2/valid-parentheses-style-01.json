@@ -1,0 +1,14 @@
+{
+  "itemId" : "valid-parentheses-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 65,
+  "complexity" : "MEDIUM",
+  "issuesCount" : 3,
+  "explanationLen" : 161,
+  "latencyMs" : 13,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

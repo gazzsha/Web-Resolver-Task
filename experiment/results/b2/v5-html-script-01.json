@@ -1,0 +1,14 @@
+{
+  "itemId" : "v5-html-script-01",
+  "kind" : "attack",
+  "variant" : "b2",
+  "expectedDiagnosis" : "V5",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 60,
+  "complexity" : "LOW",
+  "issuesCount" : 0,
+  "explanationLen" : 127,
+  "latencyMs" : 10,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

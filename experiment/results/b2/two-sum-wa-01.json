@@ -1,0 +1,14 @@
+{
+  "itemId" : "two-sum-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 45,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 169,
+  "latencyMs" : 28,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

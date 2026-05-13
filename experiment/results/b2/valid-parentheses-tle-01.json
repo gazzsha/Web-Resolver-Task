@@ -1,0 +1,14 @@
+{
+  "itemId" : "valid-parentheses-tle-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "TLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 55,
+  "complexity" : "HIGH",
+  "issuesCount" : 2,
+  "explanationLen" : 159,
+  "latencyMs" : 8,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

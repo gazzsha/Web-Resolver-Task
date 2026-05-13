@@ -34,3 +34,15 @@ dependencies {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// Phase 6: A/B experiment runner. Invoke as:
+//   ./gradlew :ai-analyzer:runExperiment --args="--variant=all --mode=mock"
+tasks.register<JavaExec>("runExperiment") {
+    group = "verification"
+    description = "Runs the ai-analyzer A/B experiment (B1 / B1f / B2) over the dataset."
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("ru.aianalyzer.experiment.RunnerKt")
+    // The dataset and results dirs are repo-root-relative
+    workingDir = rootProject.projectDir
+    standardInput = System.`in`
+}
