@@ -17,4 +17,12 @@ dependencies {
     // Micrometer custom metrics for /actuator/prometheus
     implementation(libs.micrometer.core)
     implementation(libs.spring.boot.starter.actuator)
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+    testImplementation("io.mockk:mockk:1.13.13")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
