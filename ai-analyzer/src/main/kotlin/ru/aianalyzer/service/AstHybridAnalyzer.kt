@@ -5,6 +5,7 @@ import org.slf4j.MDC
 import ru.aianalyzer.ast.AstFact
 import ru.aianalyzer.ast.AstMetricsService
 import ru.aianalyzer.ast.spotlightForPrompt
+import ru.aianalyzer.metrics.AiAnalyzerMetrics
 import ru.aianalyzer.prompt.AnalyzerPrompts
 import ru.aianalyzer.sanitize.InputSanitizer
 import ru.aianalyzer.sanitize.InputTooLargeException
@@ -33,14 +34,39 @@ private val logger = KotlinLogging.logger {}
 class AstHybridAnalyzer(
     private val gigaChatAnalyzer: GigaChatAnalyzer,
     private val astMetricsService: AstMetricsService,
-    private val fallback: SimpleRuleBasedAnalyzer
+    private val fallback: SimpleRuleBasedAnalyzer,
+    private val metrics: AiAnalyzerMetrics? = null
 ) : AIAnalyzer {
 
     override fun analyze(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        scenarioResults: List<ScenarioResult>?
+        scenarioResults: List<ScenarioResult>?,
+        taskContext: AnalyzeContext?
+    ): AIAnalysisResult {
+        val sample = metrics?.startLatencyTimer()
+        var outcome = AiAnalyzerMetrics.OUTCOME_SUCCESS
+        try {
+            val result = doAnalyze(code, language, executionResults, scenarioResults, taskContext) { newOutcome ->
+                outcome = newOutcome
+            }
+            return result
+        } finally {
+            if (sample != null) {
+                metrics.stopLatencyTimer(sample, AiAnalyzerMetrics.VARIANT_AST_HYBRID, outcome)
+            }
+            metrics?.recordCall(AiAnalyzerMetrics.VARIANT_AST_HYBRID, outcome)
+        }
+    }
+
+    private inline fun doAnalyze(
+        code: String,
+        language: String,
+        executionResults: List<SandboxExecutionResult>,
+        scenarioResults: List<ScenarioResult>?,
+        taskContext: AnalyzeContext?,
+        onOutcome: (String) -> Unit
     ): AIAnalysisResult {
         // 0. Normalise + size-limit BEFORE building the AST prompt so that V2 (Unicode masking)
         //    and V6 (token exhaustion) cannot be bypassed through the ast-hybrid path. AST is
@@ -50,7 +76,8 @@ class AstHybridAnalyzer(
             .getOrElse { e ->
                 if (e is InputTooLargeException) {
                     logger.warn { "AstHybrid skipped (oversize): ${e.message}" }
-                    val baseResult = fallback.analyze(code, language, executionResults, scenarioResults)
+                    onOutcome(AiAnalyzerMetrics.OUTCOME_FALLBACK)
+                    val baseResult = fallback.analyze(code, language, executionResults, scenarioResults, taskContext)
                     return baseResult.withAstAnnotation(AstFact.empty(language), usedFallback = true)
                 }
                 throw e
@@ -68,12 +95,15 @@ class AstHybridAnalyzer(
                 "suspiciousConst=${astFact.suspiciousReturnsConstant}"
         }
 
-        // 2. Build enriched user prompt containing the AST facts block (spotlight uses sanitised code)
+        // 2. Build enriched user prompt containing the AST facts block + task context (verdict, description).
+        //    P0-3: AST + verdict + description идут вместе, поэтому используем userPromptFull
+        //    напрямую. spotlightForPrompt укладывает AST-JSON в <AST_FACTS>...</AST_FACTS> блок.
         val astSpotlight = astFact.spotlightForPrompt()
-        val userPromptWithAst = AnalyzerPrompts.userPromptWithAst(
+        val userPromptWithAst = AnalyzerPrompts.userPromptFull(
             code = sanitized,
             language = language,
-            astJson = astSpotlight
+            astFactsBlock = astSpotlight,
+            taskContext = taskContext
         )
 
         // 3. Call LLM with AST-enriched prompt
@@ -88,13 +118,15 @@ class AstHybridAnalyzer(
         }.onFailure { e ->
             logger.warn(e) { "GigaChatAnalyzer threw during AST-hybrid analysis, delegating to fallback" }
         }.getOrElse {
-            val baseResult = fallback.analyze(sanitized, language, executionResults, scenarioResults)
+            onOutcome(AiAnalyzerMetrics.OUTCOME_FALLBACK)
+            val baseResult = fallback.analyze(sanitized, language, executionResults, scenarioResults, taskContext)
             return baseResult.withAstAnnotation(astFact, usedFallback = true)
         }
 
         // 4. Cross-check: if the LLM used rule-based internally (modelVersion != "gigachat"),
         //    annotate and return as-is (the rule-based already does the sandbox clamp).
         if (llmResult.modelVersion == "rule-based") {
+            onOutcome(AiAnalyzerMetrics.OUTCOME_FALLBACK)
             return llmResult.withAstAnnotation(astFact, usedFallback = true)
         }
 

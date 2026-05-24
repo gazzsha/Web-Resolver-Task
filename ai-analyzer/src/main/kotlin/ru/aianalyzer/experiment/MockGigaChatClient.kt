@@ -1,8 +1,6 @@
 package ru.aianalyzer.experiment
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
-import org.springframework.web.reactive.function.client.WebClient
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatClientConfig
 import java.time.Duration
@@ -24,9 +22,8 @@ import java.time.Duration
 class MockGigaChatClient(
     private val mockResponses: Map<String, String>,
     private val mapper: ObjectMapper,
-    webClient: WebClient,
     config: GigaChatClientConfig
-) : GigaChatClient(webClient, config) {
+) : GigaChatClient(config) {
 
     override fun chatCompletion(systemPrompt: String, userPrompt: String): String {
         val hint = MockContext.currentHint.get() ?: "WA"

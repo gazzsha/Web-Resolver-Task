@@ -26,6 +26,10 @@ dependencies {
     // JSON Schema validation for hardening LLM responses (Phase 2)
     implementation("com.networknt:json-schema-validator:1.4.0")
 
+    // Micrometer custom metrics for /actuator/prometheus
+    implementation(libs.micrometer.core)
+    implementation(libs.spring.boot.starter.actuator)
+
     testImplementation("org.springframework.boot:spring-boot-starter-test:3.5.0")
     testImplementation("io.mockk:mockk:1.13.13")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

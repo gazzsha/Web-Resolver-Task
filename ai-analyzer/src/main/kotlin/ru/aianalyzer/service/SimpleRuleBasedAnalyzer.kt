@@ -14,7 +14,8 @@ class SimpleRuleBasedAnalyzer : AIAnalyzer {
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        scenarioResults: List<ScenarioResult>?
+        scenarioResults: List<ScenarioResult>?,
+        taskContext: AnalyzeContext?
     ): AIAnalysisResult {
         val issues = mutableListOf<CodeIssue>()
         val recommendations = mutableListOf<String>()

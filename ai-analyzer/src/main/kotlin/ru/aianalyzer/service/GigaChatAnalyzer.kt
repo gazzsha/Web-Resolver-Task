@@ -3,8 +3,11 @@ package ru.aianalyzer.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import io.github.oshai.kotlinlogging.KotlinLogging
+import ru.aianalyzer.ast.AstMetricsService
+import ru.aianalyzer.ast.spotlightForPrompt
 import ru.aianalyzer.client.GigaChatAnalysisPayload
 import ru.aianalyzer.client.GigaChatClient
+import ru.aianalyzer.metrics.AiAnalyzerMetrics
 import ru.aianalyzer.prompt.AnalyzerPrompts
 import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.sanitize.InputSanitizer
@@ -16,10 +19,16 @@ import ru.sandbox.model.SandboxExecutionResult
 import java.security.MessageDigest
 
 /**
- * If sandbox already proved the code is broken, LLM may not raise codeQuality above this.
- * Защита от V4 (JSON-injection «codeQuality:100» при провальных тестах).
+ * Каскад верхних границ codeQuality при провальных результатах sandbox-вердикта
+ * (защита от V4 — LLM-галлюцинации «code is great» при упавших тестах).
+ *
+ * - [FAILED_CODE_QUALITY_CAP] — хотя бы один тест упал → не выше 60.
+ * - [ALL_FAILED_CODE_QUALITY_CAP] (P0-4) — НИ ОДИН тест не прошёл → не выше 40.
+ *   Это сценарий из P0-3 (заведомо неправильное `print("true")`), где LLM
+ *   раньше возвращал codeQuality 70+ с generic-похвалой.
  */
 private const val FAILED_CODE_QUALITY_CAP = 60
+private const val ALL_FAILED_CODE_QUALITY_CAP = 40
 
 private val logger = KotlinLogging.logger {}
 
@@ -29,15 +38,21 @@ class GigaChatAnalyzer(
     private val fallback: AIAnalyzer,
     private val cache: Cache<String, AIAnalysisResult>,
     private val schemaValidator: SchemaValidator,
-    private val promptVariant: PromptVariant = PromptVariant.ZERO_SHOT
+    private val promptVariant: PromptVariant = PromptVariant.ZERO_SHOT,
+    // P0-3: внутренний AST-extractor для случая, когда analyze() вызывают напрямую
+    // (без AstHybridAnalyzer-обёртки). Если null — AST блок в user-message не добавляется.
+    private val astMetricsService: AstMetricsService? = null,
+    // Метрики Prometheus: null когда работает experiment runner без Spring context.
+    private val metrics: AiAnalyzerMetrics? = null
 ) : AIAnalyzer {
 
     override fun analyze(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        scenarioResults: List<ScenarioResult>?
-    ): AIAnalysisResult = analyzeWithExtraContext(code, language, executionResults, scenarioResults, extraContext = null)
+        scenarioResults: List<ScenarioResult>?,
+        taskContext: AnalyzeContext?
+    ): AIAnalysisResult = analyzeWithExtraContext(code, language, executionResults, scenarioResults, extraContext = null, taskContext = taskContext)
 
     /**
      * Variant of [analyze] that injects additional context (e.g. AST facts) into the user prompt.
@@ -51,42 +66,63 @@ class GigaChatAnalyzer(
         language: String,
         executionResults: List<SandboxExecutionResult>,
         scenarioResults: List<ScenarioResult>? = null,
-        extraContext: String?
+        extraContext: String?,
+        taskContext: AnalyzeContext? = null
     ): AIAnalysisResult {
         val normalized = InputSanitizer.normalizeUnicode(code)
         val sanitized = runCatching { InputSanitizer.enforceSizeLimit(normalized) }
             .onFailure { e ->
                 if (e is InputTooLargeException) {
                     logger.warn { "GigaChat analyze skipped: ${e.message}" }
-                    return fallback.analyze(code, language, executionResults, scenarioResults)
+                    metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, AiAnalyzerMetrics.OUTCOME_FALLBACK)
+                    return fallback.analyze(code, language, executionResults, scenarioResults, taskContext)
                 }
             }
-            .getOrNull() ?: return fallback.analyze(code, language, executionResults, scenarioResults)
+            .getOrNull() ?: run {
+                metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, AiAnalyzerMetrics.OUTCOME_FALLBACK)
+                return fallback.analyze(code, language, executionResults, scenarioResults, taskContext)
+            }
 
-        val cacheKey = cacheKey(sanitized, language, executionResults, extraContext)
+        val cacheKey = cacheKey(sanitized, language, executionResults, extraContext, taskContext)
         cache.getIfPresent(cacheKey)?.let {
             logger.debug { "GigaChat analyze cache hit key=${cacheKey.take(12)}" }
+            metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, AiAnalyzerMetrics.OUTCOME_CACHE_HIT)
             return it
         }
 
-        val result = analyzeWithRetry(sanitized, language, executionResults, extraContext)
-            ?: fallback.analyze(sanitized, language, executionResults, scenarioResults)
+        val sample = metrics?.startLatencyTimer()
+        val llmResult = analyzeWithRetry(sanitized, language, executionResults, extraContext, taskContext)
+        val (finalResult, outcome) = if (llmResult != null) {
+            llmResult to AiAnalyzerMetrics.OUTCOME_SUCCESS
+        } else {
+            fallback.analyze(sanitized, language, executionResults, scenarioResults, taskContext) to
+                AiAnalyzerMetrics.OUTCOME_FALLBACK
+        }
+        if (sample != null) {
+            metrics.stopLatencyTimer(sample, AiAnalyzerMetrics.VARIANT_GIGACHAT, outcome)
+        }
+        metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, outcome)
 
-        cache.put(cacheKey, result)
-        return result
+        cache.put(cacheKey, finalResult)
+        return finalResult
     }
 
     private fun analyzeWithRetry(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        extraContext: String? = null
+        extraContext: String? = null,
+        taskContext: AnalyzeContext? = null
     ): AIAnalysisResult? {
         return try {
-            callAndParse(code, language, executionResults, retryHint = null, extraContext = extraContext)
+            val result = callAndParse(code, language, executionResults, retryHint = null, extraContext = extraContext, taskContext = taskContext)
+            metrics?.recordSchemaValidation(valid = true)
+            result
         } catch (schemaErr: SchemaValidationException) {
             logger.warn { "GigaChat schema invalid, retrying once: ${schemaErr.message}" }
-            runCatching { callAndParse(code, language, executionResults, retryHint = schemaErr.message ?: "schema mismatch", extraContext = extraContext) }
+            metrics?.recordSchemaValidation(valid = false)
+            runCatching { callAndParse(code, language, executionResults, retryHint = schemaErr.message ?: "schema mismatch", extraContext = extraContext, taskContext = taskContext) }
+                .onSuccess { metrics?.recordSchemaValidation(valid = true) }
                 .onFailure { logger.warn(it) { "GigaChat retry failed, falling back to rule-based" } }
                 .getOrNull()
         } catch (e: Exception) {
@@ -106,11 +142,27 @@ class GigaChatAnalyzer(
         language: String,
         executionResults: List<SandboxExecutionResult>,
         retryHint: String?,
-        extraContext: String? = null
+        extraContext: String? = null,
+        taskContext: AnalyzeContext? = null
     ): AIAnalysisResult {
+        // Если taskContext или AST-сервис не null — строим полный prompt с условием
+        // задачи, sandbox-вердиктом, AST-фактами и plain-text кодом в sentinel-маркерах.
+        // Старый путь (без контекста) сохранён для совместимости с unit-тестами,
+        // которые мокают callAndParse через analyze("code", "java", ...).
+        val effectiveTaskContext = taskContext ?: contextFromExecutionResults(executionResults)
+        val astBlock = astMetricsService?.runCatching { extract(code, language).spotlightForPrompt() }
+            ?.onFailure { logger.warn(it) { "AST extract failed, omitting block" } }
+            ?.getOrNull()
         val userPrompt = when {
             retryHint != null -> AnalyzerPrompts.userPromptRetry(code, language, retryHint)
             extraContext != null -> extraContext
+            astBlock != null || hasMeaningfulContext(effectiveTaskContext) ->
+                AnalyzerPrompts.userPromptFull(
+                    code = code,
+                    language = language,
+                    astFactsBlock = astBlock,
+                    taskContext = effectiveTaskContext
+                )
             else -> AnalyzerPrompts.userPrompt(code, language)
         }
         val raw = client.chatCompletion(
@@ -118,6 +170,11 @@ class GigaChatAnalyzer(
             userPrompt = userPrompt
         )
         val cleaned = stripJsonFences(raw)
+        // Dev-only debug: dump first response we see to /tmp for empirical inspection.
+        System.getenv("AI_DEBUG_DUMP")?.let { dumpPath ->
+            val f = java.io.File(dumpPath)
+            if (!f.exists()) f.writeText("=== RAW ===\n$raw\n\n=== CLEANED ===\n$cleaned\n")
+        }
         schemaValidator.parseAndValidate(cleaned)
         val payload = objectMapper.readValue(cleaned, GigaChatAnalysisPayload::class.java)
         return mapPayload(payload, executionResults)
@@ -128,8 +185,19 @@ class GigaChatAnalyzer(
         executionResults: List<SandboxExecutionResult>
     ): AIAnalysisResult {
         val rawQuality = payload.codeQuality.coerceIn(0, 100)
-        val hasFailure = executionResults.any { it.status != ExecutionStatus.SUCCESS }
-        val quality = if (hasFailure) minOf(rawQuality, FAILED_CODE_QUALITY_CAP) else rawQuality
+        val total = executionResults.size
+        val passed = executionResults.count { it.status == ExecutionStatus.SUCCESS }
+        val hasFailure = total > 0 && passed < total
+        val allFailed = total > 0 && passed == 0
+        // P0-4: каскад капов. Полностью провалено → 40, частично → 60, всё ОК → без капа.
+        val quality = when {
+            allFailed && rawQuality > ALL_FAILED_CODE_QUALITY_CAP -> {
+                logger.warn { "GigaChat output contradicts sandbox: passed=0/$total quality=$rawQuality → clamp $ALL_FAILED_CODE_QUALITY_CAP" }
+                ALL_FAILED_CODE_QUALITY_CAP
+            }
+            hasFailure -> minOf(rawQuality, FAILED_CODE_QUALITY_CAP)
+            else -> rawQuality
+        }
         val issues = payload.issues.take(20).map { msg ->
             CodeIssue(
                 type = IssueType.CODE_SMELL,
@@ -150,6 +218,40 @@ class GigaChatAnalyzer(
             modelVersion = "gigachat"
         )
     }
+
+    /**
+     * Собирает агрегаты вердикта (passedTests, totalTests, overallVerdict, firstError)
+     * из списка SandboxExecutionResult, чтобы передать в prompt даже когда
+     * вызывающая сторона не предоставила [AnalyzeContext].
+     *
+     * Это гарантирует, что блок «Результат проверки sandbox» всегда попадёт в
+     * user-message, даже если worker по какой-то причине не пробросил контекст.
+     */
+    private fun contextFromExecutionResults(results: List<SandboxExecutionResult>): AnalyzeContext {
+        if (results.isEmpty()) return AnalyzeContext()
+        val total = results.size
+        val passed = results.count { it.status == ExecutionStatus.SUCCESS }
+        val firstFailure = results.firstOrNull { it.status != ExecutionStatus.SUCCESS }
+        val overall = when {
+            firstFailure == null -> "OK"
+            firstFailure.status == ExecutionStatus.TIME_LIMIT_EXCEEDED -> "TIME_LIMIT_EXCEEDED"
+            firstFailure.status == ExecutionStatus.MEMORY_LIMIT_EXCEEDED -> "MEMORY_LIMIT_EXCEEDED"
+            firstFailure.status == ExecutionStatus.COMPILATION_ERROR -> "COMPILATION_ERROR"
+            firstFailure.status == ExecutionStatus.RUNTIME_ERROR -> "RUNTIME_ERROR"
+            else -> "WRONG_ANSWER"
+        }
+        val firstErr = firstFailure?.let { it.error ?: it.output }?.take(500)
+        return AnalyzeContext(
+            taskDescription = null,
+            passedTests = passed,
+            totalTests = total,
+            overallVerdict = overall,
+            firstError = firstErr
+        )
+    }
+
+    private fun hasMeaningfulContext(c: AnalyzeContext?): Boolean =
+        c != null && (c.taskDescription != null || c.totalTests != null || c.overallVerdict != null)
 
     private fun stripJsonFences(raw: String): String {
         val trimmed = raw.trim()
@@ -173,7 +275,8 @@ class GigaChatAnalyzer(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        extraContext: String?
+        extraContext: String?,
+        taskContext: AnalyzeContext?
     ): String {
         val digest = MessageDigest.getInstance("SHA-256")
         digest.update(language.lowercase().toByteArray(Charsets.UTF_8))
@@ -186,6 +289,11 @@ class GigaChatAnalyzer(
         digest.update(0)
         val verdictFp = executionResults.joinToString(",") { it.status.name }
         digest.update(verdictFp.toByteArray(Charsets.UTF_8))
+        digest.update(0)
+        // P0-3: taskDescription входит в ключ — без этого изменение условия задачи
+        // (новая редакция текста) тихо вернёт закэшированный анализ старого условия.
+        val descFp = taskContext?.taskDescription?.take(2048) ?: "no-desc"
+        digest.update(descFp.toByteArray(Charsets.UTF_8))
         return digest.digest().joinToString("") { "%02x".format(it) }
     }
 }

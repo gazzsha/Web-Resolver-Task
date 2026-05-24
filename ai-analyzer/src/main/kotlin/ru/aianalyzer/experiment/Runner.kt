@@ -5,11 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Caffeine
-import io.netty.handler.ssl.SslContextBuilder
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
 import ru.aianalyzer.ast.AstMetricsService
 import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.service.AIAnalysisResult
@@ -228,18 +223,17 @@ private fun buildAnalyzer(
 
     val gigaChatClient = if (mockMode) {
         val mockResponses = MockGigaChatClient.load(mapper)
-        MockGigaChatClient(mockResponses, mapper, dummyWebClient(), MockGigaChatClient.dummyConfig())
+        MockGigaChatClient(mockResponses, mapper, MockGigaChatClient.dummyConfig())
     } else {
-        // Real GigaChat (key in env)
-        val webClient = realWebClient()
-        val cfg = MockGigaChatClient.dummyConfig().copy(
+        val cfg = ru.aianalyzer.client.GigaChatClientConfig(
             authKey = System.getenv("GIGACHAT_AUTH_KEY"),
             scope = System.getenv("GIGACHAT_SCOPE") ?: "GIGACHAT_API_PERS",
+            model = System.getenv("GIGACHAT_MODEL") ?: "GigaChat",
             oauthBaseUrl = "https://ngw.devices.sberbank.ru:9443",
             apiBaseUrl = "https://gigachat.devices.sberbank.ru",
-            requestTimeout = Duration.ofSeconds(30)
+            requestTimeout = java.time.Duration.ofSeconds(30)
         )
-        ru.aianalyzer.client.GigaChatClient(webClient, cfg)
+        ru.aianalyzer.client.GigaChatClient(cfg, mapper)
     }
 
     val gigaChatAnalyzer = GigaChatAnalyzer(
@@ -259,20 +253,7 @@ private fun buildAnalyzer(
     }
 }
 
-private fun dummyWebClient(): WebClient = WebClient.builder().build()
-
-private fun realWebClient(): WebClient {
-    val sslContext = SslContextBuilder.forClient()
-        .trustManager(InsecureTrustManagerFactory.INSTANCE)
-        .build()
-    val httpClient = HttpClient.create()
-        .secure { it.sslContext(sslContext) }
-        .responseTimeout(Duration.ofSeconds(30))
-    return WebClient.builder()
-        .clientConnector(ReactorClientHttpConnector(httpClient))
-        .codecs { it.defaultCodecs().maxInMemorySize(1 * 1024 * 1024) }
-        .build()
-}
+// WebClient helpers removed — GigaChatClient is now JDK-based.
 
 // ─────────────────────────────────── IO ────────────────────────────────────
 

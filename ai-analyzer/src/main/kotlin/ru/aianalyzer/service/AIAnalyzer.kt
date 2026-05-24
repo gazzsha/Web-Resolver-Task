@@ -17,15 +17,20 @@ import ru.sandbox.model.SandboxExecutionResult
  * 3. (Optional) AST → structural confirmation
  */
 interface AIAnalyzer {
-    
+
     /**
-     * Analyze code and execution results
+     * Analyze code and execution results.
+     *
+     * [taskContext] (P0-3) — необязательный контекст задачи: условие, агрегаты
+     * sandbox-вердикта, первая ошибка. Подмешивается в user-message, чтобы LLM
+     * не выдумывал содержание задачи и пройдены ли тесты.
      */
     fun analyze(
         code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
-        scenarioResults: List<ScenarioResult>? = null
+        scenarioResults: List<ScenarioResult>? = null,
+        taskContext: AnalyzeContext? = null
     ): AIAnalysisResult
     
     /**
@@ -46,6 +51,28 @@ interface AIAnalyzer {
         language: String
     ): CodeQualityAssessment
 }
+
+/**
+ * Контекст задачи для содержательного промпта (P0-3).
+ *
+ * Передаётся опционально. Если null — анализатор работает по старому пути
+ * (только код + язык). Если заполнен — модель получает условие задачи и
+ * агрегаты sandbox-вердикта, что снижает галлюцинации про содержание кода
+ * и факт прохождения тестов.
+ *
+ * @property taskDescription Условие задачи на естественном языке (как в БД).
+ * @property passedTests Сколько тестов прошло; null если данные недоступны.
+ * @property totalTests Сколько всего тестов; null если данные недоступны.
+ * @property overallVerdict Итоговый verdict ("OK", "WRONG_ANSWER", и т.п.); null если неизвестен.
+ * @property firstError stderr/output первого упавшего теста, обрезано до 500 символов.
+ */
+data class AnalyzeContext(
+    val taskDescription: String? = null,
+    val passedTests: Int? = null,
+    val totalTests: Int? = null,
+    val overallVerdict: String? = null,
+    val firstError: String? = null
+)
 
 /**
  * Scenario result for AI analysis

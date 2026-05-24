@@ -1,5 +1,9 @@
 package ru.aianalyzer.service
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Caffeine
@@ -11,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatException
 import ru.aianalyzer.validation.SchemaValidator
@@ -98,6 +103,32 @@ class GigaChatAnalyzerTest {
     }
 
     @Test
+    fun `fallback writes WARN log mentioning rule-based and produces non-empty result (P1-7)`() {
+        // P1-7: при падении GigaChat-вызова логируем WARN и возвращаем непустой rule-based ответ.
+        val logger = LoggerFactory.getLogger("ru.aianalyzer.service.GigaChatAnalyzer") as Logger
+        val appender = ListAppender<ILoggingEvent>().apply { start() }
+        logger.addAppender(appender)
+        try {
+            val client = mockk<GigaChatClient>()
+            every { client.chatCompletion(any(), any()) } throws GigaChatException("network down")
+
+            val result = analyzer(client).analyze("public class Solution {}", "java", failedExecResults())
+
+            assertEquals("rule-based", result.modelVersion)
+            assertTrue(result.explanation.isNotBlank())
+            assertNotNull(result.complexity)
+
+            val warns = appender.list.filter { it.level == Level.WARN }
+            assertTrue(
+                warns.any { it.formattedMessage.contains("falling back to rule-based") },
+                "Ожидаем WARN 'falling back to rule-based', фактические логи: ${warns.map { it.formattedMessage }}"
+            )
+        } finally {
+            logger.detachAppender(appender)
+        }
+    }
+
+    @Test
     fun `parse error fallback returns rule-based result`() {
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns "this is not JSON at all"
@@ -121,15 +152,20 @@ class GigaChatAnalyzerTest {
     }
 
     @Test
-    fun `schema rejects unknown top-level keys and falls back after retry`() {
+    fun `schema accepts unknown top-level keys (additionalProperties=true)`() {
+        // After the real GigaChat run we relaxed additionalProperties to true —
+        // the model often augments the JSON with extra keys (e.g. "verdict") and
+        // strict mode caused 100% schema-reject. Required fields and value ranges
+        // still hold; extras are silently dropped by Jackson.
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns
             """{"codeQuality":80,"issues":[],"recommendations":[],"explanation":"ok","complexity":"LOW","verdict":"PASSED"}"""
 
         val result = analyzer(client).analyze("code", "java", execResults())
 
-        assertEquals("rule-based", result.modelVersion)
-        verify(exactly = 2) { client.chatCompletion(any(), any()) }
+        assertEquals(80, result.codeQuality)
+        assertEquals("gigachat", result.modelVersion)
+        verify(exactly = 1) { client.chatCompletion(any(), any()) }
     }
 
     @Test
@@ -162,12 +198,26 @@ class GigaChatAnalyzerTest {
     }
 
     @Test
-    fun `clamps codeQuality to 60 when sandbox shows failure (V4 cross-check)`() {
+    fun `clamps codeQuality to 40 when ALL tests fail (P0-4 verdict guard)`() {
+        // P0-4: passed=0/total=1 → строгий cap 40 (раньше был 60 для любой ошибки).
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns
             """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
 
         val result = analyzer(client).analyze("code", "java", failedExecResults())
+
+        assertEquals(40, result.codeQuality)
+    }
+
+    @Test
+    fun `clamps codeQuality to 60 when some tests pass and some fail (V4 cross-check)`() {
+        // Частичный провал — мягкий cap 60.
+        val client = mockk<GigaChatClient>()
+        every { client.chatCompletion(any(), any()) } returns
+            """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
+
+        val mixed = execResults() + failedExecResults()
+        val result = analyzer(client).analyze("code", "java", mixed)
 
         assertEquals(60, result.codeQuality)
     }

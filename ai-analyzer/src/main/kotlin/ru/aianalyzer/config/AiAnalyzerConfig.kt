@@ -6,19 +6,15 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
-import io.netty.handler.ssl.SslContextBuilder
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
-import org.springframework.http.client.reactive.ReactorClientHttpConnector
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.netty.http.client.HttpClient
 import ru.aianalyzer.ast.AstMetricsService
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatClientConfig
+import ru.aianalyzer.metrics.AiAnalyzerMetrics
 import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.service.AIAnalyzer
 import ru.aianalyzer.service.AIAnalysisResult
@@ -38,24 +34,7 @@ class AiAnalyzerConfig {
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    @Bean(name = ["gigaChatWebClient"])
-    fun gigaChatWebClient(
-        @Value("\${gigachat.connect-timeout-ms:5000}") connectTimeoutMs: Int,
-        @Value("\${gigachat.response-timeout-ms:30000}") responseTimeoutMs: Long
-    ): WebClient {
-        // dev-only: trust-all SSL для self-signed CA Сбера; в проде заменить на bundle с минцифровским CA.
-        val sslContext = SslContextBuilder.forClient()
-            .trustManager(InsecureTrustManagerFactory.INSTANCE)
-            .build()
-        val httpClient = HttpClient.create()
-            .secure { it.sslContext(sslContext) }
-            .option(io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeoutMs)
-            .responseTimeout(Duration.ofMillis(responseTimeoutMs))
-        return WebClient.builder()
-            .clientConnector(ReactorClientHttpConnector(httpClient))
-            .codecs { it.defaultCodecs().maxInMemorySize(1 * 1024 * 1024) }
-            .build()
-    }
+    // GigaChat HTTP client is now JDK-based; no Spring WebClient bean is needed.
 
     @Bean
     fun gigaChatClientConfig(
@@ -79,11 +58,7 @@ class AiAnalyzerConfig {
     )
 
     @Bean
-    fun gigaChatClient(
-        @org.springframework.beans.factory.annotation.Qualifier("gigaChatWebClient")
-        webClient: WebClient,
-        config: GigaChatClientConfig
-    ): GigaChatClient = GigaChatClient(webClient, config)
+    fun gigaChatClient(config: GigaChatClientConfig): GigaChatClient = GigaChatClient(config)
 
     @Bean(name = ["aiAnalysisCache"])
     fun aiAnalysisCache(
@@ -112,13 +87,18 @@ class AiAnalyzerConfig {
         @org.springframework.beans.factory.annotation.Qualifier("aiAnalysisCache")
         cache: Cache<String, AIAnalysisResult>,
         schemaValidator: SchemaValidator,
+        astMetricsService: AstMetricsService,
+        aiAnalyzerMetrics: AiAnalyzerMetrics,
         @Value("\${ai.prompt.variant:zero-shot}") promptVariantProp: String
     ): GigaChatAnalyzer {
         val variant = when (promptVariantProp.lowercase().trim()) {
             "few-shot", "few_shot", "fewshot" -> PromptVariant.FEW_SHOT
             else -> PromptVariant.ZERO_SHOT
         }
-        return GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator, variant)
+        // P0-3: подключаем AST-extractor по умолчанию, чтобы в любом production-пути
+        // (через AstHybridAnalyzer или прямой GigaChatAnalyzer) prompt содержал
+        // блок <AST_FACTS> с детерминированными структурными фактами кода.
+        return GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator, variant, astMetricsService, aiAnalyzerMetrics)
     }
 
     @Bean
@@ -138,8 +118,9 @@ class AiAnalyzerConfig {
     fun astHybridAnalyzer(
         gigaChatAnalyzer: GigaChatAnalyzer,
         astMetricsService: AstMetricsService,
-        fallback: SimpleRuleBasedAnalyzer
-    ): AstHybridAnalyzer = AstHybridAnalyzer(gigaChatAnalyzer, astMetricsService, fallback)
+        fallback: SimpleRuleBasedAnalyzer,
+        aiAnalyzerMetrics: AiAnalyzerMetrics
+    ): AstHybridAnalyzer = AstHybridAnalyzer(gigaChatAnalyzer, astMetricsService, fallback, aiAnalyzerMetrics)
 
     @Bean
     @Primary

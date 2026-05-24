@@ -18,6 +18,8 @@ kafkaVersion = "3.2.8"
 dependencyManagement = "1.1.7"
 flywayVersion = "10.20.1"
 jjwtVersion = "0.12.6"
+commonsCsv = "1.12.0"
+micrometerPrometheus = "1.13.6"
 
 [libraries]
 
@@ -50,6 +52,10 @@ jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwtVersion" 
 jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwtVersion" }
 
 chatgpt = { module = "com.github.plexpt:chatgpt", version.ref = "chatGPT" }
+
+commons-csv = { module = "org.apache.commons:commons-csv", version.ref = "commonsCsv" }
+micrometer-registry-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometerPrometheus" }
+micrometer-core = { module = "io.micrometer:micrometer-core", version.ref = "micrometerPrometheus" }
 
 [plugins]
 
