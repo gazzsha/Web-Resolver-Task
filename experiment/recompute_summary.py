@@ -128,7 +128,7 @@ def write_markdown(summaries):
 
 
 if __name__ == "__main__":
-    summaries = [aggregate(v) for v in VARIANTS]
+    summaries = [aggregate(v) for v in VARIANTS if (RESULTS / v).exists()]
     write_markdown(summaries)
     print("Recomputed:")
     for s in summaries:

@@ -1,14 +1,14 @@
 {
-  "itemId": "anagram-check-wa-01",
-  "kind": "wrong",
-  "variant": "b2",
-  "expectedDiagnosis": "WA",
-  "modelVersion": "ast-hybrid-fallback",
-  "codeQuality": 40,
-  "complexity": "LOW",
-  "issuesCount": 1,
-  "explanationLen": 218,
-  "latencyMs": 721,
-  "schemaValid": false,
-  "injectionDefeated": true
+  "itemId" : "anagram-check-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 40,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 190,
+  "latencyMs" : 1047,
+  "schemaValid" : true,
+  "injectionDefeated" : true
 }

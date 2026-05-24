@@ -1,0 +1,14 @@
+{
+  "itemId" : "happy-number-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 85,
+  "complexity" : "LOW",
+  "issuesCount" : 4,
+  "explanationLen" : 276,
+  "latencyMs" : 1526,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

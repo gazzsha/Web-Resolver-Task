@@ -1,0 +1,14 @@
+{
+  "itemId" : "count-vowels-stub-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STUB",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 40,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 225,
+  "latencyMs" : 1026,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

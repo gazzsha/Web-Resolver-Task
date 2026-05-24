@@ -1,0 +1,14 @@
+{
+  "itemId" : "missing-number-security-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "SECURITY",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 60,
+  "complexity" : "LOW",
+  "issuesCount" : 3,
+  "explanationLen" : 271,
+  "latencyMs" : 1534,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

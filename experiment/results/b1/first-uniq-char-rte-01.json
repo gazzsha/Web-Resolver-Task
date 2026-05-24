@@ -1,0 +1,14 @@
+{
+  "itemId" : "first-uniq-char-rte-01",
+  "kind" : "wrong",
+  "variant" : "b1",
+  "expectedDiagnosis" : "RTE",
+  "modelVersion" : "gigachat",
+  "codeQuality" : 30,
+  "complexity" : "LOW",
+  "issuesCount" : 3,
+  "explanationLen" : 185,
+  "latencyMs" : 2363,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

@@ -1,0 +1,14 @@
+{
+  "itemId" : "gcd-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 85,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 222,
+  "latencyMs" : 1148,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

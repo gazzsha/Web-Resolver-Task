@@ -1,0 +1,14 @@
+{
+  "itemId" : "reverse-string-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 40,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 277,
+  "latencyMs" : 1173,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

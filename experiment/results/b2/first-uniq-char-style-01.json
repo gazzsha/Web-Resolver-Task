@@ -1,0 +1,14 @@
+{
+  "itemId" : "first-uniq-char-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 60,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 302,
+  "latencyMs" : 1616,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

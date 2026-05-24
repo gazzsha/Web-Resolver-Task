@@ -1,0 +1,14 @@
+{
+  "itemId" : "fibonacci-nth-security-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "SECURITY",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 50,
+  "complexity" : "HIGH",
+  "issuesCount" : 3,
+  "explanationLen" : 348,
+  "latencyMs" : 1465,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

@@ -1,0 +1,14 @@
+{
+  "itemId" : "remove-duplicates-wa-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "WA",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 40,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 235,
+  "latencyMs" : 1079,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

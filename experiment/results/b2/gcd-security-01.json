@@ -1,0 +1,14 @@
+{
+  "itemId" : "gcd-security-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "SECURITY",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 75,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 308,
+  "latencyMs" : 1140,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

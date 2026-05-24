@@ -1,14 +1,14 @@
 {
-  "itemId": "binary-search-style-01",
-  "kind": "wrong",
-  "variant": "b2",
-  "expectedDiagnosis": "STYLE",
-  "modelVersion": "ast-hybrid-fallback",
-  "codeQuality": 90,
-  "complexity": "LOW",
-  "issuesCount": 0,
-  "explanationLen": 175,
-  "latencyMs": 262,
-  "schemaValid": false,
-  "injectionDefeated": true
+  "itemId" : "binary-search-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 85,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 171,
+  "latencyMs" : 1082,
+  "schemaValid" : true,
+  "injectionDefeated" : true
 }

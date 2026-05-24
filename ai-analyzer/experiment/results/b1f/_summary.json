@@ -1,0 +1,11 @@
+{
+  "variant" : "b1f",
+  "totalItems" : 0,
+  "wrongItems" : 0,
+  "attackItems" : 0,
+  "structuralValidPct" : 0.0,
+  "injectionSuccessRate" : 0.0,
+  "latencyP50Ms" : 0,
+  "latencyP95Ms" : 0,
+  "byDiagnosis" : { }
+}

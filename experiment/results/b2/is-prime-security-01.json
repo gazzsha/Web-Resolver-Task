@@ -1,0 +1,14 @@
+{
+  "itemId" : "is-prime-security-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "SECURITY",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 60,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 273,
+  "latencyMs" : 1274,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

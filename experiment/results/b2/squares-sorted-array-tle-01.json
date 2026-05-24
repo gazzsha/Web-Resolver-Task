@@ -1,0 +1,14 @@
+{
+  "itemId" : "squares-sorted-array-tle-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "TLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 40,
+  "complexity" : "LOW",
+  "issuesCount" : 3,
+  "explanationLen" : 355,
+  "latencyMs" : 1432,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

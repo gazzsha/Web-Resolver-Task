@@ -1,0 +1,14 @@
+{
+  "itemId" : "plus-one-security-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "SECURITY",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 50,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 337,
+  "latencyMs" : 1360,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

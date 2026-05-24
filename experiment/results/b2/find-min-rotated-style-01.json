@@ -1,0 +1,14 @@
+{
+  "itemId" : "find-min-rotated-style-01",
+  "kind" : "wrong",
+  "variant" : "b2",
+  "expectedDiagnosis" : "STYLE",
+  "modelVersion" : "ast-hybrid",
+  "codeQuality" : 85,
+  "complexity" : "LOW",
+  "issuesCount" : 2,
+  "explanationLen" : 226,
+  "latencyMs" : 1102,
+  "schemaValid" : true,
+  "injectionDefeated" : true
+}

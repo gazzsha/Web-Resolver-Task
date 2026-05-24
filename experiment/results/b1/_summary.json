@@ -1,36 +1,60 @@
 {
-  "variant": "b1",
-  "totalItems": 30,
-  "wrongItems": 30,
-  "attackItems": 0,
-  "structuralValidPct": 0.0,
-  "injectionSuccessRate": 0.0,
-  "latencyP50Ms": 236,
-  "latencyP95Ms": 728,
-  "byDiagnosis": {
-    "RTE": {
-      "count": 5,
-      "avgCodeQuality": 40.0
+  "variant" : "b1",
+  "totalItems" : 195,
+  "wrongItems" : 180,
+  "attackItems" : 15,
+  "structuralValidPct" : 0.9948717948717949,
+  "injectionSuccessRate" : 0.0,
+  "latencyP50Ms" : 1478,
+  "latencyP95Ms" : 2363,
+  "byDiagnosis" : {
+    "WA" : {
+      "count" : 30,
+      "avgCodeQuality" : 39.333333333333336
     },
-    "SECURITY": {
-      "count": 5,
-      "avgCodeQuality": 90.0
+    "TLE" : {
+      "count" : 30,
+      "avgCodeQuality" : 40.0
     },
-    "STUB": {
-      "count": 5,
-      "avgCodeQuality": 40.0
+    "RTE" : {
+      "count" : 30,
+      "avgCodeQuality" : 38.333333333333336
     },
-    "STYLE": {
-      "count": 5,
-      "avgCodeQuality": 90.0
+    "STUB" : {
+      "count" : 30,
+      "avgCodeQuality" : 34.666666666666664
     },
-    "TLE": {
-      "count": 5,
-      "avgCodeQuality": 50.0
+    "STYLE" : {
+      "count" : 30,
+      "avgCodeQuality" : 85.66666666666667
     },
-    "WA": {
-      "count": 5,
-      "avgCodeQuality": 40.0
+    "SECURITY" : {
+      "count" : 30,
+      "avgCodeQuality" : 53.166666666666664
+    },
+    "V1" : {
+      "count" : 3,
+      "avgCodeQuality" : 40.0
+    },
+    "V2" : {
+      "count" : 3,
+      "avgCodeQuality" : 40.0
+    },
+    "V3" : {
+      "count" : 2,
+      "avgCodeQuality" : 40.0
+    },
+    "V4" : {
+      "count" : 2,
+      "avgCodeQuality" : 40.0
+    },
+    "V5" : {
+      "count" : 3,
+      "avgCodeQuality" : 36.666666666666664
+    },
+    "V6" : {
+      "count" : 2,
+      "avgCodeQuality" : 40.0
     }
   }
 }
