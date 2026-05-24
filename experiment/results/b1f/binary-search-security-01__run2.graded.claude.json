@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-security-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "1668dc80-e041-4210-b562-a668a623ddf7",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Runtime.exec RCE назван, Arrays.binarySearch — конкретная безопасная замена."
+}

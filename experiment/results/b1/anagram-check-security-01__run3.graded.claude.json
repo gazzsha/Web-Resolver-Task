@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-security-01",
+  "variant": "b1",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "65083b94-2f87-497b-bee5-f76431789278",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 3,
+  "judge_rationale": "os.system shell injection в issues, но рекомендации (maketrans, Counter) только об анаграмме; нет actionable-рекомендации по security."
+}

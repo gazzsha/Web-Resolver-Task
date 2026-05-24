@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "051aa10e-e34d-45bd-b388-6cbecb12de3f",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "PEP8/range(len(/for c in s не названы; утверждение «глобальная переменная N» — галлюцинация: N локальна."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-style-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "1f5bf8a6-fc2e-411e-87b7-3a79f75655f1",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Однобуквенные имена l, r опознаны, left/right rename — конкретный actionable."
+}

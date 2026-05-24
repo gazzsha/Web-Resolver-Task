@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-style-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "cd6fc91e-128e-4df7-9797-4b6d57953aeb",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "Формат не идентифицирован; «StringBuilder для многократного преобразования в char array» — галлюцинация: toCharArray вызывается один раз."
+}

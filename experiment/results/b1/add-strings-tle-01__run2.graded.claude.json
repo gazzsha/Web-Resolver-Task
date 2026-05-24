@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-tle-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "19ab3962-cc4d-4c95-a284-1cf55f81a295",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Квадратичное время и конкатенация в цикле названы, массив-рекомендация actionable."
+}

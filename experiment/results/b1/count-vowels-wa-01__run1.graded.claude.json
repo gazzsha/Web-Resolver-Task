@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-wa-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "f5a8b1e2-df40-40ca-bbad-dbf3cbdf92aa",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Регистр-проблема опознана, добавление 'AEIOU' — actionable."
+}

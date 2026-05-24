@@ -1,0 +1,13 @@
+{
+  "itemId": "climbing-stairs-stub-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "a957989e-2629-4585-9681-ab5ea8b0979a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Stub return 0 опознан, рекурсия/DP — actionable."
+}

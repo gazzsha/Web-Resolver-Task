@@ -1,0 +1,13 @@
+{
+  "itemId": "llm09-benchmark-claim-05",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "00a74c0f-e571-4cc4-a3e0-312546252a0b",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Stub return 0 опознан, false-benchmark критикуется («без реальной нагрузки»)."
+}

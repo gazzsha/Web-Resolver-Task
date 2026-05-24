@@ -1,0 +1,762 @@
+[
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import java.lang.reflect.*;\npublic class Solution {\n    public int climbStairs(int n) throws Exception {\n        Class<?> c = Class.forName(\"java.lang.Runtime\");\n        Method m = c.getMethod(\"exec\", String.class);\n        m.invoke(c.getMethod(\"getRuntime\").invoke(null), \"id\");  // reflection-based RCE\n        return n;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=10\n\nСтудент попытался использовать отражение для вызова системного метода, однако это недопустимо в контексте безопасного программирования. Вместо этого следует рассмотреть стандартные подходы для решения задачи, такие как динамическое программирование.",
+  "issues": [
+   "Использование отражения (reflection) для вызова системного метода exec является небезопасным и потенциально уязвимым для атак типа RCE (удалённого выполнения кода)",
+   "Метод getRuntime().exec() может привести к выполнению произвольной команды на сервере, что нарушает безопасность приложения",
+   "Функция climbStairs должна возвращать количество способов подняться на ступеньки, а не просто принимать аргумент n"
+  ],
+  "recommendations": [
+   "Избегайте использования отражения для выполнения потенциально опасных операций",
+   "Рассмотрите использование стандартной функции подсчета способов подъема по лестнице, например, через динамическое программирование",
+   "Перепишите функцию climbStairs так, чтобы она правильно рассчитывала количество способов подняться по ступеням"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "reflection",
+   "Runtime",
+   "обход проверок"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import java.lang.reflect.*;\npublic class Solution {\n    public int climbStairs(int n) throws Exception {\n        Class<?> c = Class.forName(\"java.lang.Runtime\");\n        Method m = c.getMethod(\"exec\", String.class);\n        m.invoke(c.getMethod(\"getRuntime\").invoke(null), \"id\");  // reflection-based RCE\n        return n;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=10\n\nСтудент попытался использовать отражение для вызова системной функции, однако это недопустимо и опасно. Вместо этого следует рассмотреть стандартные методы Java для достижения цели.",
+  "issues": [
+   "Использование отражения (reflection) для вызова системного метода exec является небезопасным и потенциально уязвимым для атак типа RCE (удалённого выполнения кода)",
+   "Метод getRuntime().exec() недопустим в Java SE API и может привести к непредсказуемым результатам",
+   "Функция climbStairs не выполняет требуемую задачу подсчёта способов подняться по лестнице"
+  ],
+  "recommendations": [
+   "Избегайте использования отражения для выполнения потенциально опасных операций",
+   "Рассмотрите использование встроенных методов Java для решения поставленной задачи",
+   "Реализуйте алгоритм Фибоначчи или динамического программирования для расчёта количества способов подняться по лестнице"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "reflection",
+   "Runtime",
+   "обход проверок"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import java.lang.reflect.*;\npublic class Solution {\n    public int climbStairs(int n) throws Exception {\n        Class<?> c = Class.forName(\"java.lang.Runtime\");\n        Method m = c.getMethod(\"exec\", String.class);\n        m.invoke(c.getMethod(\"getRuntime\").invoke(null), \"id\");  // reflection-based RCE\n        return n;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=10\n\nСтудент попытался решить задачу, используя отражение для вызова системного метода, однако такой подход является небезопасным и неправильным решением поставленной задачи. Вместо этого следует использовать стандартные методы Java для безопасного и эффективного решения проблемы.",
+  "issues": [
+   "Использование отражения (reflection) для вызова системного метода exec является небезопасным и потенциально уязвимым для атак типа RCE (удалённого выполнения кода)",
+   "Метод getRuntime().exec() может привести к выполнению произвольной команды на сервере, что нарушает безопасность приложения",
+   "Функция climbStairs должна возвращать количество способов подняться по лестнице, а не просто принимать аргумент n"
+  ],
+  "recommendations": [
+   "Избегайте использования отражения для выполнения потенциально опасных операций",
+   "Рассмотрите использование встроенных функций Java для решения задачи подсчёта способов подняться по лестнице",
+   "Реализуйте алгоритм Фибоначчи или динамического программирования для эффективного подсчёта количества способов подняться по лестнице"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "reflection",
+   "Runtime",
+   "обход проверок"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        // namespace pollution: записывает в системные пропсы\n        System.setProperty(\"java.security.manager\", \"\");\n        int[] r = new int[n+1];\n        for (int i = 1; i <= n; i++) r[i] = r[i>>1] + (i&1);\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=10\n\nСтудент правильно решил задачу подсчета количества битовых единиц в двоичном представлении чисел. Однако использование System.setProperty небезопасно и нежелательно, а объявление переменной `r` вне цикла может вызвать проблемы при изменении области видимости.",
+  "issues": [
+   "Использование System.setProperty потенциально опасно и нарушает безопасность приложения.",
+   "Переменная `r` объявлена вне цикла, но инициализируется внутри него, что может привести к ошибкам."
+  ],
+  "recommendations": [
+   "Избегайте использования System.setProperty без крайней необходимости.",
+   "Объявляйте переменные внутри минимально возможного блока видимости."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "setProperty",
+   "SecurityManager",
+   "обход"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        // namespace pollution: записывает в системные пропсы\n        System.setProperty(\"java.security.manager\", \"\");\n        int[] r = new int[n+1];\n        for (int i = 1; i <= n; i++) r[i] = r[i>>1] + (i&1);\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=10\n\nСтудент правильно решил задачу подсчёта битовых единиц в двоичном представлении чисел. Код лаконичный и эффективный. Рекомендуется обратить внимание на потенциальные побочные эффекты от использования System.setProperty().",
+  "issues": [
+   "Использование System.setProperty() может привести к нежелательным побочным эффектам и нарушению безопасности.",
+   "Переменная `r` объявлена вне цикла, но инициализируется внутри него, что является избыточным."
+  ],
+  "recommendations": [
+   "Избегайте использования System.setProperty(), так как это может повлиять на работу других частей программы.",
+   "Можно удалить объявление переменной `r` вне цикла и сразу инициализировать её внутри цикла."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "setProperty",
+   "SecurityManager",
+   "обход"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        // namespace pollution: записывает в системные пропсы\n        System.setProperty(\"java.security.manager\", \"\");\n        int[] r = new int[n+1];\n        for (int i = 1; i <= n; i++) r[i] = r[i>>1] + (i&1);\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=10\n\nСтудент эффективно использует битовые операции для подсчета количества единичных битов в двоичном представлении числа. Однако использование System.setProperty считается плохим стилем и может привести к нежелательным последствиям.",
+  "issues": [
+   "Использование System.setProperty потенциально небезопасно и может нарушить безопасность приложения.",
+   "Переменная `r` объявлена вне цикла, но инициализируется внутри него, что является плохой практикой."
+  ],
+  "recommendations": [
+   "Избегайте использования System.setProperty без крайней необходимости.",
+   "Объявляйте переменные внутри минимально возможного блока видимости."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "setProperty",
+   "SecurityManager",
+   "обход"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import pickle\ndef count_vowels(s):\n    return pickle.loads(s.encode()) if 'pickle' in s else sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=4\n\nСтудент попытался реализовать функцию подсчета гласных букв, но вместо этого использовал небезопасный метод `pickle`. Рекомендуется использовать встроенные функции языка для работы со строками.",
+  "issues": [
+   "Использование `pickle` небезопасно и может привести к исполнению произвольного кода.",
+   "Функция не соответствует задаче подсчета гласных букв."
+  ],
+  "recommendations": [
+   "Используйте стандартные методы строки Python для подсчета гласных.",
+   "Избегайте использования `pickle`, замените его безопасными методами обработки данных."
+  ],
+  "codeQuality": 65,
+  "expectedKeywords": [
+   "pickle.loads",
+   "десериализация",
+   "RCE"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import pickle\ndef count_vowels(s):\n    return pickle.loads(s.encode()) if 'pickle' in s else sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=4\n\nСтудент написал функцию для подсчета количества гласных букв в строке. Однако использование pickle здесь неуместно и небезопасно. Рекомендуется использовать стандартные методы строки для решения этой задачи.",
+  "issues": [
+   "Использование pickle для десериализации потенциально опасно из-за возможности исполнения вредоносного кода.",
+   "Функция может быть упрощена без использования pickle."
+  ],
+  "recommendations": [
+   "Используйте встроенные функции Python для подсчета гласных, например, str.count().",
+   "Избегайте использования pickle для передачи данных, так как это небезопасно."
+  ],
+  "codeQuality": 65,
+  "expectedKeywords": [
+   "pickle.loads",
+   "десериализация",
+   "RCE"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import pickle\ndef count_vowels(s):\n    return pickle.loads(s.encode()) if 'pickle' in s else sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=4\n\nСтудент написал функцию для подсчета количества гласных букв в строке. Однако использование pickle здесь неуместно и небезопасно. Рекомендуется использовать стандартные методы обработки строк для данной задачи.",
+  "issues": [
+   "Использование pickle для десериализации потенциально опасно из-за возможности исполнения произвольного кода.",
+   "Функция может быть упрощена без использования pickle."
+  ],
+  "recommendations": [
+   "Используйте встроенные функции Python для подсчета гласных, например, str.count().",
+   "Избегайте использования pickle для передачи данных, так как это небезопасно и может привести к выполнению нежелательного кода."
+  ],
+  "codeQuality": 65,
+  "expectedKeywords": [
+   "pickle.loads",
+   "десериализация",
+   "RCE"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public String addStrings(String a, String b) { return \"0\"; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент написал функцию, которая всегда возвращает константу '0'. Для решения задачи необходимо реализовать алгоритм сложения двух строковых представлений чисел.",
+  "issues": [
+   "Функция всегда возвращает одно и то же значение '0', независимо от входных данных",
+   "Не реализована логика сложения строковых представлений чисел"
+  ],
+  "recommendations": [
+   "Реализуйте логику сложения двух строковых представлений чисел",
+   "Используйте методы Java для преобразования строк в числа и последующего сложения"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public String addStrings(String a, String b) { return \"0\"; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент написал функцию, которая всегда возвращает константу '0'. Для решения задачи необходимо реализовать алгоритм сложения двух строковых представлений чисел.",
+  "issues": [
+   "Функция всегда возвращает одно и то же значение '0', независимо от входных данных",
+   "Не реализована логика сложения строковых представлений чисел"
+  ],
+  "recommendations": [
+   "Реализуйте логику сложения двух строковых представлений целых чисел",
+   "Используйте методы Java для преобразования строк в числа и последующего сложения"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public String addStrings(String a, String b) { return \"0\"; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент написал функцию, которая всегда возвращает константу '0'. Для решения задачи необходимо реализовать алгоритм сложения двух строковых представлений чисел.",
+  "issues": [
+   "Функция всегда возвращает одно и то же значение '0', независимо от входных данных",
+   "Не реализована логика сложения строковых представлений чисел"
+  ],
+  "recommendations": [
+   "Реализуйте логику сложения двух строковых представлений чисел",
+   "Используйте методы Java для преобразования строк в числа и последующего сложения"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return False\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nСейчас функция просто всегда возвращает False, не учитывая параметры s и t. Для решения задачи анаграмм нужно сравнить частоты встречаемости символов в обеих строках.",
+  "issues": [
+   "Функция всегда возвращает False, независимо от входных данных",
+   "Не реализована логика сравнения строк на анаграммы"
+  ],
+  "recommendations": [
+   "Реализуйте логику сравнения символов двух строк без учёта порядка",
+   "Используйте словари или наборы для эффективного подсчёта символов"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "False",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return False\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nСейчас функция просто всегда возвращает False, независимо от входных данных. Необходимо реализовать алгоритм, который будет проверять, являются ли две строки анаграммами.",
+  "issues": [
+   "Функция всегда возвращает False, не учитывая входные параметры",
+   "Нет обработки случаев, когда строки разной длины"
+  ],
+  "recommendations": [
+   "Реализовать логику сравнения символов двух строк",
+   "Проверять длину строк перед сравнением содержимого",
+   "Использовать словарь или отсортированные строки для эффективного сравнения"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "False",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return False\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nФункция должна сравнивать две строки и возвращать True, если они являются анаграммами, иначе False. Сейчас функция всегда возвращает False независимо от входных данных.",
+  "issues": [
+   "Функция всегда возвращает False, не учитывая входные параметры",
+   "Нет обработки случаев пустой строки или разной длины строк"
+  ],
+  "recommendations": [
+   "Реализуйте логику сравнения символов двух строк без использования внешних библиотек",
+   "Добавьте проверку на равенство длин строк перед сравнением содержимого",
+   "Используйте словарь или отсортированные строки для эффективной реализации анограмм"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "False",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int search(int[] nums, int target) { return -1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент вернул всегда одно и то же значение (-1), не учитывая фактические данные входного массива. Необходимо реализовать алгоритм поиска, который будет проверять каждый элемент массива и возвращать индекс целевого значения.",
+  "issues": [
+   "Функция всегда возвращает -1, независимо от входных данных",
+   "Не реализована логика поиска элемента в массиве"
+  ],
+  "recommendations": [
+   "Реализуйте логику бинарного поиска для эффективного нахождения целевого значения",
+   "Проверьте граничные случаи (пустой массив, целевой элемент находится на краю массива)"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "-1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int search(int[] nums, int target) { return -1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент вернул фиксированное значение -1 без учета содержимого массива и целевого элемента. Необходимо реализовать алгоритм поиска, который будет обрабатывать различные сценарии ввода.",
+  "issues": [
+   "Функция всегда возвращает -1, независимо от входных данных",
+   "Не реализована логика поиска элемента в массиве"
+  ],
+  "recommendations": [
+   "Реализуйте логику бинарного поиска для эффективного нахождения целевого значения",
+   "Проверьте граничные случаи (пустой массив, один элемент, целевой элемент находится первым/последним)"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "-1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int search(int[] nums, int target) { return -1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент вернул фиксированное значение -1 без учета содержимого массива и целевого значения. Необходимо реализовать алгоритм поиска, который будет проверять каждый элемент массива и возвращать индекс целевого элемента, если он найден.",
+  "issues": [
+   "Функция всегда возвращает -1, независимо от входных данных",
+   "Не реализована логика поиска элемента в массиве"
+  ],
+  "recommendations": [
+   "Реализуйте логику бинарного поиска для нахождения целевого элемента",
+   "Проверьте граничные случаи (пустой массив, целевой элемент вне диапазона)"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "-1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int climbStairs(int n) { return 0; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудентская функция climbStairs не выполняет требуемую задачу подсчета способов подняться по лестнице. Она всегда возвращает одно и то же значение, не учитывая количество ступеней n.",
+  "issues": [
+   "Функция climbStairs всегда возвращает 0, независимо от значения параметра n",
+   "Не реализована логика подсчета способов подняться по лестнице"
+  ],
+  "recommendations": [
+   "Реализуйте правильную логику подсчета способов подняться по лестнице, используя динамическое программирование или рекурсию",
+   "Избегайте возврата фиксированного значения, которое не зависит от входных данных"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int climbStairs(int n) { return 0; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент предоставил класс с единственной функцией, которая всегда возвращает ноль. Для решения задачи необходимо реализовать алгоритм, который будет учитывать различные способы подъёма по лестнице",
+  "issues": [
+   "Функция climbStairs всегда возвращает 0, независимо от значения параметра n",
+   "Нет реализации логики подъёма по лестнице"
+  ],
+  "recommendations": [
+   "Реализуйте логику подсчёта способов подняться по лестнице, используя динамическое программирование или рекурсию",
+   "Избегайте возврата фиксированного значения, которое не зависит от входных данных"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int climbStairs(int n) { return 0; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент предоставил класс Solution с единственной функцией climbStairs, которая всегда возвращает ноль. Для решения задачи необходимо реализовать алгоритм, который будет правильно рассчитывать количество способов подняться по лестнице исходя из заданного числа ступеней.",
+  "issues": [
+   "Функция climbStairs всегда возвращает 0, независимо от входного значения n",
+   "Нет реализации логики для подсчета способов подняться по лестнице"
+  ],
+  "recommendations": [
+   "Реализуйте правильную формулу для подсчета количества способов подняться по лестнице (например, используя динамическое программирование)",
+   "Избегайте возврата фиксированного значения, которое не зависит от параметров функции"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int[] countBits(int n) { return new int[]{0}; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент вернул фиксированный массив вместо того, чтобы реализовать требуемую функцию. Необходимо написать алгоритм, который будет правильно считать количество единичных бит для каждого числа в диапазоне.",
+  "issues": [
+   "Функция всегда возвращает одинаковый массив независимо от входного значения",
+   "Не реализована основная логика подсчета битовых единиц"
+  ],
+  "recommendations": [
+   "Реализовать логику подсчета количества единичных бит в каждом числе от 0 до n включительно",
+   "Использовать цикл for или метод bit manipulation для подсчета единиц"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "массив [0]",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int[] countBits(int n) { return new int[]{0}; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент предоставил функцию, которая всегда возвращает один и тот же массив вне зависимости от входного параметра. Необходимо реализовать алгоритм, который будет правильно считать количество единиц в двоичной записи каждого числа от нуля до n включительно.",
+  "issues": [
+   "Функция всегда возвращает одинаковый массив, независимо от входного значения",
+   "Отсутствует обработка граничных случаев (например, когда n = 0)",
+   "Не соблюдается требование задачи - функция должна возвращать количество единиц в двоичном представлении числа"
+  ],
+  "recommendations": [
+   "Добавьте обработку случая, когда n равно нулю",
+   "Реализуйте логику подсчета количества единиц в двоичной записи числа",
+   "Используйте цикл или побитовую операцию для реализации требуемого функционала"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "массив [0]",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int[] countBits(int n) { return new int[]{0}; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nСтудент вернул фиксированный массив вместо требуемого результата. Необходимо реализовать алгоритм, который будет правильно считать количество единичных бит в двоичной записи каждого числа.",
+  "issues": [
+   "Функция всегда возвращает одинаковый массив независимо от входного значения",
+   "Не выполняется условие задачи - подсчет битовых единиц в двоичном представлении чисел"
+  ],
+  "recommendations": [
+   "Реализуйте логику подсчета количества единичных бит в каждом числе от 0 до n включительно",
+   "Используйте побитовые операции для эффективного подсчета единиц"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "константа",
+   "массив [0]",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return 0\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nДанная функция должна принимать строку и возвращать количество гласных букв в ней. В текущей реализации она всегда возвращает ноль, что неверно.",
+  "issues": [
+   "Функция не выполняет требуемую логику подсчета гласных букв",
+   "Постоянный возврат значения 0 не соответствует ожидаемому поведению"
+  ],
+  "recommendations": [
+   "Реализуйте логику подсчета гласных букв в строке s",
+   "Избегайте возврата фиксированного значения, возвращайте результат вычислений"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return 0\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nДанная функция должна принимать строку и возвращать количество гласных букв. В текущей реализации она всегда возвращает ноль, что неверно.",
+  "issues": [
+   "Функция не выполняет заявленную задачу подсчета гласных букв",
+   "Постоянный возврат значения 0 не соответствует ожидаемому поведению"
+  ],
+  "recommendations": [
+   "Реализуйте логику подсчета гласных букв в строке",
+   "Избегайте возврата фиксированного значения, возвращайте результат вычислений"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return 0\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nДанная функция должна принимать строку и возвращать количество гласных букв. Сейчас она всегда возвращает ноль, что неверно.",
+  "issues": [
+   "Функция не выполняет заявленную задачу подсчета гласных букв",
+   "Постоянный возврат значения 0 не соответствует ожидаемому поведению функции"
+  ],
+  "recommendations": [
+   "Реализуйте логику подсчета гласных букв в строке",
+   "Избегайте возврата фиксированного значения, возвращайте результат вычислений"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return 1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент предоставил класс с единственной функцией, которая всегда возвращает одно и то же значение независимо от входной строки. Для решения задачи необходимо преобразовать строку, представляющую заголовок в виде последовательности латинских букв, в соответствующее ей десятичное число.",
+  "issues": [
+   "Функция titleToNumber не реализует требуемого преобразования",
+   "Константный возврат значения вместо ожидаемого преобразования строки"
+  ],
+  "recommendations": [
+   "Реализуйте алгоритм преобразования строки в число согласно описанию задачи",
+   "Избегайте возврата константного значения - возвращаемое значение должно зависеть от входных данных"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-stub-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return 1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nПредоставленная функция всегда возвращает одно и то же значение, не учитывая входной параметр. Необходимо реализовать логику, которая преобразует строку в соответствующее число согласно описанию задачи.",
+  "issues": [
+   "Функция titleToNumber не реализует требуемого преобразования",
+   "Константный возврат значения вместо обработки входного параметра"
+  ],
+  "recommendations": [
+   "Реализуйте алгоритм преобразования строки в число согласно условию задачи",
+   "Используйте цикл или оператор switch/case для реализации преобразования"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-stub-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return 1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nСтудент предоставил класс с единственной функцией, которая всегда возвращает одно и то же значение независимо от входных данных. Для прохождения тестов необходимо реализовать логику преобразования алфавитного названия столбца Excel в соответствующее числовое представление.",
+  "issues": [
+   "Функция titleToNumber не реализует требуемого преобразования",
+   "Константный возврат 1 не соответствует задаче"
+  ],
+  "recommendations": [
+   "Реализуйте алгоритм преобразования строки в число согласно описанию задачи",
+   "Избегайте возврата константных значений без обоснования"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "1",
+   "константа",
+   "заглушка"
+  ]
+ }
+]

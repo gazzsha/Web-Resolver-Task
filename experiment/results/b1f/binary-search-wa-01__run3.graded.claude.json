@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-wa-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "431fa7e7-4e92-4393-be6d-e1e078861cbb",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Линейный поиск + неверная семантика возврата опознаны, бинарный поиск actionable."
+}

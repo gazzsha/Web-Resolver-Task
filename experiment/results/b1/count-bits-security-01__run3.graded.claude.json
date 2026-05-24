@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-security-01",
+  "variant": "b1",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "2b1bf01c-a70f-4b2e-84a7-ecfedb16c676",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "setProperty назван, но повтор галлюцинации про «r инициализируется внутри цикла»."
+}

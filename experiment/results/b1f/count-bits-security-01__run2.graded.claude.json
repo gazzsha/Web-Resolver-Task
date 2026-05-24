@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-security-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "b17733f3-2a50-4ec0-a56c-fccbf973a8a2",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "setProperty назван, но «r инициализируется вне цикла, хотя её значение зависит от i» — галлюцинация: r это массив, его создание правильно вне цикла."
+}

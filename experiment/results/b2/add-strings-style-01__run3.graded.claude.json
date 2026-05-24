@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-style-01",
+  "variant": "b2",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "9097fa36-2e5c-42ca-8641-72c51caf19e7",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "One-line и пробелы не упомянуты, BigInteger-рекомендация нерелевантна."
+}

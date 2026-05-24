@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-stub-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "05472e47-ca6e-4a30-aabc-8d23498dd986",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "STUB return 0 опознан, реализация подсчёта гласных — actionable."
+}

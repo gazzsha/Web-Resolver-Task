@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-security-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "e5222a72-32ea-4f57-9646-81474f82b5dc",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "pickle небезопасен — опознан, но «функция не соответствует задаче подсчёта гласных» — галлюцинация: else-ветка корректно считает гласные."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-style-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "0fde648d-9b6a-4550-9c87-1829e89b64e2",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "STYLE не идентифицирован; «r.get(i >> 1)» — галлюцинация: int[] не имеет .get() метода в Java."
+}

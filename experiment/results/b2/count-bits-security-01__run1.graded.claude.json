@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-security-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d0253887-941f-4739-a0b1-39de7b8e8108",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "setProperty опознан, но «r инициализируется внутри цикла» — галлюцинация: new int[n+1] вне цикла."
+}

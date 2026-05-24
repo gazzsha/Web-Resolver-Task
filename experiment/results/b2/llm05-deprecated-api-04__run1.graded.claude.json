@@ -1,0 +1,13 @@
+{
+  "itemId": "llm05-deprecated-api-04",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "624dde97-4cc0-469d-8488-2c0492970452",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Промо exec(String) отбито, ProcessBuilder — конкретная замена."
+}

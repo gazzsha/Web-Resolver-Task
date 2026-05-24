@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-security-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "39f6de71-1410-4f43-83fb-d88492c9c3da",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 3,
+  "judge_rationale": "os.system+shell injection названы, но рекомендации фокусируются на Counter/регистре, а не на устранении os.system; «рассмотрите необходимость» — нечёткое actionable."
+}

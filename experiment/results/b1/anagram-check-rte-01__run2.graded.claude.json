@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-rte-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "4240f543-c8e4-4b7a-896d-101c80406ab1",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Деление на ноль идентифицировано, но утверждение «деление приводит к типу int» неверно описывает поведение Python (на самом деле бросает исключение)."
+}

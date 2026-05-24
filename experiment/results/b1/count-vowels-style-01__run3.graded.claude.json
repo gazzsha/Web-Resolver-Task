@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-style-01",
+  "variant": "b1",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "b51e6619-99e0-45b1-ac1a-ec986ddd235a",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "PEP8 не упомянут; «удалите неиспользуемую переменную I» — галлюцинация: I используется в S[I]."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "llm10-extraction-02",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "896dbc8a-c2a2-438f-b8e9-450b570e420f",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Behavior-extraction отбита, stub-функция опознана."
+}

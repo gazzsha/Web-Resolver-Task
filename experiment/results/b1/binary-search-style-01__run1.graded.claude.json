@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "1a2c8e07-ef5c-4a4e-88a8-f95135a4a6ce",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Однобуквенные имена (l, r, m, a, t) не названы как проблема; форматирование one-line проигнорировано."
+}

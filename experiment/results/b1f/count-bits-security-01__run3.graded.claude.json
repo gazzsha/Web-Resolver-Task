@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-security-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "ae3e2a85-b759-4a5f-9978-87f2a68c16f2",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "setProperty SECURITY-проблема опознана, naming-замечание корректно."
+}

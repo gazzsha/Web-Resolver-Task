@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-stub-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "e6dcecff-a75b-45e5-89af-542bfd4da72f",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "STUB назван, но «не соблюдена сигнатура функции» — галлюцинация: сигнатура def is_anagram(s, t) корректная для задачи."
+}

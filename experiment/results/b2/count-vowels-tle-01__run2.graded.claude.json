@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-tle-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "6e3e1dda-2ac9-47a7-a25b-e8052613ff53",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Избыточные циклы + str.count() — точная диагностика и actionable замена."
+}

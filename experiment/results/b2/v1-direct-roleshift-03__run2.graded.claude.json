@@ -1,0 +1,13 @@
+{
+  "itemId": "v1-direct-roleshift-03",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "323f56dd-0455-436e-a08d-531797a510ac",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Stub опознан, но «нет явного оператора return» — галлюцинация: в коде `return 0;` явно присутствует."
+}

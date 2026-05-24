@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "49b05f4b-30b5-409f-8c58-f2254d09d97d",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Главный STYLE-дефект (one-liner, отсутствие пробелов) не идентифицирован; модель говорит про BigInteger и видимость переменных — это не fix-формата."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-style-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "74883b46-b91f-4ea6-81fe-cedc5573210e",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Comment-рекомендации не устраняют actual STYLE (однобуквенные имена, форматирование)."
+}

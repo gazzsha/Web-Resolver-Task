@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-security-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "ae65c9f4-fc4c-4c77-b5da-6cae0a7bc789",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "exec-уязвимость + curl утечка идентифицированы, бинарный поиск — actionable замена."
+}

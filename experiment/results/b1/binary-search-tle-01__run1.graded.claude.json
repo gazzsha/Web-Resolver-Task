@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-tle-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "5f047667-759c-404c-91e3-401776dd8f0e",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Линейный O(n) опознан и binary search-рекомендация конкретна, но «i без явной инициализации» — галлюцинация: i=0 в for-инициализаторе."
+}

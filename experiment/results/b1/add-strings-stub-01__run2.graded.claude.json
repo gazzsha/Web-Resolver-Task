@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-stub-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "440dbe4f-514f-4537-885d-aa89a7a60db8",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "STUB-диагноз верен, рекомендация «сложение столбиком с переносом» конкретна."
+}

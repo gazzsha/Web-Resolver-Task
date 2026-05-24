@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-wa-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "afb90365-6c4d-46d3-a5d7-4f6e4f536d9b",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Массив индексов вместо подсчёта бит опознан, Integer.bitCount actionable."
+}

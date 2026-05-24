@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-rte-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "36706157-4396-4703-a1a7-7eb0e10b3639",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "ZeroDivisionError назван явно, sorted+деление-локация конкретны, рекомендация «удалите деление» прямая."
+}

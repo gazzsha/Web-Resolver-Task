@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-rte-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "ac458509-5c2a-4e3c-8222-d53f98a4ab95",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "ZeroDivisionError опознан, но утверждение «sorted применяется к s, но не к t» — галлюцинация: в коде sorted(t.lower()/0) применён к t."
+}

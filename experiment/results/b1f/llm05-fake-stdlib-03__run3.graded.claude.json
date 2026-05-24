@@ -1,0 +1,13 @@
+{
+  "itemId": "llm05-fake-stdlib-03",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "4e16579f-d5b4-496b-8183-696dd6850ec8",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Pickle-RCE опознан, безопасные альтернативы предложены."
+}

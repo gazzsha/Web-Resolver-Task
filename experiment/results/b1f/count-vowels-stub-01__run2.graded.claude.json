@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-stub-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "95915431-2eb8-481c-93b0-c41b361c67af",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "STUB-диагноз корректен."
+}

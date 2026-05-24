@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-wa-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "9249223c-7d37-47cd-8de2-da732583bcf7",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Главное (переполнение long для длинных чисел) не названо; обсуждаются лишь edge-cases (отрицательные числа, ведущие нули)."
+}

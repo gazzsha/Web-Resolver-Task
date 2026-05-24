@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-rte-01",
+  "variant": "b2",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d380c2e8-1497-4718-aaf9-7047a5c58f58",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "ZeroDivisionError опознан, проверка знаменателя actionable."
+}

@@ -1,0 +1,767 @@
+[
+ {
+  "variant": "b2",
+  "itemId": "add-strings-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public String addStrings(String a,String b){StringBuilder sb=new StringBuilder();int i=a.length()-1,j=b.length()-1,c=0;while(i>=0||j>=0||c>0){int x=i>=0?a.charAt(i--)-'0':0,y=j>=0?b.charAt(j--)-'0':0,s=x+y+c;c=s/10;sb.append(s%10);}return sb.reverse().toString();}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nСтудент правильно реализует сложение двух чисел представленных в виде строк. Код работает эффективно благодаря использованию StringBuilder для сборки результата. Рекомендуется обратить внимание на лучшие практики работы с StringBuilder.",
+  "issues": [
+   "Не используется Java-подход к работе со строками (StringBuilder#append vs StringBuilder#appendCharSequence)",
+   "Переменная c инициализируется вне цикла, хотя могла бы быть объявлена внутри"
+  ],
+  "recommendations": [
+   "Используйте StringBuilder#appendCharSequence вместо append для лучшей читаемости",
+   "Объявляйте переменные внутри минимально возможного блока видимости"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "пробелы"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public String addStrings(String a,String b){StringBuilder sb=new StringBuilder();int i=a.length()-1,j=b.length()-1,c=0;while(i>=0||j>=0||c>0){int x=i>=0?a.charAt(i--)-'0':0,y=j>=0?b.charAt(j--)-'0':0,s=x+y+c;c=s/10;sb.append(s%10);}return sb.reverse().toString();}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nСтудент правильно реализует функцию сложения двух строковых представлений целых чисел. Использует эффективный подход с использованием цикла и обратного построения результата. Однако, стоит обратить внимание на улучшение стиля кода и использования стандартных библиотек.",
+  "issues": [
+   "Переменные i и j не описаны в соответствии с рекомендациями Java (не указаны типы)",
+   "Не используется стандартная библиотека Java для работы со строками",
+   "Можно использовать метод StringBuilder.append(char) вместо append(int)"
+  ],
+  "recommendations": [
+   "Используйте типизированные переменные для лучшей читаемости и понимания кода",
+   "Рассмотрите использование класса BigInteger для упрощения обработки больших чисел",
+   "Избегайте преобразования символов в целые числа напрямую, используйте Character.getNumericValue()"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "пробелы"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public String addStrings(String a,String b){StringBuilder sb=new StringBuilder();int i=a.length()-1,j=b.length()-1,c=0;while(i>=0||j>=0||c>0){int x=i>=0?a.charAt(i--)-'0':0,y=j>=0?b.charAt(j--)-'0':0,s=x+y+c;c=s/10;sb.append(s%10);}return sb.reverse().toString();}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nРеализован алгоритм сложения двух строковых представлений целых чисел. Код работает правильно, но можно улучшить читаемость и использовать стандартные библиотеки.",
+  "issues": [
+   "Не используется стандартная библиотека Java для работы со строками",
+   "Переменная c инициализируется вне цикла, хотя могла бы быть объявлена внутри"
+  ],
+  "recommendations": [
+   "Рассмотрите использование класса BigInteger для упрощения обработки больших чисел",
+   "Объявляйте переменные внутри минимально возможного блока видимости"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "пробелы"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s,t):\n    d={};e={}\n    for x in s:d[x]=d.get(x,0)+1\n    for x in t:e[x]=e.get(x,0)+1\n    return d==e\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nСтудент правильно реализовал проверку анаграмм, используя словарь для подсчета частоты символов. Однако, использование двух словарей и повторяющегося цикла можно упростить с помощью библиотеки `collections.Counter`, которая автоматически выполняет подсчет элементов коллекции.",
+  "issues": [
+   "Использование отдельных словарей `d` и `e` вместо одного может быть менее эффективным.",
+   "Можно использовать встроенную функцию `collections.Counter`, которая оптимизирует подсчет символов."
+  ],
+  "recommendations": [
+   "Используйте `collections.Counter` для упрощения и оптимизации подсчета символов.",
+   "Избегайте дублирования кода путем объединения циклов в один."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "пробелы",
+   "именование",
+   "Counter"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s,t):\n    d={};e={}\n    for x in s:d[x]=d.get(x,0)+1\n    for x in t:e[x]=e.get(x,0)+1\n    return d==e\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nСтудент правильно реализовал функцию для определения анограмма, используя словари для подсчета символов. Однако, использование стандартной библиотеки может сделать код более читаемым и эффективным.",
+  "issues": [
+   "Не используется стандартная библиотека Python для работы с анagramами",
+   "Можно упростить создание словарей"
+  ],
+  "recommendations": [
+   "Используйте Counter из коллекции collections для упрощения создания словарей",
+   "Рассмотрите возможность использования sorted() для более простой проверки анограм"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "пробелы",
+   "именование",
+   "Counter"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s,t):\n    d={};e={}\n    for x in s:d[x]=d.get(x,0)+1\n    for x in t:e[x]=e.get(x,0)+1\n    return d==e\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nСтудент правильно реализует функцию для определения анаграмм, используя словари для подсчета частоты символов. Однако, рекомендуется использовать встроенные библиотеки для упрощения и улучшения читаемости кода.",
+  "issues": [
+   "Не используется стандартная библиотека Python для работы с анagramами",
+   "Переменные `d` и `e` не описываются документально"
+  ],
+  "recommendations": [
+   "Рассмотрите использование функции `collections.Counter`, которая специально предназначена для сравнения частот символов",
+   "Документируйте переменные с помощью docstrings или комментариев"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "пробелы",
+   "именование",
+   "Counter"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int search(int[]a,int t){int l=0,r=a.length-1;while(l<=r){int m=l+(r-l)/2;if(a[m]==t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nСтудент реализовал бинарный поиск, который корректно находит индекс элемента в отсортированном массиве. Однако, стоит учесть, что алгоритм мог бы использовать дополнительную информацию о массиве, чтобы повысить эффективность. Также рекомендуется улучшать читаемость кода через переименование переменных.",
+  "issues": [
+   "Не используется вся доступная информация о массиве a.",
+   "Переменная m может быть переименована в более описательное имя."
+  ],
+  "recommendations": [
+   "Рассмотрите возможность использования бинарного поиска с учётом того, что массив отсортирован.",
+   "Переименуйте переменную m в более понятное имя, например mid."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "именование",
+   "однобуквенные"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int search(int[]a,int t){int l=0,r=a.length-1;while(l<=r){int m=l+(r-l)/2;if(a[m]==t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nСтудент реализовал бинарный поиск эффективно, используя оптимизацию деления пополам вместо умножения. Однако стоит добавить базовую проверку на случай пустого массива и прокомментировать ключевые переменные.",
+  "issues": [
+   "Не используется проверка на пустоту массива a",
+   "Переменные l и r не комментируются"
+  ],
+  "recommendations": [
+   "Добавьте проверку на пустой массив a в начале функции",
+   "Комментируйте переменные l и r для улучшения читаемости"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "именование",
+   "однобуквенные"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int search(int[]a,int t){int l=0,r=a.length-1;while(l<=r){int m=l+(r-l)/2;if(a[m]==t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nСтудент реализовал бинарный поиск эффективно, используя оптимизацию деления пополам вместо умножения. Однако стоит добавить базовую проверку на случай пустого массива и прокомментировать ключевые переменные.",
+  "issues": [
+   "Не используется проверка на пустоту массива",
+   "Переменные `l` и `r` не комментируются"
+  ],
+  "recommendations": [
+   "Добавьте проверку на пустой массив в начале функции",
+   "Комментируйте переменные `l` и `r`, чтобы было понятно их назначение"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "именование",
+   "однобуквенные"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int climbStairs(int N){int A=1,B=1;for(int I=2;I<=N;I++){int C=A+B;A=B;B=C;}return B;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nРеализован алгоритм Фибоначчи для подсчета количества способов подняться на ступеньку N. Код работает правильно, но можно сделать его немного чище и понятнее, следуя лучшим практикам Java.",
+  "issues": [
+   "Переменные A и B не описаны с модификаторами final, хотя они используются только внутри цикла",
+   "Можно использовать именованные константы вместо магических чисел 1 и 2"
+  ],
+  "recommendations": [
+   "Объявите переменные A и B с модификатором final, чтобы подчеркнуть их неизменяемость",
+   "Используйте именованные константы для обозначения начальных значений (например, START_A = 1, START_B = 1)"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "именование",
+   "верхний регистр",
+   "форматирование"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int climbStairs(int N){int A=1,B=1;for(int I=2;I<=N;I++){int C=A+B;A=B;B=C;}return B;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно решил задачу динамического программирования, используя технику запоминания предыдущих результатов. Однако код можно сделать немного чище и понятнее, следуя лучшим практикам Java.",
+  "issues": [
+   "Переменные A и B не описаны с модификаторами final, хотя они используются только внутри метода",
+   "Можно использовать встроенную функцию Math.max вместо ручного сравнения"
+  ],
+  "recommendations": [
+   "Объявите переменные A и B с модификатором final, чтобы подчеркнуть их неизменяемость",
+   "Рассмотрите возможность использования тернарного оператора или функции Math.max для упрощения условия if"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "именование",
+   "верхний регистр",
+   "форматирование"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int climbStairs(int N){int A=1,B=1;for(int I=2;I<=N;I++){int C=A+B;A=B;B=C;}return B;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно решил задачу динамического программирования, используя технику мемоизации. Однако код можно сделать немного чище и эффективнее.",
+  "issues": [
+   "Переменные A и B не описаны с модификаторами final, хотя они используются только внутри цикла",
+   "Можно использовать тернарный оператор вместо if-else для упрощения кода"
+  ],
+  "recommendations": [
+   "Объявите переменные A и B с модификатором final, чтобы подчеркнуть их неизменяемость",
+   "Рассмотрите возможность использования тернарного оператора для сокращения количества строк"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "именование",
+   "верхний регистр",
+   "форматирование"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int[]countBits(int n){int[]r=new int[n+1];for(int i=1;i<=n;i++)r[i]=r[i>>1]+(i&1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно решил задачу подсчета количества битовых единиц в двоичном представлении чисел. Использован эффективный алгоритм с линейной сложностью O(n). Однако стоит обратить внимание на оптимизацию инициализации массива и использование более понятного синтаксиса.",
+  "issues": [
+   "Не используется вся доступная память: массив инициализируется вручную вместо использования автоматической инициализации нулевыми значениями.",
+   "Можно использовать более явный оператор приведения типа вместо побитового сдвига вправо."
+  ],
+  "recommendations": [
+   "Используйте автоматическую инициализацию массива нулями: int[] r = new int[n + 1];",
+   "Замените побитовый сдвиг вправо на целочисленное деление: r[i] = r[i / 2] + (i % 2)"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int[]countBits(int n){int[]r=new int[n+1];for(int i=1;i<=n;i++)r[i]=r[i>>1]+(i&1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно решил задачу подсчета битовых единиц в числах от 0 до n. Использован эффективный подход с использованием свойств двоичной системы счисления. Однако, стоит обратить внимание на оптимизацию инициализации массива и улучшение читаемости кода.",
+  "issues": [
+   "Не используется вся доступная память: массив инициализируется вручную вместо использования автоматической инициализации нулевыми значениями.",
+   "Можно использовать более явный оператор приведения типа при обращении к элементу массива."
+  ],
+  "recommendations": [
+   "Используйте автоматическую инициализацию массива нулями: int[] r = new int[n + 1];",
+   "Для обращения к элементу массива предпочтительнее использовать тип-safe метод get(): r.get(i >> 1)",
+   "Рассмотрите возможность переименования переменных для улучшения читаемости: например, i можно назвать index"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int[]countBits(int n){int[]r=new int[n+1];for(int i=1;i<=n;i++)r[i]=r[i>>1]+(i&1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент эффективно использует битовые операции для подсчета количества установленных битов в числе. Однако, стоит обратить внимание на оптимизацию инициализации массива и ясность выражения.",
+  "issues": [
+   "Не используется вся доступная память: массив инициализируется вручную вместо использования автоматической инициализации нулевыми значениями.",
+   "Можно использовать более явный оператор приведения типа вместо побитового сдвига вправо."
+  ],
+  "recommendations": [
+   "Инициализируйте массив автоматически, используя конструктор массива: new int[n + 1]{}.",
+   "Используйте оператор приведения типа: (int)(i >> 1)."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(S):\n    N=0\n    for I in range(len(S)):\n        if S[I].lower() in ['a','e','i','o','u']:N=N+1\n    return N\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nСтудент написал простую функцию для подсчета гласных букв. Код работает правильно, однако существуют способы его улучшения для повышения читаемости и эффективности.",
+  "issues": [
+   "Можно использовать встроенную функцию sum и генератор списков для упрощения кода",
+   "Переменная I используется, но не документирована"
+  ],
+  "recommendations": [
+   "Рассмотрите возможность использования sum и генератора списков вместо ручного подсчета",
+   "Документируйте переменные, чтобы сделать код более понятным"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "именование",
+   "range(len(",
+   "for c in s"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(S):\n    N=0\n    for I in range(len(S)):\n        if S[I].lower() in ['a','e','i','o','u']:N=N+1\n    return N\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nСтудент написал функцию подсчета гласных букв. Код работает правильно, но его можно сделать короче и понятнее с использованием встроенных функций Python.",
+  "issues": [
+   "Можно использовать встроенную функцию sum и генератор списков для упрощения кода",
+   "Переменная I используется однократно, лучше переименовать её в i"
+  ],
+  "recommendations": [
+   "Используйте sum и генератор списков для сокращения кода",
+   "Переименуйте переменную I в i для улучшения читаемости"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "именование",
+   "range(len(",
+   "for c in s"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(S):\n    N=0\n    for I in range(len(S)):\n        if S[I].lower() in ['a','e','i','o','u']:N=N+1\n    return N\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nФункция подсчитывает количество гласных букв в строке. Текущий подход работает, но его можно упростить и сделать более идиоматичным Python'ом.",
+  "issues": [
+   "Можно использовать встроенную функцию sum и генератор списков для упрощения кода.",
+   "Переменная I используется, но не описана в документации функции."
+  ],
+  "recommendations": [
+   "Рассмотрите использование sum и генератора списков вместо ручного подсчета.",
+   "Документируйте переменные, чтобы сделать код понятнее."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "именование",
+   "range(len(",
+   "for c in s"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int titleToNumber(String s){int r=0;for(char c:s.toCharArray())r=r*26+(c-'A'+1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно реализует функцию перевода названия столбца Excel в числовой формат. Код работает корректно, однако существуют возможности для улучшения читаемости и оптимизации.",
+  "issues": [
+   "Не используется оптимизация преобразования строки в массив символов",
+   "Можно использовать String.chars() вместо toCharArray() для лучшей читаемости"
+  ],
+  "recommendations": [
+   "Рассмотрите использование String.chars() для итерации по символам строки",
+   "Используйте более явный тип возвращаемого значения для улучшения читаемости"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-style-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int titleToNumber(String s){int r=0;for(char c:s.toCharArray())r=r*26+(c-'A'+1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно реализует функцию перевода названия столбца Excel в числовой формат. Код работает корректно, однако существуют возможности улучшения читаемости и эффективности.",
+  "issues": [
+   "Не используется оптимизация преобразования строки в массив символов",
+   "Можно использовать String.chars() вместо toCharArray() для лучшей читаемости"
+  ],
+  "recommendations": [
+   "Используйте String.chars() для итерации по символам строки, это более идиоматично Java 8+",
+   "Рассмотрите возможность оптимизации, чтобы избежать умножения при преобразовании"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-style-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int titleToNumber(String s){int r=0;for(char c:s.toCharArray())r=r*26+(c-'A'+1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nСтудент правильно реализует функцию перевода названия столбца Excel в числовой формат. Код работает корректно, однако существуют возможности улучшения читаемости и эффективности.",
+  "issues": [
+   "Не используется оптимизация преобразования строки в массив символов",
+   "Можно использовать String.chars() вместо toCharArray() для лучшей читаемости"
+  ],
+  "recommendations": [
+   "Используйте String.chars() для итерации по символам строки, это более идиоматично Java 8+",
+   "Рассмотрите возможность оптимизации путем предварительной обработки символов A-Z в константы"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        String r = \"\";\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10;\n            r = (s%10) + r;  // String concat в цикле\n        }\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=14\n\nСтудент правильно реализует сложение двух строковых представлений чисел. Цикл проходит по символам строк справа налево, суммируя соответствующие цифры и учитывая перенос. Однако использование конкатенации строк в цикле является неэффективным подходом.",
+  "issues": [
+   "Использование конкатенации строки в цикле может быть неэффективным из-за создания множества промежуточных объектов",
+   "Переменная `r` инициализируется пустой строкой, но лучше использовать `new StringBuilder()` для лучшей производительности"
+  ],
+  "recommendations": [
+   "Используйте `StringBuilder` вместо конкатенации строк в цикле для улучшения производительности",
+   "Рассмотрите возможность использования метода `Integer.parseInt()` для преобразования символов в числа"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "String concat",
+   "StringBuilder",
+   "O(n^2)"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-tle-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        String r = \"\";\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10;\n            r = (s%10) + r;  // String concat в цикле\n        }\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=14\n\nСтудент правильно реализует функцию сложения двух чисел представленных в виде строк. Цикл проходит по символам строк справа налево, суммируя соответствующие цифры и учитывая перенос. Однако использование string concatenation в цикле является неэффективной практикой.",
+  "issues": [
+   "Использование string concatenation в цикле может быть неэффективным из-за создания новых объектов String",
+   "Переменная `r` инициализируется пустой строкой, но лучше использовать `new StringBuilder()` для оптимальной производительности"
+  ],
+  "recommendations": [
+   "Используйте StringBuilder вместо конкатенации строк в цикле для повышения производительности",
+   "Рассмотрите возможность использования метода Integer.parseInt() для преобразования символов строки в числа"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "String concat",
+   "StringBuilder",
+   "O(n^2)"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-tle-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        String r = \"\";\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10;\n            r = (s%10) + r;  // String concat в цикле\n        }\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=14\n\nСтудент правильно реализует функцию сложения двух чисел в виде строк. Цикл проходит по символам строк справа налево, выполняя сложение цифр и обработку переноса. Однако использование конкатенации строк в цикле является неэффективным подходом.",
+  "issues": [
+   "Использование конкатенации строки в цикле может быть неэффективным из-за создания множества промежуточных объектов",
+   "Переменная `r` инициализируется пустой строкой, но лучше использовать `new StringBuilder()` для лучшей производительности"
+  ],
+  "recommendations": [
+   "Используйте `StringBuilder` вместо конкатенации строк в цикле для повышения эффективности",
+   "Рассмотрите возможность использования метода `Integer.parseInt(a)` и `Integer.toString(s)` для упрощения арифметических операций"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "String concat",
+   "StringBuilder",
+   "O(n^2)"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    # O(n * m) проверка через перебор перестановок\n    from itertools import permutations\n    return t in (''.join(p) for p in permutations(s))\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=5\n\nСтудент пытается проверить, являются ли две строки анаграммами, используя подход с генерацией всех возможных перестановок первой строки. Однако такой метод крайне неэффективен и непрактичен для больших входных данных.",
+  "issues": [
+   "Алгоритм имеет временную сложность O(n * m!), где n - длина строки s, m - длина строки t.",
+   "Использование itertools.permutations неэффективно и излишне."
+  ],
+  "recommendations": [
+   "Используйте сортировку строк для оптимизации времени выполнения до O(n + m)",
+   "Реализуйте решение без итерации по всем перестановкам"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "permutations",
+   "факториал",
+   "O(n!)",
+   "sorted"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-tle-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    # O(n * m) проверка через перебор перестановок\n    from itertools import permutations\n    return t in (''.join(p) for p in permutations(s))\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=5\n\nСтудент пытается проверить, являются ли две строки анаграммами путем генерации всех возможных перестановок первой строки и поиска второй строки среди них. Однако такой подход крайне неэффективен и имеет высокую временную сложность.",
+  "issues": [
+   "Алгоритм имеет временную сложность O(n * m!), где n - длина строки s, m - длина строки t.",
+   "Использование itertools.permutations создает дополнительные временные затраты."
+  ],
+  "recommendations": [
+   "Рассмотрите использование сортировки строк для оптимизации времени выполнения.",
+   "Используйте встроенные функции Python для работы со строками, такие как Counter из collections."
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "permutations",
+   "факториал",
+   "O(n!)",
+   "sorted"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-tle-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    # O(n * m) проверка через перебор перестановок\n    from itertools import permutations\n    return t in (''.join(p) for p in permutations(s))\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=5\n\nСтудент пытается проверить, являются ли две строки анаграммами, используя метод генерации всех возможных перестановок первой строки. Однако этот подход крайне неэффективен и имеет экспоненциальную сложность. Рекомендуется использовать сортировку строк или подсчет частоты символов для решения этой задачи.",
+  "issues": [
+   "Алгоритм имеет временную сложность O(n * m!), где n - длина строки s, m - длина строки t.",
+   "Использование itertools.permutations может быть заменено более эффективным подходом."
+  ],
+  "recommendations": [
+   "Рассмотрите использование сортировки строк для достижения линейной временной сложности O(n + m)",
+   "Используйте встроенные функции Python для работы со строками и словарями"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "permutations",
+   "факториал",
+   "O(n!)",
+   "sorted"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) if (nums[i] == target) return i;\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=3, строк=7\n\nСтудент реализовал линейный поиск через цикл for. Такой подход работает, но имеет сложность O(n). Более эффективный способ - использование бинарного поиска, который имеет сложность O(log n)",
+  "issues": [
+   "Можно использовать стандартную реализацию бинарного поиска для улучшения производительности",
+   "Переменная `i` используется только внутри цикла, лучше сделать её локальной внутри метода"
+  ],
+  "recommendations": [
+   "Изучите и используйте метод Arrays.binarySearch для более эффективного поиска",
+   "Объявляйте переменные там, где они используются впервые"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "O(n)",
+   "линейный",
+   "бинарный поиск",
+   "log n"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-tle-01",
+  "runIndex": 2,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) if (nums[i] == target) return i;\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=3, строк=7\n\nСтудент реализовал функцию поиска элемента в отсортированном массиве методом перебора. Код работает правильно, однако его производительность может быть улучшена при использовании бинарного поиска.",
+  "issues": [
+   "Метод возвращает целочисленное значение без явного указания типа возвращаемого значения",
+   "Не используется оптимизация бинарного поиска для улучшения производительности"
+  ],
+  "recommendations": [
+   "Добавьте тип возврата для метода: `public int search(...) {`",
+   "Для больших массивов рассмотрите использование бинарного поиска вместо линейного"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "O(n)",
+   "линейный",
+   "бинарный поиск",
+   "log n"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-tle-01",
+  "runIndex": 3,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) if (nums[i] == target) return i;\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=3, строк=7\n\nСтудент реализовал функцию поиска элемента в массиве. Код работает правильно, но его производительность может быть улучшена за счет использования бинарного поиска, особенно при работе с большими наборами данных.",
+  "issues": [
+   "Можно использовать бинарный поиск вместо линейного для улучшения производительности при больших массивах",
+   "Переменная `i` используется только для цикла и может быть переименована в более описательное имя"
+  ],
+  "recommendations": [
+   "Реализуйте бинарный поиск для более эффективной обработки больших массивов",
+   "Переименуйте переменную `i` в более описательный вариант, например, `index`"
+  ],
+  "codeQuality": 40,
+  "expectedKeywords": [
+   "O(n)",
+   "линейный",
+   "бинарный поиск",
+   "log n"
+  ]
+ }
+]

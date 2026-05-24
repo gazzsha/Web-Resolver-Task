@@ -3,28 +3,28 @@
     {
       "pair": "b1_vs_b1f",
       "n_pairs": 21,
-      "mean_v1": 3.0,
-      "mean_v2": 3.0,
+      "mean_v1": 3.905,
+      "mean_v2": 4.0,
       "wilcoxon_stat": 0.0,
-      "p_value_raw": 1.0,
-      "cliffs_delta": 0.0,
-      "p_value_holm": 1.0
+      "p_value_raw": 0.15729920705028505,
+      "cliffs_delta": 0.095,
+      "p_value_holm": 0.47189762115085515
     },
     {
       "pair": "b1_vs_b2",
       "n_pairs": 21,
-      "mean_v1": 3.0,
-      "mean_v2": 3.0,
+      "mean_v1": 3.905,
+      "mean_v2": 4.0,
       "wilcoxon_stat": 0.0,
-      "p_value_raw": 1.0,
-      "cliffs_delta": 0.0,
-      "p_value_holm": 1.0
+      "p_value_raw": 0.15729920705028505,
+      "cliffs_delta": 0.095,
+      "p_value_holm": 0.47189762115085515
     },
     {
       "pair": "b1f_vs_b2",
       "n_pairs": 21,
-      "mean_v1": 3.0,
-      "mean_v2": 3.0,
+      "mean_v1": 4.0,
+      "mean_v2": 4.0,
       "wilcoxon_stat": 0.0,
       "p_value_raw": 1.0,
       "cliffs_delta": 0.0,
@@ -35,32 +35,32 @@
     {
       "pair": "b1_vs_b1f",
       "n_pairs": 180,
-      "mean_v1": 3.1,
-      "mean_v2": 3.122,
-      "wilcoxon_stat": 420.0,
-      "p_value_raw": 0.6547208460185769,
-      "cliffs_delta": 0.011,
-      "p_value_holm": 0.6547208460185769
+      "mean_v1": 3.489,
+      "mean_v2": 3.756,
+      "wilcoxon_stat": 180.0,
+      "p_value_raw": 1.5972192976374829e-06,
+      "cliffs_delta": 0.176,
+      "p_value_holm": 4.791657892912449e-06
     },
     {
       "pair": "b1_vs_b2",
       "n_pairs": 180,
-      "mean_v1": 3.1,
-      "mean_v2": 3.028,
-      "wilcoxon_stat": 383.5,
-      "p_value_raw": 0.053365547022211926,
-      "cliffs_delta": -0.075,
-      "p_value_holm": 0.10673109404442385
+      "mean_v1": 3.489,
+      "mean_v2": 3.733,
+      "wilcoxon_stat": 317.0,
+      "p_value_raw": 0.0002652849145476185,
+      "cliffs_delta": 0.152,
+      "p_value_holm": 0.000530569829095237
     },
     {
       "pair": "b1f_vs_b2",
       "n_pairs": 180,
-      "mean_v1": 3.122,
-      "mean_v2": 3.028,
-      "wilcoxon_stat": 308.0,
-      "p_value_raw": 0.013149117330897016,
-      "cliffs_delta": -0.085,
-      "p_value_holm": 0.039447351992691046
+      "mean_v1": 3.756,
+      "mean_v2": 3.733,
+      "wilcoxon_stat": 253.0,
+      "p_value_raw": 0.41730571299301633,
+      "cliffs_delta": -0.026,
+      "p_value_holm": 0.41730571299301633
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-wa-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "15db5040-e889-4506-9046-b369fc40a136",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Только первый символ опознан, цикл по строке — actionable."
+}

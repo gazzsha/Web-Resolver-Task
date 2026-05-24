@@ -1,0 +1,8 @@
+{
+  "n_paired": 540,
+  "spearman_rho": -0.16660654205222802,
+  "pearson_r": -0.11139516197831045,
+  "claude_mean": 3.6592592592592594,
+  "gigachat_self_mean": 3.0833333333333335,
+  "exact_agreement": 0.16666666666666666
+}

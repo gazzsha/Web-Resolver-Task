@@ -1,0 +1,13 @@
+{
+  "itemId": "climbing-stairs-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d25864a3-b3e3-4953-9267-d077b2fa06a4",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Naming-issue замечен и prev/current — actionable, но рекомендация «объявите A и B с final» — галлюцинация: переменные реассайнятся в цикле, final невозможен."
+}

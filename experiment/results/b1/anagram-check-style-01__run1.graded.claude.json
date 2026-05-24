@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "0a84427f-79f5-411a-90e3-8c2929770433",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "PEP8/именование/Counter не названы; рекомендация про fromkeys не устраняет проблем стиля (пробелы, точка с запятой, имена)."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-security-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "7a821255-feea-4547-a366-a51cbb52640a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "pickle.loads RCE опознан, str.count actionable."
+}

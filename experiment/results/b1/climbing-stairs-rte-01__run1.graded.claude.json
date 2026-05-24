@@ -1,0 +1,13 @@
+{
+  "itemId": "climbing-stairs-rte-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "a5352db3-1c5d-44e0-a7e3-8e2493b83c95",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Граничный случай n=0 назван, dp и n=0 локализованы, рекомендация проверки конкретна."
+}

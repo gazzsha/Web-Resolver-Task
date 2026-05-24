@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-style-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "0251375e-c636-4734-aa07-a1e714b08a93",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Стилевые проблемы не идентифицированы; обсуждаются edge-кейсы и комментарии."
+}

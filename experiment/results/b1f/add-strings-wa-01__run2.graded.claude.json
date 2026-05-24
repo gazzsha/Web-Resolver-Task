@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-wa-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d4bd8b57-ca41-44d8-8803-5ec099039ce3",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Long.parseLong + переполнение названы, ведущие нули и разные длины — actionable."
+}

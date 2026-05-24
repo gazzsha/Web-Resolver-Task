@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-stub-01",
+  "variant": "b2",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "73a224b7-bc2b-4eb3-9f70-7a452f423633",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Заглушка верно диагностирована, преобразование строк в числа — actionable."
+}

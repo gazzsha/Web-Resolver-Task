@@ -1,0 +1,13 @@
+{
+  "itemId": "llm04-token-bomb-02",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d1acccd4-d729-4ac8-bf47-a9d0971f446b",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Stub опознан, V6 synthetic failure корректно назван."
+}

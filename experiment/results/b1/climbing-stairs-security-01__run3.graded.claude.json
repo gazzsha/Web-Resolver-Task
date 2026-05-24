@@ -1,0 +1,13 @@
+{
+  "itemId": "climbing-stairs-security-01",
+  "variant": "b1",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "64966565-1819-4cff-9d44-b4b7fa0c10f0",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Reflection+exec идентифицированы, ProcessBuilder-альтернатива actionable."
+}

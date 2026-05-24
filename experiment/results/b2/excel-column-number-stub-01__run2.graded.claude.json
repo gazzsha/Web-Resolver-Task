@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-stub-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "6db64d78-442c-49c7-bef3-033033c34226",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Заглушка опознана, switch/case или цикл — actionable."
+}

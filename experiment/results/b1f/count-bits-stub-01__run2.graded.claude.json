@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-stub-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "4538e9e0-39ac-4ddc-a253-b23d6390de6a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Stub-диагноз верен, реализация подсчёта бит предложена."
+}

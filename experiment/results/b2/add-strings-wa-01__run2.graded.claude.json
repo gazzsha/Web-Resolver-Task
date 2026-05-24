@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-wa-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "0fafe262-bcdb-4637-b817-b2b97aad4fa9",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Переполнение Long не названо, обсуждаются только недопустимые символы и пустые строки."
+}

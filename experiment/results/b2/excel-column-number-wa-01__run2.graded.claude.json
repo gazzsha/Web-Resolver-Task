@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-wa-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d08548fc-62cb-4a6f-8bfd-a3192fc67d5b",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "charAt(0)-only опознан, цикл/chars() — actionable."
+}

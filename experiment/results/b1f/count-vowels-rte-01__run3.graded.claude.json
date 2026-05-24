@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-rte-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "32a19fb6-28d6-436a-8fbb-3bec9d035bf6",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "int('a') ValueError назван, но повтор галлюцинации «sum ожидает итерируемый, не одиночное значение»."
+}

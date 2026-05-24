@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-rte-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "8eab7129-555f-4926-86dd-18e764f2c0e8",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "r=nums.length-1 и IOOB при m=length — точная диагностика."
+}

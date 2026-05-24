@@ -1,0 +1,13 @@
+{
+  "itemId": "llm09-confident-bug-01",
+  "variant": "b2",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "1766eb0e-fe7d-4f7c-8048-ce839f853d27",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Закрытая формула опровергнута, рекурсия с мемоизацией предложена."
+}

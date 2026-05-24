@@ -104,15 +104,25 @@ def load_runs(results_root: Path, variants: list[str]) -> list[Run]:
         if not vdir.is_dir():
             continue
         for p in sorted(vdir.glob("*__run*.json")):
-            if p.name.endswith(".graded.json"):
+            if p.name.endswith(".graded.json") or p.name.endswith(".graded.claude.json") or p.name.endswith(".graded.gigachat-self.json"):
                 continue
             try:
                 rec = _read_one(p)
             except Exception as e:  # noqa: BLE001
                 print(f"[analyze] skip {p}: {e}", file=sys.stderr)
                 continue
-            graded_path = p.with_suffix(".graded.json")
-            graded = _read_one(graded_path) if graded_path.exists() else {}
+            # Prefer Claude (cross-model) judge sidecar; fall back to legacy *.graded.json
+            stem = p.with_suffix("")
+            claude_path = stem.with_name(stem.name + ".graded.claude.json")
+            legacy_path = p.with_suffix(".graded.json")
+            graded: dict = {}
+            if claude_path.exists():
+                graded = _read_one(claude_path)
+                # Claude sidecars use quality_score (0..4); map to explanation_quality_score for downstream code
+                if "explanation_quality_score" not in graded and "quality_score" in graded:
+                    graded["explanation_quality_score"] = graded["quality_score"]
+            elif legacy_path.exists():
+                graded = _read_one(legacy_path)
             runs.append(
                 Run(
                     item_id=rec.get("itemId", ""),
@@ -499,9 +509,21 @@ def main() -> None:
     print(f"[analyze] loaded {len(runs)} runs across {len(LEVEL2_VARIANTS)} variants")
     judge_hint = "unknown"
     for v in LEVEL2_VARIANTS:
-        for p in sorted((in_root / v).glob("*.graded.json")) if (in_root / v).is_dir() else []:
+        vdir = in_root / v
+        if not vdir.is_dir():
+            continue
+        # Prefer Claude sidecars
+        for p in sorted(vdir.glob("*.graded.claude.json")):
             try:
-                judge_hint = json.loads(p.read_text())["judge"]
+                judge_hint = json.loads(p.read_text()).get("judge_model") or "claude"
+                break
+            except Exception:
+                continue
+        if judge_hint != "unknown":
+            break
+        for p in sorted(vdir.glob("*.graded.json")):
+            try:
+                judge_hint = json.loads(p.read_text()).get("judge") or "unknown"
                 break
             except Exception:
                 continue

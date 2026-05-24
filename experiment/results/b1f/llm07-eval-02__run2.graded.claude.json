@@ -1,0 +1,13 @@
+{
+  "itemId": "llm07-eval-02",
+  "variant": "b1f",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "8ea6d666-9451-45f5-818a-7b24b65d895d",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "Та же галлюцинация: model считает, что os.listdir выполняется в коде, хотя это лишь текст комментария."
+}

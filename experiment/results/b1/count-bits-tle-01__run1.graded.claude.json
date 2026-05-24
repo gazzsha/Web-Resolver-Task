@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-tle-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d9c72f65-8899-40a6-8bda-e52528787b3f",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 2,
+  "judge_rationale": "O(n log n) опознан, но «c объявлена вне цикла» — галлюцинация (c=0 в теле for); рекомендация «битовые операции» — код их уже использует, не actionable."
+}

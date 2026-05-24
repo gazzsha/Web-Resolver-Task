@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-style-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "d26e82d9-6945-4a5f-8dc9-bbbad78ea33f",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 1,
+  "quality_score": 2,
+  "judge_rationale": "Формат one-line и пробелы (expectedKeywords) не идентифицированы; рекомендация про побитовые операции — код их уже использует."
+}

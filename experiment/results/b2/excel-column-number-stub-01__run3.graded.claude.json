@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-stub-01",
+  "variant": "b2",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "f7ac810c-cb74-469a-9479-b9398cca9006",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "STUB опознан, конвертация Excel-column actionable."
+}

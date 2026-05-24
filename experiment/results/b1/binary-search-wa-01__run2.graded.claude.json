@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-wa-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "2ec0d2d0-f45d-47d2-b24c-267a8137b8d8",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Семантика индекса vs значения — корректная диагностика."
+}

@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-stub-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "5571f252-0fe4-4717-b91e-2e444449454a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "STUB-метка распознана, рекомендации по сортировке/подсчёту actionable."
+}

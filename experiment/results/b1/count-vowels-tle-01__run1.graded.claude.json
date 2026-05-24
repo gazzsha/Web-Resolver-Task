@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-tle-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "c90a30f0-b226-4fcf-947d-2c0cd3e60539",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Вложенные циклы + дублирование опознаны, str.count() — actionable."
+}
