@@ -678,6 +678,12 @@ class DockerSandboxService(
     // Utilities
     // -----------------------------------------------------------------------
 
+    // F-14 (differential-review): the regex captures only \w+, i.e. word
+    // characters [A-Za-z0-9_]. That tight character class is what blocks
+    // shell-metacharacter injection when the captured name is interpolated
+    // into `sh -c "javac $className.java && java $className < input.txt"`.
+    // DO NOT loosen this regex without revisiting the executeJavaCode path —
+    // a class name like "Foo;rm -rf /;Bar" would otherwise reach the shell.
     private fun extractClassName(code: String): String? {
         val classPattern = Regex("""(?:public\s+)?class\s+(\w+)""")
         return classPattern.find(code)?.groupValues?.get(1)

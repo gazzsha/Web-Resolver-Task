@@ -90,7 +90,11 @@ class AiAnalyzerConfig {
         cache: Cache<String, AIAnalysisResult>,
         schemaValidator: SchemaValidator,
         astMetricsService: AstMetricsService,
-        aiAnalyzerMetrics: AiAnalyzerMetrics,
+        // Nullable: in slice-tests like ProviderSwitchTest the @Component-scanned
+        // AiAnalyzerMetrics bean isn't on the context. Production AiAnalyzerConfig
+        // is loaded alongside the metrics @Component via @SpringBootApplication
+        // scan, so this is non-null at runtime.
+        aiAnalyzerMetrics: AiAnalyzerMetrics?,
         @Value("\${ai.prompt.variant:zero-shot}") promptVariantProp: String
     ): GigaChatAnalyzer {
         val variant = when (promptVariantProp.lowercase().trim()) {
@@ -121,7 +125,7 @@ class AiAnalyzerConfig {
         gigaChatAnalyzer: GigaChatAnalyzer,
         astMetricsService: AstMetricsService,
         fallback: SimpleRuleBasedAnalyzer,
-        aiAnalyzerMetrics: AiAnalyzerMetrics
+        aiAnalyzerMetrics: AiAnalyzerMetrics?
     ): AstHybridAnalyzer = AstHybridAnalyzer(gigaChatAnalyzer, astMetricsService, fallback, aiAnalyzerMetrics)
 
     @Bean

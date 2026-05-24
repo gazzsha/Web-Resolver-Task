@@ -93,7 +93,11 @@ open class GigaChatClient(
             )
         )
         val body = objectMapper.writeValueAsString(request)
-        logger.info { "GigaChat chat URI=${config.apiBaseUrl}/api/v1/chat/completions body=$body tokenLen=${token.length}" }
+        // F-8: INFO carries only sizes — prompt + user code can contain PII
+        // (email in code comments, hard-coded contact data). Full body is
+        // available at TRACE for debugging.
+        logger.info { "GigaChat chat URI=${config.apiBaseUrl}/api/v1/chat/completions bodySize=${body.length} tokenLen=${token.length}" }
+        logger.trace { "GigaChat chat body=$body" }
         val httpReq = HttpRequest.newBuilder()
             .uri(URI.create("${config.apiBaseUrl}/api/v1/chat/completions"))
             .timeout(config.requestTimeout)

@@ -154,7 +154,15 @@ class GigaChatAnalyzer(
             ?.onFailure { logger.warn(it) { "AST extract failed, omitting block" } }
             ?.getOrNull()
         val userPrompt = when {
-            retryHint != null -> AnalyzerPrompts.userPromptRetry(code, language, retryHint)
+            // F-9: retry now carries AST + verdict context so the retry isn't a degraded
+            // attempt vs the original. See AnalyzerPrompts.userPromptRetry.
+            retryHint != null -> AnalyzerPrompts.userPromptRetry(
+                code = code,
+                language = language,
+                validationError = retryHint,
+                astFactsBlock = astBlock,
+                taskContext = effectiveTaskContext
+            )
             extraContext != null -> extraContext
             astBlock != null || hasMeaningfulContext(effectiveTaskContext) ->
                 AnalyzerPrompts.userPromptFull(

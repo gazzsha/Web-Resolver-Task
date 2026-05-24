@@ -8,6 +8,7 @@ import model.TaskImportResultErrorsInner
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVRecord
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -78,9 +79,17 @@ class TaskImportService(
                     } catch (e: IllegalArgumentException) {
                         skipped++
                         errors += error(lineNo, e.message ?: "Ошибка парсинга строки")
-                    } catch (e: Exception) {
+                    } catch (e: DataIntegrityViolationException) {
+                        // F-10: concurrent import committed the same title between our snapshot
+                        // and persist(). uq_test_title_lower (V9) caught it; count as skipped.
                         skipped++
-                        errors += error(lineNo, "Внутренняя ошибка: ${e.message}")
+                        errors += error(lineNo, "Задача с таким title была импортирована параллельно")
+                        log.info { "CSV import: dedup race on line $lineNo, skipping" }
+                    } catch (e: Exception) {
+                        // F-11: do not echo e.message to clients — it may carry JPA/Jackson
+                        // internals (column names, type info). Full stack trace stays in logs.
+                        skipped++
+                        errors += error(lineNo, "Внутренняя ошибка обработки строки")
                         log.warn(e) { "CSV import failure on line $lineNo" }
                     }
                 }
@@ -91,11 +100,16 @@ class TaskImportService(
     }
 
     private fun parseRecord(record: CSVRecord): ParsedTask {
-        val title = record.requiredField("title")
+        // F-7: deformula() guards against CSV/Excel formula-injection if the data is
+        // ever exported. Fields starting with =/+/-/@/tab/CR get a leading apostrophe
+        // before persist; Excel treats the result as plain text.
+        val title = record.requiredField("title").deformula()
         val difficulty = Difficulty.entries.firstOrNull { it.name.equals(record.requiredField("difficulty"), true) }
             ?: throw IllegalArgumentException("difficulty: ожидается Easy/Medium/Hard")
-        val category = record.optionalField("category")
-        val description = record.requiredField("description")
+        // F-12: schema-level length cap matching VARCHAR(64) in V8 migration.
+        val category = record.optionalField("category")?.deformula()
+            ?.also { require(it.length <= 64) { "category: не должно превышать 64 символа" } }
+        val description = record.requiredField("description").deformula()
         val returnType = Type.entries.firstOrNull { it.name.equals(record.requiredField("return_type"), true) }
             ?: throw IllegalArgumentException("return_type: ожидается ${Type.entries.joinToString("/") { it.name }}")
         val args: List<ArgumentTest> = try {
@@ -140,6 +154,11 @@ class TaskImportService(
     private fun CSVRecord.optionalField(name: String): String? =
         runCatching { get(name) }.getOrNull()?.trim()?.takeUnless { it.isEmpty() }
 
+    // F-7: defuse CSV-formula-injection. Latent risk today (no export path), but
+    // becomes exploitable the moment an "export catalog to CSV" endpoint ships.
+    private fun String.deformula(): String =
+        if (firstOrNull() in FORMULA_INJECTION_PREFIXES) "'" + this else this
+
     private fun error(line: Int, message: String) = TaskImportResultErrorsInner().apply {
         this.line = line
         this.message = message
@@ -148,6 +167,7 @@ class TaskImportService(
     companion object {
         private val ARG_LIST_TYPE = object : TypeReference<List<ArgumentTest>>() {}
         private val TESTS_LIST_TYPE = object : TypeReference<List<Tests>>() {}
+        private val FORMULA_INJECTION_PREFIXES = setOf('=', '+', '-', '@', '\t', '\r')
     }
 
     private data class ParsedTask(

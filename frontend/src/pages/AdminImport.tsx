@@ -37,6 +37,10 @@ const AdminImport = () => {
   const [result, setResult] = useState<TaskImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // UX-only redirect — never a security boundary. The actual access control is
+  // enforced server-side by @PreAuthorize("hasRole('TEACHER')") on
+  // TasksController.importTasksFromCsv. A student editing local state could
+  // reach this page; the backend will still reject the request with 403.
   if (user && user.role !== 'TEACHER') {
     return <Navigate to="/" replace />;
   }
