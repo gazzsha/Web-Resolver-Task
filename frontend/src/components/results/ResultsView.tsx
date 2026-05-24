@@ -50,6 +50,7 @@ import type { SubmissionResult, AIAnalysisFull } from '@/types';
 import { submissionService, aiService } from '@/services/api';
 import { brand } from '@/theme/theme';
 import PollingView from './PollingView';
+import CopyButton from '@/components/common/CopyButton';
 
 const POLL_INTERVAL_MS = 2000;
 const MAX_POLL_DURATION_MS = 120_000;
@@ -898,9 +899,16 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 <Grid container spacing={2}>
                   {test.output && (
                     <Grid item xs={12}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
-                        Вывод программы
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                          Вывод программы
+                        </Typography>
+                        <CopyButton
+                          text={test.output}
+                          label="вывод программы"
+                          size="small"
+                        />
+                      </Box>
                       <Paper
                         variant="outlined"
                         sx={(t) => ({
@@ -920,7 +928,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                   )}
                   {test.error && (
                     <Grid item xs={12}>
-                      <Alert severity="error" sx={{ mt: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                          Ошибка выполнения
+                        </Typography>
+                        <CopyButton
+                          text={test.error}
+                          label="ошибку выполнения"
+                          size="small"
+                        />
+                      </Box>
+                      <Alert severity="error" sx={{ mt: 0 }}>
                         <Typography
                           variant="body2"
                           sx={{
@@ -932,6 +950,28 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                           {test.error}
                         </Typography>
                       </Alert>
+                    </Grid>
+                  )}
+                  {(test.output || test.error) && (
+                    <Grid item xs={12}>
+                      <CopyButton
+                        text={[
+                          test.output ? `Вывод программы:\n${test.output}` : '',
+                          test.error ? `Ошибка:\n${test.error}` : '',
+                        ]
+                          .filter(Boolean)
+                          .join('\n\n')}
+                        label="все данные теста"
+                        size="small"
+                      />
+                      <Typography
+                        component="span"
+                        variant="caption"
+                        color="text.disabled"
+                        sx={{ ml: 0.5 }}
+                      >
+                        Скопировать всё
+                      </Typography>
                     </Grid>
                   )}
                 </Grid>

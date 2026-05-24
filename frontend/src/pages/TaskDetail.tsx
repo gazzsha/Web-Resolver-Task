@@ -31,6 +31,7 @@ import { taskService, meService } from '@/services/api';
 import { brand } from '@/theme/theme';
 import { StatusChip, LanguageChip } from '@/components/submissions/chips';
 import { formatTimeAgo } from '@/utils/dateUtils';
+import CopyButton from '@/components/common/CopyButton';
 
 const DIFFICULTY_RU: Record<string, string> = {
   Easy: 'Лёгкая',
@@ -239,9 +240,10 @@ const TaskDetail = () => {
               >
                 <AssignmentIcon fontSize="small" />
               </Box>
-              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, flex: 1 }}>
                 Условие задачи
               </Typography>
+              <CopyButton text={task.description} label="условие задачи" size="small" />
             </Box>
 
             <Typography
