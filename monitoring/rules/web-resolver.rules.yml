@@ -1,0 +1,335 @@
+# Multi-window multi-burn-rate alerting per Google SRE Workbook (5m+1h, 30m+6h, 6h+3d).
+# SLO targets: HTTP errors <= 1% (99%), AI fallback <= 10% (90%).
+# Latency alerts are static-threshold (p95 budget) — burn-rate is reserved for ratio-SLI only.
+# Recording rules follow Google `job:<metric>:<aggregation><window>` convention.
+# Cardinality discipline: aggregations drop `instance`, `uri`, `exception` — keep only `job`/`status`.
+# AI fallback critical burn-rate (14.4*0.10=1.44) clamped to 0.5 (ratio SLI in [0,1]).
+# Kafka lag, Postgres health, JVM pressure, instance-up — operational alerts, not SLO burn.
+# All alerts carry severity {critical|high|medium} and a runbook_url annotation.
+
+groups:
+  # =========================================================================
+  - name: http-slo
+    interval: 30s
+    rules:
+      - record: job:http_requests:rate5m
+        expr: sum by (job) (rate(http_server_requests_seconds_count[5m]))
+      - record: job:http_requests:rate30m
+        expr: sum by (job) (rate(http_server_requests_seconds_count[30m]))
+      - record: job:http_requests:rate1h
+        expr: sum by (job) (rate(http_server_requests_seconds_count[1h]))
+      - record: job:http_requests:rate6h
+        expr: sum by (job) (rate(http_server_requests_seconds_count[6h]))
+      - record: job:http_requests:rate3d
+        expr: sum by (job) (rate(http_server_requests_seconds_count[3d]))
+
+      - record: job:http_errors:ratio_rate5m
+        expr: |
+          sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+          /
+          sum by (job) (rate(http_server_requests_seconds_count[5m]))
+      - record: job:http_errors:ratio_rate30m
+        expr: |
+          sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[30m]))
+          /
+          sum by (job) (rate(http_server_requests_seconds_count[30m]))
+      - record: job:http_errors:ratio_rate1h
+        expr: |
+          sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[1h]))
+          /
+          sum by (job) (rate(http_server_requests_seconds_count[1h]))
+      - record: job:http_errors:ratio_rate6h
+        expr: |
+          sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[6h]))
+          /
+          sum by (job) (rate(http_server_requests_seconds_count[6h]))
+      - record: job:http_errors:ratio_rate3d
+        expr: |
+          sum by (job) (rate(http_server_requests_seconds_count{status=~"5.."}[3d]))
+          /
+          sum by (job) (rate(http_server_requests_seconds_count[3d]))
+
+      - alert: HttpErrorBudgetBurnFast
+        expr: |
+          job:http_errors:ratio_rate5m  > (14.4 * 0.01)
+          and
+          job:http_errors:ratio_rate1h  > (14.4 * 0.01)
+        for: 2m
+        labels:
+          severity: critical
+          slo: http-availability
+        annotations:
+          summary: "HTTP 5xx error budget burning 14.4x (job={{ $labels.job }})"
+          description: "Monthly error budget (1%) will be exhausted in ~2 days. 5m+1h windows both above 14.4x burn."
+          runbook_url: "https://internal.example.com/runbook/HttpErrorBudgetBurnFast"
+
+      - alert: HttpErrorBudgetBurnMedium
+        expr: |
+          job:http_errors:ratio_rate30m > (6 * 0.01)
+          and
+          job:http_errors:ratio_rate6h  > (6 * 0.01)
+        for: 15m
+        labels:
+          severity: high
+          slo: http-availability
+        annotations:
+          summary: "HTTP 5xx error budget burning 6x (job={{ $labels.job }})"
+          description: "Monthly error budget (1%) exhausted in ~5 days. 30m+6h windows both above 6x burn."
+          runbook_url: "https://internal.example.com/runbook/HttpErrorBudgetBurnMedium"
+
+      - alert: HttpErrorBudgetBurnSlow
+        expr: |
+          job:http_errors:ratio_rate6h > (1 * 0.01)
+          and
+          job:http_errors:ratio_rate3d > (1 * 0.01)
+        for: 1h
+        labels:
+          severity: medium
+          slo: http-availability
+        annotations:
+          summary: "HTTP 5xx error rate trending above SLO (job={{ $labels.job }})"
+          description: "6h+3d windows both above 1x burn — SLO will not recover without action."
+          runbook_url: "https://internal.example.com/runbook/HttpErrorBudgetBurnSlow"
+
+  # =========================================================================
+  - name: http-latency-slo
+    interval: 30s
+    rules:
+      - record: job:http_request_duration_seconds:p95_5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, le) (rate(http_server_requests_seconds_bucket[5m]))
+          )
+      - record: job_uri:submission_start_duration_seconds:p95_5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, le) (
+              rate(http_server_requests_seconds_bucket{
+                uri="/api/v1/task-resolver/task/start",
+                method="PATCH"
+              }[5m])
+            )
+          )
+
+      - alert: HighHttpLatency
+        expr: job:http_request_duration_seconds:p95_5m > 1
+        for: 10m
+        labels:
+          severity: high
+          slo: http-latency
+        annotations:
+          summary: "HTTP p95 latency > 1s (job={{ $labels.job }})"
+          description: "Global HTTP p95 above SLO target (1s) for 10m. Check JVM GC, DB pool, downstream calls."
+          runbook_url: "https://internal.example.com/runbook/HighHttpLatency"
+
+      - alert: SubmissionStartLatencyHigh
+        expr: job_uri:submission_start_duration_seconds:p95_5m > 0.5
+        for: 10m
+        labels:
+          severity: high
+          slo: submission-start-latency
+        annotations:
+          summary: "PATCH /task/start p95 > 500ms"
+          description: "Submission-start endpoint above SLO. Verify Kafka producer ack, DB insert latency."
+          runbook_url: "https://internal.example.com/runbook/SubmissionStartLatencyHigh"
+
+  # =========================================================================
+  - name: ai-fallback-slo
+    interval: 30s
+    rules:
+      - record: ai_analyzer:calls:rate5m
+        expr: sum(rate(ai_analyzer_calls_total[5m]))
+      - record: ai_analyzer:calls:rate30m
+        expr: sum(rate(ai_analyzer_calls_total[30m]))
+      - record: ai_analyzer:calls:rate1h
+        expr: sum(rate(ai_analyzer_calls_total[1h]))
+      - record: ai_analyzer:calls:rate6h
+        expr: sum(rate(ai_analyzer_calls_total[6h]))
+      - record: ai_analyzer:calls:rate3d
+        expr: sum(rate(ai_analyzer_calls_total[3d]))
+
+      - record: ai_analyzer:fallback:ratio_rate5m
+        expr: |
+          sum(rate(ai_analyzer_calls_total{outcome="fallback"}[5m]))
+          / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 0.001)
+      - record: ai_analyzer:fallback:ratio_rate30m
+        expr: |
+          sum(rate(ai_analyzer_calls_total{outcome="fallback"}[30m]))
+          / clamp_min(sum(rate(ai_analyzer_calls_total[30m])), 0.001)
+      - record: ai_analyzer:fallback:ratio_rate1h
+        expr: |
+          sum(rate(ai_analyzer_calls_total{outcome="fallback"}[1h]))
+          / clamp_min(sum(rate(ai_analyzer_calls_total[1h])), 0.001)
+      - record: ai_analyzer:fallback:ratio_rate6h
+        expr: |
+          sum(rate(ai_analyzer_calls_total{outcome="fallback"}[6h]))
+          / clamp_min(sum(rate(ai_analyzer_calls_total[6h])), 0.001)
+      - record: ai_analyzer:fallback:ratio_rate3d
+        expr: |
+          sum(rate(ai_analyzer_calls_total{outcome="fallback"}[3d]))
+          / clamp_min(sum(rate(ai_analyzer_calls_total[3d])), 0.001)
+
+      # SLO 90% -> budget 10%. Burn factors clamped: 14.4*0.10=1.44 -> 0.5 (max plausible ratio).
+      - alert: AiFallbackBudgetBurnFast
+        expr: |
+          ai_analyzer:fallback:ratio_rate5m > 0.5
+          and
+          ai_analyzer:fallback:ratio_rate1h > 0.5
+          and
+          ai_analyzer:calls:rate5m > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          slo: ai-fallback
+        annotations:
+          summary: "AI fallback-rate > 50% — GigaChat likely degraded"
+          description: "Fallback ratio above clamped 14.4x burn on 5m+1h. Budget (10%) exhausted in <2 days."
+          runbook_url: "https://internal.example.com/runbook/AiFallbackBudgetBurnFast"
+
+      - alert: AiFallbackBudgetBurnMedium
+        expr: |
+          ai_analyzer:fallback:ratio_rate30m > (6 * 0.10)
+          and
+          ai_analyzer:fallback:ratio_rate6h  > (6 * 0.10)
+          and
+          ai_analyzer:calls:rate30m > 0.01
+        for: 15m
+        labels:
+          severity: high
+          slo: ai-fallback
+        annotations:
+          summary: "AI fallback-rate > 60% (6x burn)"
+          description: "30m+6h fallback ratio sustained above 60%. Investigate GigaChat auth/quota/network."
+          runbook_url: "https://internal.example.com/runbook/AiFallbackBudgetBurnMedium"
+
+      - alert: AiFallbackBudgetBurnSlow
+        expr: |
+          ai_analyzer:fallback:ratio_rate6h > (1 * 0.10)
+          and
+          ai_analyzer:fallback:ratio_rate3d > (1 * 0.10)
+          and
+          ai_analyzer:calls:rate6h > 0.01
+        for: 1h
+        labels:
+          severity: medium
+          slo: ai-fallback
+        annotations:
+          summary: "AI fallback-rate trending above SLO (>10%)"
+          description: "6h+3d windows above 1x burn — SLO will breach without intervention."
+          runbook_url: "https://internal.example.com/runbook/AiFallbackBudgetBurnSlow"
+
+  # =========================================================================
+  - name: sandbox-slo
+    interval: 30s
+    rules:
+      - record: job:sandbox_execution_seconds:p95_5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, le) (rate(sandbox_execution_seconds_bucket[5m]))
+          )
+      - record: job_language:sandbox_execution_seconds:p95_5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (job, language, le) (rate(sandbox_execution_seconds_bucket[5m]))
+          )
+
+      - alert: SandboxLatencyHigh
+        expr: job:sandbox_execution_seconds:p95_5m > 10
+        for: 10m
+        labels:
+          severity: high
+          slo: sandbox-latency
+        annotations:
+          summary: "Sandbox p95 execution > 10s"
+          description: "Sandbox p95 above SLO. Check Docker daemon load, image pull times, runaway TLE-prone solutions."
+          runbook_url: "https://internal.example.com/runbook/SandboxLatencyHigh"
+
+  # =========================================================================
+  - name: kafka-lag
+    interval: 30s
+    rules:
+      - record: consumergroup:kafka_consumergroup_lag:max5m
+        expr: max by (consumergroup, topic) (max_over_time(kafka_consumergroup_lag[5m]))
+
+      - alert: KafkaConsumerLagHigh
+        expr: consumergroup:kafka_consumergroup_lag:max5m > 1000
+        for: 5m
+        labels:
+          severity: high
+          component: kafka
+        annotations:
+          summary: "Kafka consumer lag > 1000 (group={{ $labels.consumergroup }}, topic={{ $labels.topic }})"
+          description: "Consumer group lagging >1000 messages for 5m. Worker may be stalled or under-scaled."
+          runbook_url: "https://internal.example.com/runbook/KafkaConsumerLagHigh"
+
+  # =========================================================================
+  - name: postgres-health
+    interval: 30s
+    rules:
+      - alert: PostgresDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: postgres
+        annotations:
+          summary: "PostgreSQL is down (instance={{ $labels.instance }})"
+          description: "postgres-exporter reports pg_up=0 for 1m. Service cannot persist submissions."
+          runbook_url: "https://internal.example.com/runbook/PostgresDown"
+
+      - alert: PostgresHighConnections
+        expr: |
+          sum by (instance) (pg_stat_activity_count)
+          /
+          max by (instance) (pg_settings_max_connections)
+          > 0.85
+        for: 10m
+        labels:
+          severity: high
+          component: postgres
+        annotations:
+          summary: "Postgres connections > 85% of max (instance={{ $labels.instance }})"
+          description: "Connection pool near saturation. Check HikariCP sizing and leaked connections."
+          runbook_url: "https://internal.example.com/runbook/PostgresHighConnections"
+
+  # =========================================================================
+  - name: jvm-health
+    interval: 30s
+    rules:
+      - record: job_area:jvm_memory_used_ratio:avg5m
+        expr: |
+          avg by (job, area) (
+            jvm_memory_used_bytes
+            /
+            clamp_min(jvm_memory_max_bytes, 1)
+          )
+
+      - alert: JvmMemoryPressure
+        expr: job_area:jvm_memory_used_ratio:avg5m{area="heap"} > 0.9
+        for: 10m
+        labels:
+          severity: high
+          component: jvm
+        annotations:
+          summary: "JVM heap > 90% (job={{ $labels.job }})"
+          description: "Heap utilization sustained >90% for 10m. Risk of OOM / long GC pauses."
+          runbook_url: "https://internal.example.com/runbook/JvmMemoryPressure"
+
+  # =========================================================================
+  - name: infrastructure
+    interval: 30s
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: infrastructure
+        annotations:
+          summary: "Target down (job={{ $labels.job }}, instance={{ $labels.instance }})"
+          description: "Prometheus scrape failing for 2m. Service is unreachable or stopped."
+          runbook_url: "https://internal.example.com/runbook/InstanceDown"
