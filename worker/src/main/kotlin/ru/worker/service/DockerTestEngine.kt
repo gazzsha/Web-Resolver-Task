@@ -19,9 +19,12 @@ class DockerTestEngine(
 ) : TestEngine {
 
     override fun runTest(code: String, language: String, testCase: TestCase): TestResult {
+        // F-25: user-controlled input/expectedOutput at DEBUG only — INFO is
+        // forwarded to centralised aggregators where verbose per-request data
+        // is noisy and potentially leaks attacker-controlled content.
         logger.info { "Running test ${testCase.testId} in Docker sandbox" }
-        logger.info { "Test input: ${testCase.input}" }
-        logger.info { "Expected output: ${testCase.expectedOutput}" }
+        logger.debug { "Test input: ${testCase.input}" }
+        logger.debug { "Expected output: ${testCase.expectedOutput}" }
 
         try {
             // Create sandbox execution request
@@ -41,12 +44,14 @@ class DockerTestEngine(
                 cpuLimit = 1.0
             )
 
-            logger.info { "Executing sandbox request: ${request.requestId}" }
+            logger.debug { "Executing sandbox request: ${request.requestId}" }
 
             // Execute in Docker sandbox
             val executionResult = sandboxService.execute(request)
 
-            logger.info { "Sandbox execution completed: status=${executionResult.status}, output=${executionResult.output}" }
+            // F-25: full output to DEBUG; INFO carries only structural status.
+            logger.info { "Sandbox execution completed: status=${executionResult.status}" }
+            logger.debug { "Sandbox output: ${executionResult.output}" }
 
             // Map sandbox result to test result
             val status = when (executionResult.status) {

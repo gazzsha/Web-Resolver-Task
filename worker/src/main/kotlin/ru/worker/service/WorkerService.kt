@@ -117,6 +117,11 @@ class WorkerService(
                 memoryUsedKb = testResults.sumOf { it.memoryUsedKb }
             )
         } catch (e: Exception) {
+            // F-24: surface the truncated exception message so the consumer
+            // side can render a useful error to the student. Full stack stays
+            // in worker logs at ERROR with structured taskId for correlation.
+            org.slf4j.LoggerFactory.getLogger(WorkerService::class.java)
+                .error("processTask failed for taskId={}", message.taskId, e)
             finalStatus = TaskStatus.ERROR
             return WorkerTaskResult(
                 taskId = message.taskId,
@@ -128,7 +133,8 @@ class WorkerService(
                 scenarioResults = emptyList(),
                 aiAnalysis = null,
                 totalExecutionTimeMs = System.currentTimeMillis() - startTime,
-                memoryUsedKb = 0
+                memoryUsedKb = 0,
+                errorMessage = e.message?.take(500)
             )
         } finally {
             if (timerSample != null) {

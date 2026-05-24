@@ -54,7 +54,11 @@ data class WorkerTaskResult(
     val scenarioResults: List<ScenarioResult>,
     val aiAnalysis: ru.aianalyzer.service.AIAnalysisResult?,
     val totalExecutionTimeMs: Long,
-    val memoryUsedKb: Long
+    val memoryUsedKb: Long,
+    // F-24: carries the truncated exception message when processTask hits an
+    // unhandled error (status=ERROR). Null on the happy path. Consumed side
+    // can surface this to the student instead of an opaque "ERROR" verdict.
+    val errorMessage: String? = null
 )
 
 /**
