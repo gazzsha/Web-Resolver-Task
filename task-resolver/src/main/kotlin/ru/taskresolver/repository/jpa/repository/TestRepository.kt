@@ -33,4 +33,10 @@ interface TestRepository : JpaRepository<Test, Long> {
 
     @Query("SELECT DISTINCT t.category FROM Test t WHERE t.category IS NOT NULL ORDER BY t.category")
     fun findAllCategories(): List<String>
+
+    // F-5: проекция вместо findAll() для дедупликации в TaskImportService.
+    // Избегаем загрузки всей сущности (description, difficulty, category) в heap
+    // при импорте больших CSV.
+    @Query("SELECT LOWER(t.title) FROM Test t WHERE t.title IS NOT NULL")
+    fun findAllTitlesLowercase(): List<String>
 }

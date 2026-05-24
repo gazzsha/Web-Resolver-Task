@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import ru.security.JwtTokenProvider
+import ru.taskresolver.service.TaskImportService
 import ru.taskresolver.service.TestService
 import ru.taskresolver.web.TasksController
 import java.util.UUID
@@ -33,6 +34,9 @@ class TasksControllerTest {
 
     @MockBean
     lateinit var testService: TestService
+
+    @MockBean
+    lateinit var taskImportService: TaskImportService
 
     @MockBean
     lateinit var jwtTokenProvider: JwtTokenProvider

@@ -45,7 +45,8 @@ class AiAnalyzerConfig {
         @Value("\${gigachat.api-base-url:https://gigachat.devices.sberbank.ru}") apiBaseUrl: String,
         @Value("\${gigachat.request-timeout-seconds:30}") requestTimeoutSeconds: Long,
         @Value("\${gigachat.max-retries:3}") maxRetries: Long,
-        @Value("\${gigachat.token-ttl-minutes:30}") tokenTtlMinutes: Long
+        @Value("\${gigachat.token-ttl-minutes:30}") tokenTtlMinutes: Long,
+        @Value("\${gigachat.tls.trust-all:true}") trustAll: Boolean
     ): GigaChatClientConfig = GigaChatClientConfig(
         authKey = authKey,
         scope = scope,
@@ -54,7 +55,8 @@ class AiAnalyzerConfig {
         apiBaseUrl = apiBaseUrl,
         requestTimeout = Duration.ofSeconds(requestTimeoutSeconds),
         maxRetries = maxRetries,
-        tokenTtl = Duration.ofMinutes(tokenTtlMinutes)
+        tokenTtl = Duration.ofMinutes(tokenTtlMinutes),
+        trustAll = trustAll
     )
 
     @Bean

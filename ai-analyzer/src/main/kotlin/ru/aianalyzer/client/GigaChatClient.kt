@@ -32,7 +32,11 @@ data class GigaChatClientConfig(
     val requestTimeout: Duration = Duration.ofSeconds(30),
     val maxRetries: Long = 3,
     val initialBackoff: Duration = Duration.ofMillis(500),
-    val tokenTtl: Duration = Duration.ofMinutes(30)
+    val tokenTtl: Duration = Duration.ofMinutes(30),
+    // F-4: MITM defence. Default true для dev (Минцифры root обычно не в JDK trust
+    // store), но в production должно быть false с заранее установленным
+    // /etc/ssl/certs/russian_trusted_root_ca.pem. См. DIFFERENTIAL_REVIEW_REPORT.md F-4.
+    val trustAll: Boolean = true
 )
 
 /**
@@ -56,19 +60,27 @@ open class GigaChatClient(
     private val cachedToken = AtomicReference<CachedToken?>(null)
 
     private val httpClient: JdkHttpClient = run {
-        // dev-only trust-all SSL for Sber self-signed CA. Production must replace
-        // this with a trust store bundled with the Минцифры root.
-        val tm = arrayOf<TrustManager>(object : X509TrustManager {
-            override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-            override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
-        })
-        val sslContext = SSLContext.getInstance("TLS")
-        sslContext.init(null, tm, SecureRandom())
-        JdkHttpClient.newBuilder()
-            .sslContext(sslContext)
-            .connectTimeout(Duration.ofSeconds(10))
-            .build()
+        val builder = JdkHttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10))
+        if (config.trustAll) {
+            // F-4: trust-all gated за gigachat.tls.trust-all=true. Loud-warn на каждом
+            // старте — это dev-only путь. Для production добавить Минцифры root в
+            // системный trust store и выставить gigachat.tls.trust-all=false.
+            logger.warn {
+                "GigaChat client TLS trust-all enabled — every server certificate accepted. " +
+                    "MITM possible. Production MUST set gigachat.tls.trust-all=false and " +
+                    "install Минцифры root CA into the JDK trust store."
+            }
+            val tm = arrayOf<TrustManager>(object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+            })
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, tm, SecureRandom())
+            builder.sslContext(sslContext)
+        }
+        // Иначе используем системный SSLContext по умолчанию (с актуальным CA bundle).
+        builder.build()
     }
 
     open fun chatCompletion(systemPrompt: String, userPrompt: String): String {

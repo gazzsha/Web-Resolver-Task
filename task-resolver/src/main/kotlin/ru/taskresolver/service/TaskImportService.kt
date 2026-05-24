@@ -49,8 +49,10 @@ class TaskImportService(
         var imported = 0
         var skipped = 0
 
-        val existingTitles = testRepository.findAll()
-            .mapNotNull { it.title.takeUnless(String::isBlank)?.lowercase() }
+        // F-5: проекция (только колонка title) вместо findAll() — не тащим
+        // description/difficulty/category в heap при большом каталоге.
+        val existingTitles = testRepository.findAllTitlesLowercase()
+            .filter(String::isNotBlank)
             .toMutableSet()
 
         InputStreamReader(file.inputStream, StandardCharsets.UTF_8).use { reader ->
