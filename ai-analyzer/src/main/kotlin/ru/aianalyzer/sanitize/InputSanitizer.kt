@@ -50,4 +50,44 @@ object InputSanitizer {
             .replace(markdownImageRegex, "[image: $1]")
             .replace(htmlTagRegex, "")
             .replace(dangerousScheme, "blocked:")
+
+    /**
+     * Safety-net post-processor that enforces impersonal, non-mentoring tone in LLM output.
+     *
+     * Applied AFTER [stripUnsafeOutput] to fields [explanation] and [recommendations].
+     * Guards against GigaChat ignoring the system-prompt style constraint and producing
+     * student-addressing phrases like «студент попытался», «необходимо внимательно», «вам».
+     *
+     * Replacements are ordered from most specific to most general to avoid double-substitution.
+     * Technical terms (String, StringBuilder, Java, etc.) are never touched.
+     */
+    // (?ui) = UNICODE_CASE + CASE_INSENSITIVE, required for Cyrillic case-insensitive matching.
+    // Plain (?i) only covers ASCII; without UNICODE_CASE Cyrillic upper/lower cases are not folded.
+    private val IMPERSONAL_REPLACEMENTS: List<Pair<Regex, String>> = listOf(
+        // Explicit student/author references — replace with neutral "решение" or remove
+        Regex("""(?ui)автор\s+решения""") to "",
+        Regex("""(?ui)обучающ(ийся|егося|емуся|имся|емся)""") to "",
+        Regex("""(?ui)студент(ы|а|у|ов|ом|ам|ами|ах)?""") to "решение",
+
+        // Second-person pronouns — remove. \b is ASCII-only so use Unicode-aware word delimiters:
+        // match the pronoun when preceded by start-of-string or non-letter and followed by non-letter or end.
+        Regex("""(?ui)(?<![а-яёА-ЯЁa-zA-Z])(вам|вас|вы|ты|тебе|тебя)(?![а-яёА-ЯЁa-zA-Z])""") to "",
+
+        // Mentoring directives — remove the phrase, leaving the rest of the sentence
+        Regex("""(?ui)нужно\s+внимательно\s+""") to "",
+        Regex("""(?ui)обратите\s+внимание\s*[,:]?\s*""") to "",
+        Regex("""(?ui)необходимо\s+""") to "",
+        Regex("""(?ui)следует\s+""") to "",
+
+        // Collapse multiple spaces that may appear after removals
+        Regex("""\s{2,}""") to " "
+    )
+
+    fun enforceImpersonalTone(text: String): String {
+        var result = text
+        for ((pattern, replacement) in IMPERSONAL_REPLACEMENTS) {
+            result = result.replace(pattern, replacement)
+        }
+        return result.trim()
+    }
 }
