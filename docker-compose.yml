@@ -54,6 +54,127 @@ services:
       timeout: 10s
       retries: 5
 
+  # Prometheus (метрики, SLO/SLA)
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: web-resolver-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=14d"
+      - "--web.enable-lifecycle"
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
+      - ./secrets/scraper_password:/etc/prometheus/scraper_password:ro
+      - prometheus_data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
+  # Grafana (визуализация SLO-дашбордов)
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: web-resolver-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
+  # Alertmanager — маршрутизация алертов от Prometheus
+  alertmanager:
+    image: prom/alertmanager:v0.27.0
+    container_name: web-resolver-alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    restart: unless-stopped
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
+  # Postgres exporter — pg_stat_*, connections, replication lag
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.16.0
+    container_name: web-resolver-postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-web_resolver}?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
+  # Kafka exporter — consumer lag, topic/partition offsets
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.8.0
+    container_name: web-resolver-kafka-exporter
+    command:
+      - "--kafka.server=kafka:29092"
+    ports:
+      - "9308:9308"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
+  # Node exporter — CPU/RAM/disk хост-машины.
+  # NOTE (macOS): /proc и /sys недоступны вне Linux-VM, большинство метрик будут пустыми.
+  # Полноценно работает на Linux-хосте (prod). На dev-машине оставлен для паритета.
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: web-resolver-node-exporter
+    pid: host
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro,rslave
+    restart: unless-stopped
+    networks:
+      - web-resolver-network
+    profiles:
+      - monitoring
+      - all
+
   # Docker-in-Docker for Sandbox (optional, for enhanced isolation)
   # Note: In production, use separate Docker daemon or rootless Docker
   dind:
@@ -73,6 +194,12 @@ volumes:
   postgres_data:
     driver: local
   dind-data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  alertmanager_data:
     driver: local
 
 networks:

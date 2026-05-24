@@ -21,6 +21,9 @@ Snap*
 # Local env
 .env
 
+# Secrets (Prometheus scraper password, etc.)
+secrets/
+
 # Claude Code local settings / runtime
 .claude/.DS_Store
 .claude/scheduled_tasks.lock
