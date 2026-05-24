@@ -208,6 +208,7 @@ components:
         - testId
         - status
         - verdict
+        - passed
       properties:
         testId:
           type: string
@@ -216,6 +217,9 @@ components:
           $ref: '#/components/schemas/TestStatus'
         verdict:
           $ref: '#/components/schemas/Verdict'
+        passed:
+          type: boolean
+          description: True если verdict == OK, иначе false. Удобный флаг для клиента, чтобы не интерпретировать enum.
         output:
           type: string
           nullable: true

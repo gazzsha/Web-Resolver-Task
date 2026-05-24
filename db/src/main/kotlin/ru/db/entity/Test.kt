@@ -21,7 +21,9 @@ data class Test(
     var title: String,
 
     @Enumerated(value = EnumType.STRING)
-    var difficulty: Difficulty
+    var difficulty: Difficulty,
+
+    var category: String? = null
 )
 
 enum class Difficulty {

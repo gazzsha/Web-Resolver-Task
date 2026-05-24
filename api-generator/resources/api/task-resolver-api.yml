@@ -16,6 +16,20 @@ paths:
         - Tasks
       summary: Получить список всех задач
       operationId: getAllTasks
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Фильтр по категории (тематике) задачи. Если не указан, возвращаются задачи всех категорий.
+          schema:
+            type: string
+            example: "Array"
+        - name: difficulty
+          in: query
+          required: false
+          description: Фильтр по сложности. Допустимые значения совпадают с enum Difficulty.
+          schema:
+            $ref: './common-models.yml#/components/schemas/Difficulty'
       responses:
         '200':
           description: Успешный запрос
@@ -27,6 +41,72 @@ paths:
                   $ref: '#/components/schemas/TaskInfo'
         '403':
           description: Доступ запрещен
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/tasks/categories:
+    get:
+      tags:
+        - Tasks
+      summary: Получить список доступных категорий задач
+      operationId: getTaskCategories
+      responses:
+        '200':
+          description: Список различных категорий, присутствующих в каталоге задач
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["Array", "String", "Math", "Stack"]
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/admin/tasks/import:
+    post:
+      tags:
+        - Tasks
+      summary: Импорт задач из CSV-файла (только для роли TEACHER)
+      operationId: importTasksFromCsv
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: "CSV-файл с колонками: title,difficulty,category,description,return_type,arguments_json,tests_json"
+      responses:
+        '200':
+          description: Результат импорта
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskImportResult'
+        '400':
+          description: Невалидный CSV
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '403':
+          description: Доступ запрещён (требуется роль TEACHER)
           content:
             application/json:
               schema:
@@ -140,6 +220,33 @@ components:
           $ref: './common-models.yml#/components/schemas/ResultResponse'
         id:
           $ref: './common-models.yml#/components/schemas/Id'
+    TaskImportResult:
+      title: Результат импорта задач из CSV
+      required:
+        - importedCount
+        - skippedCount
+        - errors
+      properties:
+        importedCount:
+          type: integer
+          description: Количество успешно импортированных задач
+          example: 12
+        skippedCount:
+          type: integer
+          description: Количество пропущенных строк (дубликаты, ошибки парсинга)
+          example: 3
+        errors:
+          type: array
+          description: Список ошибок по строкам CSV (если есть)
+          items:
+            type: object
+            properties:
+              line:
+                type: integer
+                example: 5
+              message:
+                type: string
+                example: "Поле title пустое"
     StartTaskRequest:
       title: Запрос на запуск задачи
       required:
