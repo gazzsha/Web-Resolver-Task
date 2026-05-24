@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.MediaType
 import org.springframework.security.authorization.AuthorityAuthorizationManager
+import org.springframework.security.authorization.AuthorizationDecision
 import org.springframework.security.authorization.AuthorizationManager
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -30,7 +31,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
     @Value("\${prometheus.scraper.username:prometheus-scraper}")
     private val scraperUser: String,
-    @Value("\${prometheus.scraper.password:scraper-dev-pass}")
+    // Fail-fast: must be supplied via PROMETHEUS_SCRAPER_PASSWORD env var.
+    // No source-baked default — see DIFFERENTIAL_REVIEW_REPORT.md F-3.
+    @Value("\${prometheus.scraper.password}")
     private val scraperPassword: String,
 ) {
     // Docker bridge networks (172.16/12), localhost IPv4/IPv6.
@@ -51,11 +54,16 @@ class SecurityConfig(
 
     // Defense-in-depth: запрос проходит только если (A) IP в Docker bridge / loopback
     // И (B) basic-auth попал в учётку с ролью OPS. Любой слой по отдельности недостаточен.
+    //
+    // F-1 fix: возвращаем AuthorizationDecision(false) вместо null на IP-deny.
+    // Spring Security 6 AuthorizationFilter трактует null как «abstain» и пропускает
+    // запрос дальше без AccessDeniedException — то есть null == grant, что инвертирует
+    // защиту. См. DIFFERENTIAL_REVIEW_REPORT.md F-1.
     private fun prometheusAccess(): AuthorizationManager<RequestAuthorizationContext> {
         val hasOps = AuthorityAuthorizationManager.hasRole<RequestAuthorizationContext>("OPS")
         return AuthorizationManager { authentication, ctx ->
             val ipOk = ipMatchers.any { it.matches(ctx.request) }
-            if (!ipOk) return@AuthorizationManager null
+            if (!ipOk) return@AuthorizationManager AuthorizationDecision(false)
             hasOps.check(authentication, ctx)
         }
     }
