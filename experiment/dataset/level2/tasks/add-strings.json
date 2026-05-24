@@ -1,0 +1,17 @@
+{
+  "description": "Сложить два неотрицательных целых, заданных строками без ведущих нулей. Без BigInteger.",
+  "id": "add-strings",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public String addStrings(String a, String b) {\n        StringBuilder sb = new StringBuilder();\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10; sb.append(s%10);\n        }\n        return sb.reverse().toString();\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "134",
+      "input": "11\n123"
+    },
+    {
+      "expected": "100",
+      "input": "99\n1"
+    }
+  ],
+  "title": "Add Strings"
+}

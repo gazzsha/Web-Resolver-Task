@@ -1,0 +1,12 @@
+{
+  "code": "def is_anagram(s,t):\n    d={};e={}\n    for x in s:d[x]=d.get(x,0)+1\n    for x in t:e[x]=e.get(x,0)+1\n    return d==e\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "пробелы",
+    "именование",
+    "Counter"
+  ],
+  "id": "anagram-check-style-01",
+  "taskId": "anagram-check"
+}

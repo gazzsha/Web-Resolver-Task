@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public int search(int[]a,int t){int l=0,r=a.length-1;while(l<=r){int m=l+(r-l)/2;if(a[m]==t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "именование",
+    "однобуквенные"
+  ],
+  "id": "binary-search-style-01",
+  "taskId": "binary-search"
+}

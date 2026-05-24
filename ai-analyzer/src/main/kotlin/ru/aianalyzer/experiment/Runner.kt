@@ -85,17 +85,20 @@ private fun parseCli(args: Array<String>): CliArgs {
         m?.let { mr -> mr.groupValues[1] to mr.groupValues[2] }
     }.toMap()
     return CliArgs(
-        variant = map["variant"] ?: error("--variant=b0|b1|b1f|b2|b3|all is required"),
+        variant = map["variant"] ?: error("--variant=b1|b1f|b2|all is required"),
         mode = map["mode"] ?: "real",
-        dataset = Paths.get(map["dataset"] ?: "experiment/dataset"),
+        dataset = Paths.get(map["dataset"] ?: "experiment/dataset/level2"),
         out = Paths.get(map["out"] ?: "experiment/results"),
-        limit = map["limit"]?.toInt() ?: Int.MAX_VALUE,
-        runs = map["runs"]?.toInt() ?: 5,
+        limit = map["limit"]?.toInt() ?: 60,
+        runs = map["runs"]?.toInt() ?: 3,
         onlyItems = map["only"]?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet().orEmpty()
     )
 }
 
-private val ALL_VARIANTS = listOf("b0", "b1", "b1f", "b2", "b3")
+// Level-2 confirmatory design: only B1 (zero-shot), B1f (few-shot), B2 (AST-hybrid).
+// B0 (rule-based baseline) and B3 (no-guards ablation) are reserved for a future Level-3
+// extension and are intentionally NOT run in the confirmatory protocol.
+private val ALL_VARIANTS = listOf("b1", "b1f", "b2")
 
 fun main(args: Array<String>) {
     val cli = parseCli(args)
@@ -279,13 +282,13 @@ internal fun synthesizeVerdict(item: DatasetItem): List<SandboxExecutionResult> 
 // ─────────────────────────────────── WIRING ────────────────────────────────
 
 private fun buildAnalyzer(variant: String, mockMode: Boolean): AIAnalyzer {
+    // Level-2 variants only. B0/B3 removed from confirmatory protocol; if a caller
+    // requests them we fail loudly so the misuse is obvious in the logs.
     val (provider, promptVariant, disableGuards) = when (variant) {
-        "b0"  -> Triple("rule-based", PromptVariant.ZERO_SHOT, false)
         "b1"  -> Triple("gigachat", PromptVariant.ZERO_SHOT, false)
         "b1f" -> Triple("gigachat", PromptVariant.FEW_SHOT, false)
         "b2"  -> Triple("ast-hybrid", PromptVariant.ZERO_SHOT, false)
-        "b3"  -> Triple("gigachat", PromptVariant.ZERO_SHOT, true)
-        else  -> error("unknown variant: $variant")
+        else  -> error("unknown variant: '$variant' (Level-2 supports only b1|b1f|b2; b0/b3 reserved for Level-3)")
     }
     return buildAnalyzerInternal(provider, promptVariant, mockMode, disableGuards)
 }

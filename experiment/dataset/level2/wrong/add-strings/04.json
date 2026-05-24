@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public String addStrings(String a, String b) { return \"0\"; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "add-strings-stub-01",
+  "taskId": "add-strings"
+}

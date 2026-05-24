@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        // namespace pollution: записывает в системные пропсы\n        System.setProperty(\"java.security.manager\", \"\");\n        int[] r = new int[n+1];\n        for (int i = 1; i <= n; i++) r[i] = r[i>>1] + (i&1);\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "setProperty",
+    "SecurityManager",
+    "обход"
+  ],
+  "id": "count-bits-security-01",
+  "taskId": "count-bits"
+}

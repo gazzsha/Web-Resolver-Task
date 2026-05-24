@@ -1,0 +1,12 @@
+{
+  "code": "def count_vowels(S):\n    N=0\n    for I in range(len(S)):\n        if S[I].lower() in ['a','e','i','o','u']:N=N+1\n    return N\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "range(len(",
+    "for c in s"
+  ],
+  "id": "count-vowels-style-01",
+  "taskId": "count-vowels"
+}

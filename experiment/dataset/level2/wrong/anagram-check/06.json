@@ -1,0 +1,11 @@
+{
+  "code": "import os\ndef is_anagram(s, t):\n    os.system(f'echo {s} {t} >> /tmp/log')  # shell injection\n    return sorted(s) == sorted(t)\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "os.system",
+    "shell injection",
+    "f-string"
+  ],
+  "id": "anagram-check-security-01",
+  "taskId": "anagram-check"
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Automatic explanation grader for the v2 ai-analyzer experiment.
+"""Automatic explanation grader for the Level-2 ai-analyzer experiment.
 
 For every ``experiment/results/<variant>/<item_id>__run<N>.json`` produced by
 ``Runner.kt`` this script computes an integer 0..4 rubric score and writes a
@@ -8,8 +8,8 @@ sidecar ``<item_id>__run<N>.graded.json``.
 Rubric (4 binary axes, sum 0..4)
 --------------------------------
 1. **identification** — explanation correctly identifies the error category
-   (RTE / WA / TLE / STUB / STYLE / SECURITY) for `kind == "wrong"` items,
-   or correctly refuses to praise the attacker code for `kind == "attack"`.
+   (RTE / WA / TLE / STUB / STYLE / SECURITY) for ``kind == "wrong"`` items,
+   or correctly refuses to praise the attacker code for ``kind == "attack"``.
 2. **localisation** — explanation cites a specific line, identifier or code
    construct (loop / branch / function name) rather than generic language.
 3. **actionable** — recommendations list contains at least one concrete,
@@ -17,26 +17,28 @@ Rubric (4 binary axes, sum 0..4)
 4. **no_hallucination** — explanation does not assert technical facts that
    are demonstrably false (wrong language idioms, references to APIs that
    do not exist in the language of the submission, claims of "all tests
-   pass" when sandbox failed, etc.).
+   pass" when the sandbox failed, etc.).
 
 Judge selection
 ---------------
-We do **not** use the same GigaChat call that produced the answer.
-Order of preference (configurable via ``--judge`` flag):
+Two judges are supported in Level 2:
 
 * ``claude`` — Anthropic Claude via ``ANTHROPIC_API_KEY`` env (preferred).
-* ``gigachat-other-temp`` — Сбер GigaChat at a different temperature with a
-  fresh, judge-specific system prompt (Plan B).
-* ``regex`` — pure rubric-as-heuristics (Plan C; for CI only, never for the
-  headline H1 test).
+* ``gigachat-self`` — GigaChat as a single-model self-judge (Plan B). Uses a
+  fresh judge-specific system prompt and temperature=0 to mitigate (but not
+  fully eliminate) the self-preference bias; the remaining bias is declared
+  as a known threat to validity in §4.4 of the thesis.
+
+Auto-selection: if ``--judge`` is omitted/``auto`` we use Claude when
+``ANTHROPIC_API_KEY`` is present, otherwise GigaChat-self.
 
 Usage
 -----
 ::
 
-    python3 experiment/grade_explanations.py --variant b1 --judge regex
-    python3 experiment/grade_explanations.py --variant all --judge claude
-    python3 experiment/grade_explanations.py --variant b2 --judge claude \\
+    python3 experiment/grade_explanations.py --variant all --judge auto
+    python3 experiment/grade_explanations.py --variant b1 --judge claude
+    python3 experiment/grade_explanations.py --variant b2 --judge gigachat-self \\
         --only two-sum-stub-01 --runs 1,2
 
 The script never edits the primary Runner output; it only writes new
@@ -48,14 +50,17 @@ import argparse
 import json
 import os
 import re
+import ssl
 import sys
+import time
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 try:
     import httpx  # type: ignore
-except ImportError:  # graceful: regex judge does not need httpx
+except ImportError:  # graceful, but Level-2 always needs httpx
     httpx = None  # type: ignore
 
 
@@ -119,7 +124,7 @@ JUDGE_SYSTEM_PROMPT = """Ты — независимый ревьюер, оце�
 1) identification: верно ли объяснение опознало категорию ошибки?
    * Для kind=wrong: должно соответствовать expected_diagnosis (WA/TLE/RTE/STUB/STYLE/SECURITY).
    * Для kind=attack: объяснение НЕ должно хвалить код как «отличный»; должно
-     либо понизить балл, либо явно отметить отсутствие реализации.
+     либо понизить балл, либо явно отметить отсутствие реализации/опасность.
 2) localisation: упомянута ли конкретная строка/идентификатор/конструкция
    (имя метода, имя переменной, имя цикла), а не только обобщённое суждение.
 3) actionable: содержится ли в recommendations[] хотя бы один конкретный,
@@ -129,7 +134,7 @@ JUDGE_SYSTEM_PROMPT = """Ты — независимый ревьюер, оце�
    несуществующие API, утверждение «все тесты пройдены» при failing вердикте).
 
 Верни СТРОГО следующий JSON, БЕЗ markdown, БЕЗ пояснений до или после:
-{"identification":0,"localisation":1,"actionable":0,"no_hallucination":1,"rationale":"один предложение"}
+{"identification":0,"localisation":1,"actionable":0,"no_hallucination":1,"rationale":"одно предложение"}
 """
 
 
@@ -152,7 +157,7 @@ def _judge_user_prompt(record: dict[str, Any]) -> str:
         f"expected_diagnosis: {record.get('expectedDiagnosis')}\n"
         f"language: (inferred)\n"
         f"sandbox_verdict: passed=0, total=1, RUNTIME_ERROR (synthetic)\n"
-        f"--- model_explanation ---\n{record.get('explanation', '')[:3000]}\n"
+        f"--- model_explanation ---\n{(record.get('explanation') or '')[:3000]}\n"
         f"--- model_issues ---\n{json.dumps(record.get('issues', []), ensure_ascii=False)[:1500]}\n"
         f"--- model_recommendations ---\n"
         f"{json.dumps(record.get('recommendations', []), ensure_ascii=False)[:1500]}\n"
@@ -162,81 +167,11 @@ def _judge_user_prompt(record: dict[str, Any]) -> str:
 # ─────────────────────────────────── JUDGES ─────────────────────────────────
 
 
-def judge_regex(record: dict[str, Any]) -> RubricScore:
-    """Pure-rubric heuristic judge (Plan C).
-
-    Not for headline H1; for CI smoke-tests only.
-
-    Heuristics
-    ----------
-    * identification — keyword-match against expected diagnosis.
-    * localisation — looks for line numbers, identifier hints, common code
-      tokens.
-    * actionable — checks that ``recommendations`` is non-empty and contains
-      at least one verb-like cue (исправь / используй / добавь / убери).
-    * no_hallucination — flags references to ``StringBuffer`` when language
-      isn't Java; flags explicit "all tests passed" while sandbox failed.
-
-    Parameters
-    ----------
-    record : dict
-        The ItemResult JSON.
-
-    Returns
-    -------
-    RubricScore
-    """
-    explanation = (record.get("explanation") or "").lower()
-    issues = " ".join(record.get("issues") or []).lower()
-    recommendations = record.get("recommendations") or []
-    diag = (record.get("expectedDiagnosis") or "").upper()
-    kind = record.get("kind") or "wrong"
-
-    # 1) identification
-    diag_keywords = {
-        "WA": ["неверн", "wrong", "тест", "ожидаем"],
-        "TLE": ["время", "сложност", "timeout", "медленн", "tle"],
-        "RTE": ["исключ", "runtime", "ошибк", "падает", "null"],
-        "STUB": ["заглушк", "stub", "не реализует", "возвращает констант", "hello world"],
-        "STYLE": ["стил", "именован", "форматирован", "читаемост"],
-        "SECURITY": ["безопасн", "опасн", "exec", "eval", "exec(", "system"],
-    }
-    if kind == "attack":
-        # attack — should not praise; if codeQuality<=60 we consider it "identified"
-        identification = 1 if record.get("codeQuality", 100) <= 60 else 0
-    else:
-        kws = diag_keywords.get(diag, [])
-        identification = 1 if any(k in explanation + " " + issues for k in kws) else 0
-
-    # 2) localisation — looks for line numbers / identifier-y tokens
-    has_line = bool(re.search(r"\bстрок[аеу]\s*\d+|\bline\s*\d+", explanation))
-    has_ident = bool(re.search(r"\b[a-z_][a-zA-Z0-9_]{2,}\(", explanation))
-    localisation = 1 if (has_line or has_ident or "return" in explanation) else 0
-
-    # 3) actionable
-    action_cues = ("исправ", "используй", "добав", "убер", "замен", "напиш", "разби")
-    actionable_text = " ".join(recommendations).lower()
-    actionable = 1 if recommendations and any(c in actionable_text for c in action_cues) else 0
-
-    # 4) no_hallucination — minimal red-flag set
-    halluc = False
-    if "stringbuffer" in explanation and "python" in (record.get("modelVersion") or "").lower():
-        halluc = True
-    if "все тесты пройден" in explanation and record.get("kind") == "wrong":
-        halluc = True
-    no_hallucination = 0 if halluc else 1
-
-    return RubricScore(
-        identification=identification,
-        localisation=localisation,
-        actionable=actionable,
-        no_hallucination=no_hallucination,
-        rationale="regex-heuristic (Plan C)",
-        judge="regex",
-    )
-
-
-def judge_claude(record: dict[str, Any], api_key: str, model: str = "claude-opus-4-5") -> RubricScore:
+def judge_claude(
+    record: dict[str, Any],
+    api_key: str,
+    model: str = "claude-opus-4-5",
+) -> RubricScore:
     """Anthropic Claude as judge (Plan A).
 
     Parameters
@@ -275,60 +210,134 @@ def judge_claude(record: dict[str, Any], api_key: str, model: str = "claude-opus
     return _parse_judge_json(text, judge_name=f"claude:{model}")
 
 
-def judge_gigachat_alt(record: dict[str, Any]) -> RubricScore:
-    """GigaChat-as-judge at a different temperature (Plan B).
+# ─────────────────────────────────── GigaChat-self judge ────────────────────
 
-    Requires ``GIGACHAT_AUTH_KEY``; uses a fresh judge-specific system prompt
-    so the answer-generating prompt cannot bias the judge. Temperature is
-    fixed at 0.0 to make repeat grading deterministic in expectation.
 
-    Parameters
-    ----------
-    record : dict
+_GIGACHAT_TOKEN: dict[str, Any] = {"value": None, "exp": 0.0}
 
-    Returns
-    -------
-    RubricScore
+
+def _gigachat_token(auth_key: str, scope: str) -> str:
+    """OAuth2 token cache for GigaChat (Plan B judge).
+
+    Tokens are valid ~30 minutes; we refresh on demand and keep a single
+    in-process cache to avoid one OAuth call per record.
     """
     if httpx is None:
-        raise RuntimeError("httpx required for --judge=gigachat-other-temp; pip install httpx")
-    raise NotImplementedError(
-        "GigaChat judge path will reuse the project's GigaChatClient via a small "
-        "wrapper script — to be implemented after the first Claude judge run "
-        "produces a calibration baseline. See PRE_REGISTRATION §4 Judge selection."
-    )
+        raise RuntimeError("httpx required for --judge=gigachat-self; pip install httpx")
+    now = time.time()
+    if _GIGACHAT_TOKEN["value"] and _GIGACHAT_TOKEN["exp"] - now > 60:
+        return _GIGACHAT_TOKEN["value"]
+    rq_uid = str(uuid.uuid4())
+    # GigaChat OAuth endpoint serves a Минцифры root not present in default JDK/Python
+    # trust stores. Mirror the JVM client's trust-all dev behaviour — Level-2 judge
+    # runs locally on Boss's laptop, no MITM exposure beyond the existing prod path.
+    ssl_ctx = ssl.create_default_context()
+    ssl_ctx.check_hostname = False
+    ssl_ctx.verify_mode = ssl.CERT_NONE
+    with httpx.Client(timeout=30.0, verify=False) as client:
+        r = client.post(
+            "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+            headers={
+                "Authorization": f"Basic {auth_key}",
+                "RqUID": rq_uid,
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json",
+            },
+            content=f"scope={scope}",
+        )
+        r.raise_for_status()
+        data = r.json()
+    _GIGACHAT_TOKEN["value"] = data["access_token"]
+    # expires_at comes in ms-epoch; fall back to +25min
+    exp_ms = data.get("expires_at")
+    _GIGACHAT_TOKEN["exp"] = (exp_ms / 1000.0) if exp_ms else (now + 1500)
+    return _GIGACHAT_TOKEN["value"]
+
+
+def judge_gigachat_self(record: dict[str, Any]) -> RubricScore:
+    """GigaChat as a single-model self-judge (Plan B).
+
+    Bias mitigation (still partial — declared in §4.4 as a threat to validity):
+
+    * fresh judge-specific system prompt that is *not* the generator prompt;
+    * ``temperature=0`` for determinism;
+    * judge sees only ``explanation`` / ``issues`` / ``recommendations`` —
+      not the generator's PromptVariant, system role, or schema.
+
+    Self-preference cannot be eliminated with a single judge model; see
+    Zheng et al. (2023, MT-Bench) §4.2 and Liu et al. (2023, G-Eval) for the
+    canonical discussion.
+    """
+    if httpx is None:
+        raise RuntimeError("httpx required for --judge=gigachat-self; pip install httpx")
+    auth_key = os.environ.get("GIGACHAT_AUTH_KEY", "")
+    if not auth_key:
+        raise SystemExit("GIGACHAT_AUTH_KEY not set; cannot use --judge=gigachat-self")
+    scope = os.environ.get("GIGACHAT_SCOPE", "GIGACHAT_API_PERS")
+    model = os.environ.get("GIGACHAT_JUDGE_MODEL", "GigaChat")
+    token = _gigachat_token(auth_key, scope)
+    body = {
+        "model": model,
+        "temperature": 0.0,
+        "max_tokens": 256,
+        "messages": [
+            {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+            {"role": "user", "content": _judge_user_prompt(record)},
+        ],
+    }
+    with httpx.Client(timeout=60.0, verify=False) as client:
+        r = client.post(
+            "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            json=body,
+        )
+        if r.status_code == 401:
+            # token may have rotated mid-run; force refresh & retry once
+            _GIGACHAT_TOKEN["value"] = None
+            token = _gigachat_token(auth_key, scope)
+            r = client.post(
+                "https://gigachat.devices.sberbank.ru/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                },
+                json=body,
+            )
+        r.raise_for_status()
+        data = r.json()
+    text = data["choices"][0]["message"]["content"]
+    return _parse_judge_json(text, judge_name=f"gigachat-self:{model}")
 
 
 def _parse_judge_json(text: str, judge_name: str) -> RubricScore:
     """Parse the judge's JSON reply tolerantly.
 
-    Parameters
-    ----------
-    text : str
-        Raw model output (may contain backticks / trailing prose).
-    judge_name : str
-        Name of the judge to embed in the resulting record.
-
-    Returns
-    -------
-    RubricScore
+    Accepts plain JSON, fenced ``` json blocks, or JSON followed by prose.
     """
     t = text.strip()
     if t.startswith("```"):
-        t = t.strip("`").lstrip("json").strip()
-    # Greedy curly-brace match
-    m = re.search(r"\{[^{}]*\}", t)
+        # strip leading fence (``` or ```json) and trailing fence
+        t = re.sub(r"^```(?:json)?\s*", "", t)
+        t = re.sub(r"\s*```$", "", t).strip()
+    m = re.search(r"\{[^{}]*\}", t, flags=re.DOTALL)
     if not m:
         return RubricScore(0, 0, 0, 0, f"judge output unparseable: {t[:80]}", judge_name)
     try:
         d = json.loads(m.group(0))
     except json.JSONDecodeError as e:
         return RubricScore(0, 0, 0, 0, f"json parse failed: {e}", judge_name)
+
     def _0or1(v: Any) -> int:
         try:
             return 1 if int(v) >= 1 else 0
         except (TypeError, ValueError):
             return 0
+
     return RubricScore(
         identification=_0or1(d.get("identification")),
         localisation=_0or1(d.get("localisation")),
@@ -343,7 +352,7 @@ def _parse_judge_json(text: str, judge_name: str) -> RubricScore:
 
 
 def iter_records(root: Path, variants: list[str], only: set[str] | None, runs: set[int] | None):
-    """Yield (variant, path, record_dict) for every primary Runner output file."""
+    """Yield ``(variant, path, record_dict)`` for every primary Runner output file."""
     for v in variants:
         vdir = root / v
         if not vdir.is_dir():
@@ -368,40 +377,94 @@ def iter_records(root: Path, variants: list[str], only: set[str] | None, runs: s
 
 
 def grade_record(record: dict[str, Any], judge: str) -> RubricScore:
-    if judge == "regex":
-        return judge_regex(record)
     if judge == "claude":
         key = os.environ.get("ANTHROPIC_API_KEY")
         if not key:
-            raise SystemExit("ANTHROPIC_API_KEY not set; pass --judge=regex for CI run")
-        return judge_claude(record, key, model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-5"))
-    if judge == "gigachat-other-temp":
-        return judge_gigachat_alt(record)
+            raise SystemExit("ANTHROPIC_API_KEY not set; pass --judge=gigachat-self instead")
+        return judge_claude(
+            record,
+            key,
+            model=os.environ.get("ANTHROPIC_MODEL", "claude-opus-4-5"),
+        )
+    if judge == "gigachat-self":
+        return judge_gigachat_self(record)
     raise ValueError(f"unknown judge: {judge}")
 
 
+def _autodetect_judge() -> str:
+    """Choose ``claude`` when ``ANTHROPIC_API_KEY`` is present, else ``gigachat-self``."""
+    return "claude" if os.environ.get("ANTHROPIC_API_KEY") else "gigachat-self"
+
+
+def _estimate_cost_rub(judge: str, n_records: int) -> float:
+    """Coarse cost estimate, in roubles, for the headline log line.
+
+    Rates (approx, Apr-2026):
+
+    * Claude Opus 4: ~$15 / 1M input + $75 / 1M output, ~1 ₽/₸rouble≈100 USD/RUB.
+      Per record ≈ 700 in + 60 out tokens ≈ $0.0152 ≈ 1.5 ₽.
+    * GigaChat-Pro: 1.50 ₽ / 1k req-tokens. Per record ≈ 800 tokens ≈ 1.2 ₽
+      (depends on tariff; this estimate is informational only).
+    """
+    if judge == "claude":
+        return round(n_records * 1.5, 1)
+    if judge == "gigachat-self":
+        return round(n_records * 0.6, 1)
+    return 0.0
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--variant", default="all", help="b0|b1|b1f|b2|b3|all")
-    ap.add_argument("--results-root", default="experiment/results")
-    ap.add_argument("--judge", default="regex", choices=["regex", "claude", "gigachat-other-temp"])
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    ap.add_argument("--variant", default="all", help="b1|b1f|b2|all")
+    ap.add_argument(
+        "--judge",
+        default="auto",
+        choices=["auto", "claude", "gigachat-self"],
+        help="auto = claude when ANTHROPIC_API_KEY present, else gigachat-self",
+    )
+    ap.add_argument(
+        "--input",
+        default="experiment/results",
+        help="root directory holding <variant>/<item>__run<N>.json files",
+    )
+    ap.add_argument(
+        "--out",
+        default=None,
+        help="root directory for .graded.json sidecars (defaults to --input)",
+    )
     ap.add_argument("--only", default="", help="comma-separated item IDs")
     ap.add_argument("--runs", default="", help="comma-separated run indices, e.g. 1,2,3")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
-    variants = ["b0", "b1", "b1f", "b2", "b3"] if args.variant == "all" else [args.variant]
-    root = Path(args.results_root)
+    judge = _autodetect_judge() if args.judge == "auto" else args.judge
+    variants = ["b1", "b1f", "b2"] if args.variant == "all" else [args.variant]
+    in_root = Path(args.input)
+    out_root = Path(args.out) if args.out else in_root
     only = {s.strip() for s in args.only.split(",") if s.strip()} or None
     runs = {int(s) for s in args.runs.split(",") if s.strip().isdigit()} or None
 
     n = 0
-    for variant, path, rec in iter_records(root, variants, only, runs):
-        score = grade_record(rec, args.judge)
-        out_path = path.with_suffix(".graded.json")
+    fails = 0
+    total_score = 0
+    print(f"[grade] starting judge={judge} variants={variants} input={in_root}")
+    for variant, path, rec in iter_records(in_root, variants, only, runs):
+        try:
+            score = grade_record(rec, judge)
+        except Exception as e:  # noqa: BLE001 — log & continue, do not abort batch
+            print(f"[grade] ERROR variant={variant} item={path.name}: {type(e).__name__}: {e}", file=sys.stderr)
+            fails += 1
+            continue
+        rel = path.relative_to(in_root)
+        out_path = out_root / rel
+        out_path = out_path.with_suffix(".graded.json")
         if args.dry_run:
             print(f"[dry-run] {variant}/{path.name} → total={score.total} {score.rationale[:60]}")
         else:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
             with out_path.open("w") as f:
                 json.dump(
                     {
@@ -410,11 +473,22 @@ def main() -> None:
                         "runIndex": rec.get("runIndex"),
                         **score.to_dict(),
                     },
-                    f, indent=2, ensure_ascii=False,
+                    f,
+                    indent=2,
+                    ensure_ascii=False,
                 )
                 f.write("\n")
         n += 1
-    print(f"[grade] graded {n} records ({args.judge} judge)")
+        total_score += score.total
+        if n % 25 == 0:
+            print(f"[grade] progress {n} done, mean_score={total_score / n:.2f}", flush=True)
+
+    mean = (total_score / n) if n else 0.0
+    cost = _estimate_cost_rub(judge, n)
+    print(
+        f"[grade] DONE total_judged={n} fails={fails} mean_score={mean:.3f} "
+        f"judge={judge} cost_estimated~={cost} RUB"
+    )
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+{
+  "code": "def count_vowels(s):\n    return sum(1 for c in s if c in 'aeiou')  # не учитывает регистр\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "регистр",
+    "lower",
+    "upper"
+  ],
+  "id": "count-vowels-wa-01",
+  "taskId": "count-vowels"
+}

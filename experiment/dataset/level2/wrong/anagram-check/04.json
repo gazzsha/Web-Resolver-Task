@@ -1,0 +1,11 @@
+{
+  "code": "def is_anagram(s, t):\n    return False\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "False",
+    "заглушка"
+  ],
+  "id": "anagram-check-stub-01",
+  "taskId": "anagram-check"
+}

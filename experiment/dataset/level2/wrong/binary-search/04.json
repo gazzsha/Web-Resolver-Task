@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int search(int[] nums, int target) { return -1; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "-1",
+    "константа",
+    "заглушка"
+  ],
+  "id": "binary-search-stub-01",
+  "taskId": "binary-search"
+}

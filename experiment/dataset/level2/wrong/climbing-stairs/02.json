@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int climbStairs(int n) { return n; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "Фибоначчи",
+    "рекуррентное соотношение",
+    "DP"
+  ],
+  "id": "climbing-stairs-wa-01",
+  "taskId": "climbing-stairs"
+}

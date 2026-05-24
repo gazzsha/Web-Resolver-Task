@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int titleToNumber(String s) {\n        return s.charAt(0) - 'A' + 1;  // только первый символ\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "многосимвольные",
+    "26-ричная",
+    "AA=27"
+  ],
+  "id": "excel-column-number-wa-01",
+  "taskId": "excel-column-number"
+}

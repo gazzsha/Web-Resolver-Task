@@ -1,0 +1,11 @@
+{
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    return len(s) == len(t)  # сравнивает только длины\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "длина",
+    "символы",
+    "sorted"
+  ],
+  "id": "anagram-check-wa-01",
+  "taskId": "anagram-check"
+}

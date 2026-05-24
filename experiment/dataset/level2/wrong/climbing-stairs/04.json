@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int climbStairs(int n) { return 0; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "climbing-stairs-stub-01",
+  "taskId": "climbing-stairs"
+}

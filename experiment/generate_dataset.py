@@ -2609,6 +2609,85 @@ def _select_gold_subset() -> List[dict]:
     return items[:30]
 
 
+def _emit_level2_subset() -> dict:
+    """Materialise a Level-2 confirmatory subset under ``dataset/level2/``.
+
+    Layout mirrors the main dataset (``tasks/``, ``wrong/<task>/<n>.json``,
+    ``attacks/<n>.json``) so the JVM runner can load it transparently via
+    ``--dataset=experiment/dataset/level2``.
+
+    Composition (60 items, deterministic seed ``level2-v1``):
+
+    - 20 wrong from {RTE, WA, TLE}    (7 + 7 + 6)
+    - 20 mixed from {STUB, STYLE, SECURITY} (7 + 7 + 6)
+    - 20 attacks: 2 per OWASP LLM01..LLM10
+
+    Selection rule: sort source list by id (alphabetic), then take first K.
+    No randomness — re-running the script always yields identical bytes.
+    """
+    level2_dir = DATASET_ROOT / "level2"
+    tasks_dir = level2_dir / "tasks"
+    wrong_dir = level2_dir / "wrong"
+    attacks_dir = level2_dir / "attacks"
+    for d in (tasks_dir, wrong_dir, attacks_dir):
+        if d.exists():
+            shutil.rmtree(d)
+        d.mkdir(parents=True)
+
+    # ── wrong-bucket selection: stable sort, fixed quotas
+    quotas_wrong = {"RTE": 7, "WA": 7, "TLE": 6}
+    quotas_mixed = {"STUB": 7, "STYLE": 7, "SECURITY": 6}
+    all_quotas = {**quotas_wrong, **quotas_mixed}
+    by_diag: dict = {}
+    for w in WRONG:
+        by_diag.setdefault(w.expectedDiagnosis, []).append(w)
+    chosen_wrong: list = []
+    for diag, n in all_quotas.items():
+        bucket = sorted(by_diag.get(diag, []), key=lambda w: w.id)
+        chosen_wrong.extend(bucket[:n])
+
+    # ── attack-bucket selection: 2 per OWASP class
+    by_owasp: dict = {}
+    for a in ATTACKS:
+        by_owasp.setdefault(a.owasp_class, []).append(a)
+    chosen_attacks: list = []
+    for cls in sorted(by_owasp.keys()):
+        bucket = sorted(by_owasp[cls], key=lambda a: a.id)
+        chosen_attacks.extend(bucket[:2])
+
+    # ── emit task files only for tasks actually referenced
+    referenced_tasks = {w.taskId for w in chosen_wrong}
+    for task in TASKS:
+        if task.id in referenced_tasks:
+            _write_json(tasks_dir / f"{task.id}.json", asdict(task))
+
+    # ── emit wrong solutions grouped by task (matches loader expectations)
+    wrong_by_task: dict = {}
+    for w in chosen_wrong:
+        wrong_by_task.setdefault(w.taskId, []).append(w)
+    for task_id, items in wrong_by_task.items():
+        for i, w in enumerate(items, start=1):
+            _write_json(wrong_dir / task_id / f"{i:02d}.json", asdict(w))
+
+    # ── emit attacks flat
+    for i, a in enumerate(chosen_attacks, start=1):
+        _write_json(attacks_dir / f"{i:02d}.json", asdict(a))
+
+    diag_counts: dict = {}
+    for w in chosen_wrong:
+        diag_counts[w.expectedDiagnosis] = diag_counts.get(w.expectedDiagnosis, 0) + 1
+    owasp_counts: dict = {}
+    for a in chosen_attacks:
+        owasp_counts[a.owasp_class] = owasp_counts.get(a.owasp_class, 0) + 1
+    return {
+        "level2_total": len(chosen_wrong) + len(chosen_attacks),
+        "level2_wrong_by_diag": diag_counts,
+        "level2_attacks_by_owasp": owasp_counts,
+        "level2_tasks_referenced": len(referenced_tasks),
+        "level2_seed": "level2-v1",
+    }
+
+
 def emit() -> dict:
     # Wipe & re-emit so output is bit-deterministic
     tasks_dir = DATASET_ROOT / "tasks"
@@ -2664,6 +2743,10 @@ def emit() -> dict:
     owasp_counts: dict = {}
     for a in ATTACKS:
         owasp_counts[a.owasp_class] = owasp_counts.get(a.owasp_class, 0) + 1
+
+    # Level-2 confirmatory subset (60 items) lives in dataset/level2/.
+    level2_stats = _emit_level2_subset()
+
     return {
         "tasks": len(TASKS),
         "wrong": len(WRONG),
@@ -2672,6 +2755,7 @@ def emit() -> dict:
         "tasks_python": sum(1 for t in TASKS if t.language == "python"),
         "gold_items": len(gold_items),
         "owasp_distribution": owasp_counts,
+        **level2_stats,
     }
 
 
