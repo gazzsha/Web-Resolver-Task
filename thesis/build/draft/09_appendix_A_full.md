@@ -152,7 +152,16 @@ class GigaChatAnalyzer(
     // (без AstHybridAnalyzer-обёртки). Если null — AST блок в user-message не добавляется.
     private val astMetricsService: AstMetricsService? = null,
     // Метрики Prometheus: null когда работает experiment runner без Spring context.
-    private val metrics: AiAnalyzerMetrics? = null
+    private val metrics: AiAnalyzerMetrics? = null,
+    // ── EXPERIMENT-ONLY ────────────────────────────────────────────────────────
+    // Когда true — отключает каскад verdict-cap'ов в [mapPayload]. Используется
+    // ИСКЛЮЧИТЕЛЬНО в experiment Runner для варианта B3 (no-guards), чтобы
+    // изолировать вклад verdict-guard слоя в защиту от prompt-injection
+    // (см. PRE_REGISTRATION.md, H4). В production-конфигурации
+    // [ru.aianalyzer.config.AiAnalyzerConfig] этот флаг НЕ выставляется
+    // (значение по умолчанию `false`), а unit-тесты в
+    // GigaChatAnalyzerTest проверяют, что cap'ы работают.
+    private val disableVerdictGuards: Boolean = false
 ) : AIAnalyzer {
 
     override fun analyze(
@@ -187,15 +196,6 @@ class GigaChatAnalyzer(
                     return fallback.analyze(code, language, executionResults, scenarioResults, taskContext)
                 }
             }
-            .getOrNull() ?: run {
-                metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, AiAnalyzerMetrics.OUTCOME_FALLBACK)
-                return fallback.analyze(code, language, executionResults, scenarioResults, taskContext)
-            }
-
-        val cacheKey = cacheKey(sanitized, language, executionResults, extraContext, taskContext)
-        cache.getIfPresent(cacheKey)?.let {
-            logger.debug { "GigaChat analyze cache hit key=${cacheKey.take(12)}" }
-            metrics?.recordCall(AiAnalyzerMetrics.VARIANT_GIGACHAT, AiAnalyzerMetrics.OUTCOME_CACHE_HIT)
     // ----- [фрагмент опущен; полная версия — GigaChatAnalyzer.kt] -----        code: String,
         language: String,
         executionResults: List<SandboxExecutionResult>,
