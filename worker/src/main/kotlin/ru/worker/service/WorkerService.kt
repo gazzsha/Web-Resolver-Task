@@ -2,8 +2,10 @@ package ru.worker.service
 
 import ru.sandbox.model.SandboxExecutionResult
 import ru.sandbox.service.DockerSandboxService
+import ru.worker.metrics.WorkerMetrics
 import ru.worker.model.*
 import ru.aianalyzer.service.AIAnalyzer
+import ru.aianalyzer.service.AnalyzeContext
 import ru.scenarioplayer.ScenarioRunner
 import java.util.UUID
 
@@ -14,13 +16,16 @@ class WorkerService(
     private val testEngine: TestEngine,
     private val scenarioRunner: ScenarioRunner,
     private val aiAnalyzer: AIAnalyzer,
-    private val sandboxService: DockerSandboxService? = null
+    private val sandboxService: DockerSandboxService? = null,
+    private val metrics: WorkerMetrics? = null
 ) {
 
     fun processTask(message: WorkerTaskMessage): WorkerTaskResult {
         val startTime = System.currentTimeMillis()
         val testResults = mutableListOf<TestResult>()
         val scenarioResults = mutableListOf<ru.scenarioplayer.ScenarioResult>()
+        val timerSample = metrics?.startProcessingTimer()
+        var finalStatus: TaskStatus = TaskStatus.ERROR
 
         try {
             // 1. Run test cases using TestEngine with Docker Sandbox.
@@ -72,13 +77,32 @@ class WorkerService(
             val taskStatus = determineTaskStatus(testResults, scenarioResults)
 
             // 4. Run AI analysis
+            // P0-3: собираем агрегаты sandbox-вердикта и пробрасываем условие задачи.
+            val totalTestsCount = testResults.size
+            val passedTestsCount = testResults.count { it.status == TestStatus.PASSED }
+            val firstFailure = testResults.firstOrNull { it.status != TestStatus.PASSED }
+            val overallVerdict = when {
+                totalTestsCount == 0 -> null
+                firstFailure == null -> "OK"
+                else -> firstFailure.verdict.name
+            }
+            val firstError = firstFailure?.let { it.error ?: it.output }?.take(500)
+
             val aiAnalysis = aiAnalyzer.analyze(
                 code = message.code,
                 language = message.language,
-                executionResults = testResults.map { it.toSandboxResult() }
+                executionResults = testResults.map { it.toSandboxResult() },
+                taskContext = AnalyzeContext(
+                    taskDescription = message.taskDescription,
+                    passedTests = passedTestsCount,
+                    totalTests = totalTestsCount,
+                    overallVerdict = overallVerdict,
+                    firstError = firstError
+                )
             )
 
             val endTime = System.currentTimeMillis()
+            finalStatus = taskStatus
 
             return WorkerTaskResult(
                 taskId = message.taskId,
@@ -93,6 +117,7 @@ class WorkerService(
                 memoryUsedKb = testResults.sumOf { it.memoryUsedKb }
             )
         } catch (e: Exception) {
+            finalStatus = TaskStatus.ERROR
             return WorkerTaskResult(
                 taskId = message.taskId,
                 testId = message.testId,
@@ -105,6 +130,11 @@ class WorkerService(
                 totalExecutionTimeMs = System.currentTimeMillis() - startTime,
                 memoryUsedKb = 0
             )
+        } finally {
+            if (timerSample != null) {
+                metrics.stopProcessingTimer(timerSample)
+            }
+            metrics?.recordSubmission(finalStatus)
         }
     }
 

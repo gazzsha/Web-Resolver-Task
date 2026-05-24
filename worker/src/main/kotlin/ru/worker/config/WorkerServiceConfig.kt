@@ -7,9 +7,11 @@ import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
+import ru.worker.metrics.WorkerMetrics
 import ru.worker.service.*
 import ru.aianalyzer.service.AIAnalyzer
 import ru.scenarioplayer.ScenarioRunner
+import ru.sandbox.metrics.SandboxMetrics
 import ru.sandbox.service.DockerSandboxService
 import ru.sandbox.service.SandboxImageManager
 
@@ -24,7 +26,8 @@ class WorkerServiceConfig {
     fun sandboxImageManager(): SandboxImageManager = SandboxImageManager()
 
     @Bean
-    fun dockerSandboxService(im: SandboxImageManager): DockerSandboxService = DockerSandboxService(im)
+    fun dockerSandboxService(im: SandboxImageManager, sandboxMetrics: SandboxMetrics): DockerSandboxService =
+        DockerSandboxService(im, sandboxMetrics)
 
     @Bean
     fun testEngine(dockerSandboxService: DockerSandboxService): TestEngine {
@@ -72,12 +75,14 @@ class WorkerServiceConfig {
     fun workerService(
         testEngine: TestEngine,
         scenarioRunner: ScenarioRunner,
-        aiAnalyzer: AIAnalyzer
+        aiAnalyzer: AIAnalyzer,
+        workerMetrics: WorkerMetrics
     ): WorkerService {
         return WorkerService(
             testEngine = testEngine,
             scenarioRunner = scenarioRunner,
-            aiAnalyzer = aiAnalyzer
+            aiAnalyzer = aiAnalyzer,
+            metrics = workerMetrics
         )
     }
 }

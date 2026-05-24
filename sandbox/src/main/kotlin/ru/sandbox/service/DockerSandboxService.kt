@@ -1,6 +1,7 @@
 package ru.sandbox.service
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import ru.sandbox.metrics.SandboxMetrics
 import ru.sandbox.model.*
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -10,7 +11,9 @@ import java.util.UUID
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 
 private val logger = KotlinLogging.logger {}
@@ -37,7 +40,8 @@ private val logger = KotlinLogging.logger {}
  * - Capability drop (ALL)
  */
 class DockerSandboxService(
-    private val imageManager: SandboxImageManager
+    private val imageManager: SandboxImageManager,
+    private val metrics: SandboxMetrics? = null
 ) {
 
     private val workDir = Paths.get("/tmp/web-resolver-sandbox")
@@ -60,7 +64,7 @@ class DockerSandboxService(
 
     /**
      * Execute user code in isolated Docker container.
-     * Supported languages: java, python.
+     * Supported languages: java, python, kotlin.
      */
     fun execute(request: SandboxExecutionRequest): SandboxExecutionResult {
         logger.info { "Executing code for request ${request.requestId}, language: ${request.language}" }
@@ -69,6 +73,7 @@ class DockerSandboxService(
             when (request.language.lowercase()) {
                 "java" -> executeJavaCode(request)
                 "python" -> executePythonCode(request)
+                "kotlin" -> executeKotlinCode(request)
                 else -> SandboxExecutionResult(
                     requestId = request.requestId,
                     status = ExecutionStatus.INTERNAL_ERROR,
@@ -119,6 +124,41 @@ class DockerSandboxService(
                 compareOutput(runResult.output ?: "", request.expectedOutput)
             } else {
                 // Preserve the execution-failure verdict already set in runResult
+                runResult.verdict
+            }
+
+            return runResult.copy(verdict = finalVerdict)
+        } finally {
+            requestDir.toFile().deleteRecursively()
+        }
+    }
+
+    private fun executeKotlinCode(request: SandboxExecutionRequest): SandboxExecutionResult {
+        val requestDir = workDir.resolve(request.requestId.toString())
+        Files.createDirectories(requestDir)
+        try {
+            // Kotlin source file name doesn't need to match a "main class" — kotlinc bundles into a jar.
+            Files.writeString(requestDir.resolve("Solution.kt"), request.code)
+            Files.writeString(requestDir.resolve("input.txt"), request.testInput)
+
+            val runResult = runInDocker(
+                requestId = request.requestId,
+                language = "kotlin",
+                requestDir = requestDir,
+                image = "web-resolver/kotlin:1.9.22",
+                // Reduce JVM startup overhead via -J-Xmx; allocate up to 384m to kotlinc (compile-time only).
+                command = listOf(
+                    "sh", "-c",
+                    "kotlinc -J-Xmx384m Solution.kt -include-runtime -d solution.jar 2>&1 && java -jar solution.jar < input.txt"
+                ),
+                timeoutSeconds = request.timeoutSeconds,
+                memoryLimitMb = maxOf(request.memoryLimitMb, 512), // kotlinc + JVM bundle needs more headroom
+                cpuLimit = request.cpuLimit
+            )
+
+            val finalVerdict = if (runResult.status == ExecutionStatus.SUCCESS) {
+                compareOutput(runResult.output ?: "", request.expectedOutput)
+            } else {
                 runResult.verdict
             }
 
@@ -191,6 +231,8 @@ class DockerSandboxService(
     ): SandboxExecutionResult {
 
         var containerId: String? = null
+        val timerSample = metrics?.startExecutionTimer()
+        var finalVerdict: Verdict = Verdict.RUNTIME_ERROR
 
         try {
             if (!imageManager.ensureImage(image)) {
@@ -205,6 +247,9 @@ class DockerSandboxService(
             }
 
             // ---- Step 1: start container in detached mode (no --rm) ----
+            // --stop-timeout=0 гарантирует, что любой docker stop НЕ даёт grace-period;
+            // основной hard-timeout всё равно реализуется внешним watchdog ниже через
+            // docker kill -s SIGKILL, но флаг защищает от утечки на случай побочных stop.
             val dockerRunCmd = buildList {
                 add("docker"); add("run"); add("-d")
                 add("--platform=linux/amd64")
@@ -214,12 +259,13 @@ class DockerSandboxService(
                 add("--cap-drop=ALL")
                 add("--security-opt=no-new-privileges:true")
                 add("--pids-limit=64")
+                add("--stop-timeout=0")
                 add("-m"); add("${memoryLimitMb}m")
                 add("--cpus"); add("$cpuLimit")
                 add("-v"); add("${requestDir.toAbsolutePath()}:/app")
                 add("-w"); add("/app")
                 add(image)
-                addAll(command)
+                addAll(wrapForPeakMemoryCapture(command))
             }
 
             logger.debug { "docker run: ${dockerRunCmd.joinToString(" ")}" }
@@ -263,32 +309,48 @@ class DockerSandboxService(
                 0L, 100L, TimeUnit.MILLISECONDS
             )
 
-            // ---- Step 3: wait for container exit with host-side timeout guard ----
+            // ---- Step 3: wait for container exit with hard host-side watchdog ----
+            // Внешний watchdog: ровно через timeoutSeconds*1000ms послать SIGKILL.
+            // Это даёт wall-time контейнера ≤ timeoutSeconds (+малую погрешность планировщика),
+            // в отличие от прежней схемы с grace 5с, где wall достигал timeoutSeconds+5.
+            // docker wait после SIGKILL мгновенно возвращает exit-code (обычно 137),
+            // и мы маркируем результат как TIME_LIMIT_EXCEEDED по флагу timedOutFlag.
             val exitCode: Int
-            val timedOut: Boolean
+            val timedOutFlag = AtomicBoolean(false)
+            val watchdog: ScheduledFuture<*> = pollScheduler.schedule(
+                {
+                    timedOutFlag.set(true)
+                    logger.debug { "Watchdog firing SIGKILL for container $containerId (timeout ${timeoutSeconds}s)" }
+                    killContainer(containerId)
+                },
+                timeoutSeconds * 1000L, TimeUnit.MILLISECONDS
+            )
 
             try {
                 val waitProc = ProcessBuilder("docker", "wait", containerId)
                     .redirectErrorStream(true)
                     .start()
 
-                // Add 5 s of grace beyond user timeout to allow compile time overhead.
-                // If docker wait still hasn't returned by then we kill the container.
-                val waitFinished = waitProc.waitFor(timeoutSeconds + 5, TimeUnit.SECONDS)
+                // Жёсткий host-side limit: timeoutSeconds + 2с страховки на случай
+                // если ScheduledExecutorService задержался под нагрузкой. Watchdog
+                // обязан сработать раньше; этот ветка — крайний случай.
+                val waitFinished = waitProc.waitFor(timeoutSeconds + 2, TimeUnit.SECONDS)
 
                 if (!waitFinished) {
                     waitProc.destroyForcibly()
-                    killContainer(containerId)
-                    timedOut = true
+                    if (timedOutFlag.compareAndSet(false, true)) {
+                        killContainer(containerId)
+                    }
                     exitCode = 124
                 } else {
-                    timedOut = false
                     val waitOut = waitProc.inputStream.bufferedReader().readText().trim()
                     exitCode = waitOut.toIntOrNull() ?: -1
                 }
             } finally {
+                watchdog.cancel(false)
                 pollFuture.cancel(true)
             }
+            val timedOut = timedOutFlag.get()
 
             // ---- Step 4: inspect for wall time and OOMKilled flag ----
             val inspectResult = inspectContainer(containerId)
@@ -299,9 +361,15 @@ class DockerSandboxService(
             val stdout = dockerLogs(containerId, stderr = false).trim()
             val stderr = dockerLogs(containerId, stderr = true).trim()
 
+            // P1-6: для коротких программ (<500мс) polling каждые 100мс не успевает
+            // снять реальный peak; читаем cgroup-файл memory.peak, сохранённый
+            // самим контейнером перед exit в /app/.peak_memory_bytes (см. wrapForPeakMemoryCapture).
+            val cgroupPeakBytes = readCgroupPeakMemoryFile(requestDir)
+            val effectivePeakBytes = maxOf(peakMemoryBytes.get(), cgroupPeakBytes)
+
             logger.debug {
                 "Container $containerId finished: exit=$exitCode oom=$oomKilled " +
-                "wall=${wallTimeMs}ms peak=${peakMemoryBytes.get()}B"
+                "wall=${wallTimeMs}ms polledPeak=${peakMemoryBytes.get()}B cgroupPeak=${cgroupPeakBytes}B"
             }
 
             // ---- Step 6: resolve verdict from host signals ----
@@ -312,6 +380,10 @@ class DockerSandboxService(
                 stderr = stderr,
                 language = language
             )
+            finalVerdict = verdict
+            if (oomKilled || verdict == Verdict.MEMORY_LIMIT_EXCEEDED) {
+                metrics?.recordOomKilled()
+            }
             val status = verdictToExecutionStatus(verdict)
 
             return SandboxExecutionResult(
@@ -320,11 +392,12 @@ class DockerSandboxService(
                 output = stdout.ifBlank { null },
                 error = stderr.ifBlank { null },
                 executionTimeMs = wallTimeMs,
-                memoryUsedKb = peakMemoryBytes.get() / 1024,
+                memoryUsedKb = effectivePeakBytes / 1024,
                 verdict = verdict
             )
         } catch (e: Exception) {
             logger.error(e) { "Docker execution failed" }
+            finalVerdict = Verdict.RUNTIME_ERROR
             return SandboxExecutionResult(
                 requestId = requestId,
                 status = ExecutionStatus.INTERNAL_ERROR,
@@ -336,6 +409,9 @@ class DockerSandboxService(
         } finally {
             // Always remove the container (we did NOT use --rm)
             containerId?.let { removeContainer(it) }
+            if (timerSample != null) {
+                metrics.stopExecutionTimer(timerSample, language, finalVerdict)
+            }
         }
     }
 
@@ -366,9 +442,12 @@ class DockerSandboxService(
         stderr: String,
         language: String
     ): Verdict = when {
+        // timedOut должен быть раньше exit==137: watchdog шлёт SIGKILL, контейнер
+        // отдаёт код 137, который без флага был бы интерпретирован как OOM.
+        timedOut                                           -> Verdict.TIME_LIMIT_EXCEEDED
         oomKilled                                          -> Verdict.MEMORY_LIMIT_EXCEEDED
         exitCode == 137                                    -> Verdict.MEMORY_LIMIT_EXCEEDED
-        timedOut || exitCode == 124                        -> Verdict.TIME_LIMIT_EXCEEDED
+        exitCode == 124                                    -> Verdict.TIME_LIMIT_EXCEEDED
         exitCode == 139                                    -> Verdict.RUNTIME_ERROR   // SIGSEGV
         exitCode != 0                                      -> Verdict.RUNTIME_ERROR
         LanguageErrorPattern.stderrIndicatesError(language, stderr) -> Verdict.RUNTIME_ERROR
@@ -527,6 +606,48 @@ class DockerSandboxService(
             }
         } catch (_: Exception) {
             // Container may have stopped between poll cycles — ignore silently
+        }
+    }
+
+    /**
+     * Оборачивает пользовательскую команду так, чтобы перед exit контейнер сам
+     * прочитал peak memory из cgroup v2 (или v1 как fallback) и записал в
+     * /app/.peak_memory_bytes на bind-mount'е. Хост-сторона затем читает файл.
+     *
+     * Решает проблему "memoryUsedKb=0 для программ <500мс": docker stats имеет
+     * default sampling ~1с, а наш polling 100мс всё равно может пропустить
+     * короткие программы. cgroup memory.peak — точное значение, обновляется
+     * ядром в реальном времени.
+     *
+     * Поддерживается только форма команды `sh -c "<script>"` (все языки в этом
+     * сервисе её используют). Для других форм — return as-is (graceful degrade
+     * к polled value).
+     */
+    private fun wrapForPeakMemoryCapture(command: List<String>): List<String> {
+        if (command.size < 3 || command[0] != "sh" || command[1] != "-c") return command
+        val original = command[2]
+        // Жёстко: даже если original упадёт, мы должны сохранить peak и вернуть
+        // оригинальный rc. echo 0 на крайний случай, чтобы файл всегда существовал.
+        val wrapped = "$original; __rc=\$?; { " +
+            "cat /sys/fs/cgroup/memory.peak 2>/dev/null || " +
+            "cat /sys/fs/cgroup/memory/memory.max_usage_in_bytes 2>/dev/null || " +
+            "echo 0; } > /app/.peak_memory_bytes 2>/dev/null; exit \$__rc"
+        return listOf("sh", "-c", wrapped)
+    }
+
+    /**
+     * Читает peak memory bytes из файла, который сам контейнер сохранил перед exit.
+     * Возвращает 0 при отсутствии файла или неразборном содержимом
+     * (graceful degrade — упадёт обратно на polled value).
+     */
+    private fun readCgroupPeakMemoryFile(requestDir: java.nio.file.Path): Long {
+        return try {
+            val file = requestDir.resolve(".peak_memory_bytes").toFile()
+            if (!file.exists()) return 0L
+            file.readText().trim().toLongOrNull() ?: 0L
+        } catch (e: Exception) {
+            logger.debug(e) { "readCgroupPeakMemoryFile failed" }
+            0L
         }
     }
 

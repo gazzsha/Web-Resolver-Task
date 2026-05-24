@@ -13,4 +13,8 @@ dependencies {
     implementation(libs.spring.kafka)
     implementation("io.github.oshai:kotlin-logging:7.0.14")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
+
+    // Micrometer custom metrics for /actuator/prometheus
+    implementation(libs.micrometer.core)
+    implementation(libs.spring.boot.starter.actuator)
 }

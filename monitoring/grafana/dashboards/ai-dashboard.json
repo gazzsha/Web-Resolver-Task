@@ -1,0 +1,112 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "uid": "web-resolver-ai",
+  "title": "Web Resolver — AI Analyzer",
+  "tags": ["ai", "gigachat", "web-resolver"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Calls / sec (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "sum(rate(ai_analyzer_calls_total[5m]))", "refId": "A"}],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Fallback rate (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {"expr": "sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[5m])) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 0.001)", "refId": "A"}
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 0.1},
+              {"color": "red", "value": 0.3}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Schema valid ratio (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "sum(rate(ai_analyzer_schema_valid_total{valid=\"true\"}[5m])) / clamp_min(sum(rate(ai_analyzer_schema_valid_total[5m])), 0.001)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "p95 latency (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(ai_analyzer_latency_seconds_bucket[5m])))", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Calls by variant / outcome (5m)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "sum by (variant, outcome) (rate(ai_analyzer_calls_total[5m]))", "refId": "A", "legendFormat": "{{variant}} / {{outcome}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Latency p50 / p95 / p99 (5m)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum by (le) (rate(ai_analyzer_latency_seconds_bucket[5m])))", "refId": "A", "legendFormat": "p50"},
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(ai_analyzer_latency_seconds_bucket[5m])))", "refId": "B", "legendFormat": "p95"},
+        {"expr": "histogram_quantile(0.99, sum by (le) (rate(ai_analyzer_latency_seconds_bucket[5m])))", "refId": "C", "legendFormat": "p99"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Fallback rate trend (5m vs 1h)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[5m])) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 0.001)", "refId": "A", "legendFormat": "5m"},
+        {"expr": "sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[1h])) / clamp_min(sum(rate(ai_analyzer_calls_total[1h])), 0.001)", "refId": "B", "legendFormat": "1h"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Schema validation outcomes (5m)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"expr": "sum by (valid) (rate(ai_analyzer_schema_valid_total[5m]))", "refId": "A", "legendFormat": "valid={{valid}}"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    }
+  ]
+}
