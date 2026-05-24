@@ -120,5 +120,5 @@ uses `--judge=auto` (default).
 ## 8. Registration footer
 
 * Pre-registration version: **Level-2 v1.0**
-* Git commit at registration: **TBD** (set by Phase 2 of the runner script)
+* Git commit at registration: **2d4b8b8705a56f9bd1664788509ddc3d7eaacf69**
 * Registered: 2026-05-24 (Europe/Moscow)
