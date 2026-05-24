@@ -273,7 +273,7 @@ const TaskPanel: React.FC<TaskPanelProps> = ({ task, loading, onBack, onResetCod
                 'Точка входа main',
                 'Чтение данных из stdin',
                 'Вывод результата в stdout',
-                'Класс Solution (Java / Kotlin)',
+                'Класс Solution (Java)',
               ].map((req) => (
                 <Box
                   component="li"

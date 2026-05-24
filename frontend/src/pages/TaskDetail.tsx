@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -11,6 +11,11 @@ import {
   Card,
   CardContent,
   Divider,
+  Link as MuiLink,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
   alpha,
   useTheme,
   Alert,
@@ -21,9 +26,11 @@ import TimerIcon from '@mui/icons-material/Timer';
 import MemoryIcon from '@mui/icons-material/Memory';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
-import type { Task } from '@/types';
-import { taskService } from '@/services/api';
+import type { Task, SubmissionSummary } from '@/types';
+import { taskService, meService } from '@/services/api';
 import { brand } from '@/theme/theme';
+import { StatusChip, LanguageChip } from '@/components/submissions/chips';
+import { formatTimeAgo } from '@/utils/dateUtils';
 
 const DIFFICULTY_RU: Record<string, string> = {
   Easy: 'Лёгкая',
@@ -45,6 +52,7 @@ const TaskDetail = () => {
   const [loading, setLoading] = useState(true);
   const [task, setTask] = useState<Task | null>(null);
   const [error, setError] = useState(false);
+  const [taskSubmissions, setTaskSubmissions] = useState<SubmissionSummary[]>([]);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -63,6 +71,22 @@ const TaskDetail = () => {
       fetchTask();
     }
   }, [id]);
+
+  const loadSubmissions = useCallback(() => {
+    if (!id) return;
+    meService.getSubmissions().then((all) => {
+      const filtered = all
+        .filter((s) => s.taskId === id)
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setTaskSubmissions(filtered);
+    }).catch(() => {
+      // Non-critical
+    });
+  }, [id]);
+
+  useEffect(() => {
+    loadSubmissions();
+  }, [loadSubmissions]);
 
   if (loading) {
     return (
@@ -104,7 +128,7 @@ const TaskDetail = () => {
   const diffStyle = DIFFICULTY_STYLES[task.difficulty] ?? { bg: '#6b7280', color: '#374151' };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1400 }}>
+    <Box sx={{ width: '100%' }}>
       {/* Back button */}
       <Button
         variant="text"
@@ -334,6 +358,78 @@ const TaskDetail = () => {
               </Box>
             </CardContent>
           </Card>
+
+          {/* Mini-attempts table */}
+          {taskSubmissions.length > 0 && (
+            <Card
+              sx={{
+                mt: 3,
+                border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'}`,
+                boxShadow: 'none',
+              }}
+            >
+              <CardContent sx={{ p: 2.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    Мои попытки ({taskSubmissions.length})
+                  </Typography>
+                  <MuiLink
+                    component="button"
+                    variant="body2"
+                    sx={{ fontWeight: 600, cursor: 'pointer', border: 'none', background: 'none', color: 'primary.main' }}
+                    onClick={() => navigate(`/submissions?task=${id}`)}
+                  >
+                    Все попытки
+                  </MuiLink>
+                </Box>
+                <Table size="small" aria-label="Мои попытки по этой задаче">
+                  <TableBody>
+                    {taskSubmissions.slice(0, 5).map((item, idx) => (
+                      <TableRow
+                        key={item.id}
+                        role="link"
+                        tabIndex={0}
+                        sx={{
+                          cursor: 'pointer',
+                          '&:last-child td': { border: 0 },
+                          '&:hover': { bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' },
+                        }}
+                        onClick={() => navigate(`/results/${item.id}`)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            navigate(`/results/${item.id}`);
+                          }
+                        }}
+                      >
+                        <TableCell sx={{ pl: 0, width: 24 }}>
+                          <Typography variant="caption" color="text.secondary">{idx + 1}</Typography>
+                        </TableCell>
+                        <TableCell sx={{ py: 0.75 }}>
+                          <StatusChip status={item.status} />
+                        </TableCell>
+                        <TableCell sx={{ py: 0.75 }}>
+                          <LanguageChip language={item.language} />
+                        </TableCell>
+                        <TableCell align="right" sx={{ py: 0.75 }}>
+                          <Typography variant="caption" sx={{ fontFamily: '"JetBrains Mono", monospace' }}>
+                            {item.passedTests != null && item.totalTests != null
+                              ? `${item.passedTests}/${item.totalTests}`
+                              : '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right" sx={{ pr: 0, py: 0.75 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            {formatTimeAgo(item.createdAt)}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
 
           {/* CTA button */}
           <Button

@@ -46,13 +46,40 @@ api.interceptors.response.use(
 
 // Task services
 export const taskService = {
-  getAll: async (): Promise<Task[]> => {
-    const response = await api.get<Task[]>('/tasks');
+  getAll: async (params?: { category?: string; difficulty?: 'Easy' | 'Medium' | 'Hard' }): Promise<Task[]> => {
+    const response = await api.get<Task[]>('/tasks', { params });
     return response.data;
   },
 
   getById: async (id: string): Promise<Task> => {
     const response = await api.get<Task>(`/tasks/${id}`);
+    return response.data;
+  },
+
+  getCategories: async (): Promise<string[]> => {
+    const response = await api.get<string[]>('/tasks/categories');
+    return response.data;
+  },
+};
+
+// Admin services (требуют роль TEACHER на бэкенде)
+export interface TaskImportError {
+  line: number;
+  message: string;
+}
+export interface TaskImportResult {
+  importedCount: number;
+  skippedCount: number;
+  errors: TaskImportError[];
+}
+
+export const adminService = {
+  importTasksFromCsv: async (file: File): Promise<TaskImportResult> => {
+    const form = new FormData();
+    form.append('file', file);
+    const response = await api.post<TaskImportResult>('/admin/tasks/import', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return response.data;
   },
 };

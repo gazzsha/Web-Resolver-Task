@@ -35,6 +35,7 @@ interface AppState {
   addSubmission: (submission: SubmissionResult) => void;
   toggleDarkMode: () => void;
   toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -70,6 +71,7 @@ export const useAppStore = create<AppState>((set) => ({
       return { darkMode: next };
     }),
   toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+  setSidebarOpen: (open) => set({ sidebarOpen: open }),
   setLoading: (loading) => set({ loading }),
   setError: (error) => set({ error }),
 }));

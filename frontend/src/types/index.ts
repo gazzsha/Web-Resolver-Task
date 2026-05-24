@@ -8,10 +8,12 @@ export interface Task {
 }
 
 // Submission types
+// P0-1: Kotlin исключён из MVP — только Java и Python принимаются на стороне сервера.
+// Тип SubmissionSummary ниже сохраняет 'kotlin' для отображения исторических submissions.
 export interface Submission {
   testId: string;
   code: string;
-  language: 'java' | 'kotlin' | 'python';
+  language: 'java' | 'python';
 }
 
 export interface SubmissionResult {

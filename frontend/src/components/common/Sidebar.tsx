@@ -13,33 +13,25 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import CodeIcon from '@mui/icons-material/Code';
 import HistoryIcon from '@mui/icons-material/History';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import { brand } from '@/theme/theme';
+import { useAuthStore } from '@/store/authStore';
+import type { Role } from '@/types/auth';
 
-const menuItems = [
-  {
-    label: 'Главная',
-    icon: DashboardIcon,
-    path: '/',
-    exact: true,
-  },
-  {
-    label: 'Задачи',
-    icon: CodeIcon,
-    path: '/tasks',
-    exact: false,
-  },
-  {
-    label: 'Мои решения',
-    icon: HistoryIcon,
-    path: '/submissions',
-    exact: false,
-  },
-  {
-    label: 'Статистика',
-    icon: BarChartIcon,
-    path: '/statistics',
-    exact: false,
-  },
+interface MenuItem {
+  label: string;
+  icon: React.ComponentType<{ fontSize?: 'small' | 'medium' | 'large' | 'inherit' }>;
+  path: string;
+  exact: boolean;
+  requireRole?: Role;
+}
+
+const menuItems: MenuItem[] = [
+  { label: 'Главная',     icon: DashboardIcon,  path: '/',              exact: true },
+  { label: 'Задачи',      icon: CodeIcon,       path: '/tasks',         exact: false },
+  { label: 'Мои решения', icon: HistoryIcon,    path: '/submissions',   exact: false },
+  { label: 'Статистика',  icon: BarChartIcon,   path: '/statistics',    exact: false },
+  { label: 'Импорт задач', icon: UploadFileIcon, path: '/admin/import', exact: false, requireRole: 'TEACHER' },
 ];
 
 interface SidebarProps {
@@ -49,6 +41,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const role = useAuthStore((s) => s.user?.role);
+  const visibleItems = menuItems.filter((it) => !it.requireRole || it.requireRole === role);
 
   const isActive = (path: string, exact: boolean) => {
     if (exact) return location.pathname === path;
@@ -71,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     >
       {/* Nav links */}
       <List sx={{ px: 0, flexGrow: 1 }}>
-        {menuItems.map((item) => {
+        {visibleItems.map((item) => {
           const active = isActive(item.path, item.exact);
           const Icon = item.icon;
 

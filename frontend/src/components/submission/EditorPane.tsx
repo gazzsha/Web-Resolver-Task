@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -15,58 +15,112 @@ import {
 } from '@mui/material';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import SendIcon from '@mui/icons-material/Send';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CodeIcon from '@mui/icons-material/Code';
 import { brand } from '@/theme/theme';
 
-type Language = 'java' | 'kotlin' | 'python';
+// P0-1: Kotlin исключён из MVP (kotlinc cold start > sandbox-timeout). Sandbox
+// и DB-схема поддерживают Kotlin, но фронт его не предлагает в выборе языка.
+type Language = 'java' | 'python';
+type SubmitState = 'idle' | 'submitting' | 'polling' | 'result';
 
 const LANGUAGE_LABELS: Record<Language, string> = {
   java: 'Java',
-  kotlin: 'Kotlin',
   python: 'Python',
 };
 
 const FILE_NAMES: Record<Language, string> = {
   java: 'Solution.java',
-  kotlin: 'Solution.kt',
   python: 'solution.py',
 };
 
 const LANGUAGE_COLORS: Record<Language, string> = {
   java: '#f59e0b',
-  kotlin: '#a855f7',
   python: '#3b82f6',
 };
 
 interface EditorPaneProps {
   code: string;
   language: Language;
-  submitting: boolean;
+  /** Legacy prop kept for callers that still pass it — maps to submitState==='submitting' */
+  submitting?: boolean;
+  /** New 4-state machine prop; takes precedence over `submitting` if provided */
+  submitState?: SubmitState;
   onCodeChange: (value: string) => void;
   onLanguageChange: (lang: Language) => void;
   onSubmit: () => void;
   onEditorMount?: OnMount;
+  /** Navigate to task list — shown as second button in result state */
+  onNavigateToTasks?: () => void;
 }
 
 const EditorPane: React.FC<EditorPaneProps> = ({
   code,
   language,
-  submitting,
+  submitting: submittingProp,
+  submitState: submitStateProp,
   onCodeChange,
   onLanguageChange,
   onSubmit,
   onEditorMount,
+  onNavigateToTasks,
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // Resolve effective state — prefer 4-state prop, fall back to legacy boolean
+  const effectiveState: SubmitState = submitStateProp ?? (submittingProp ? 'submitting' : 'idle');
+
+  const isReadOnly = effectiveState === 'submitting' || effectiveState === 'polling';
+  const showOverlay = effectiveState === 'submitting';
+  const isProcessing = effectiveState === 'submitting' || effectiveState === 'polling';
+  const isResult = effectiveState === 'result';
 
   const borderColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)';
   const tabBg = isDark ? '#13152a' : '#f0f1f8';
   const editorBg = isDark ? '#1e1e1e' : '#ffffff';
   const langColor = LANGUAGE_COLORS[language];
 
-  const canSubmit = code.trim().length > 0 && !submitting;
+  const canSubmit = code.trim().length > 0 && !isProcessing && !isResult;
+
+  // Ref for «Отправить снова» button — autoFocus when state transitions to result
+  const resubmitBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isResult && resubmitBtnRef.current) {
+      resubmitBtnRef.current.focus();
+    }
+  }, [isResult]);
+
+  // Button label and icon per state
+  const getSubmitButtonContent = () => {
+    if (effectiveState === 'submitting') {
+      return {
+        label: 'Отправляется...',
+        icon: <CircularProgress size={16} color="inherit" />,
+      };
+    }
+    if (effectiveState === 'polling') {
+      return {
+        label: 'Ожидание результата...',
+        icon: <CircularProgress size={16} color="inherit" />,
+      };
+    }
+    if (effectiveState === 'result') {
+      return {
+        label: 'Отправить снова',
+        icon: <SendIcon sx={{ fontSize: 18 }} />,
+      };
+    }
+    return {
+      label: 'Отправить решение',
+      icon: <SendIcon sx={{ fontSize: 18 }} />,
+    };
+  };
+
+  const { label: btnLabel, icon: btnIcon } = getSubmitButtonContent();
+  const gradientBg = `linear-gradient(135deg, ${brand.indigo} 0%, ${brand.indigoDark} 100%)`;
 
   return (
     <Box
@@ -91,7 +145,6 @@ const EditorPane: React.FC<EditorPaneProps> = ({
           minHeight: 44,
         }}
       >
-        {/* Active "tab" for the file */}
         <Box
           sx={{
             display: 'flex',
@@ -119,10 +172,8 @@ const EditorPane: React.FC<EditorPaneProps> = ({
           </Typography>
         </Box>
 
-        {/* Spacer */}
         <Box sx={{ flex: 1 }} />
 
-        {/* Language selector + keyboard hint */}
         <Box
           sx={{
             display: 'flex',
@@ -131,7 +182,6 @@ const EditorPane: React.FC<EditorPaneProps> = ({
             px: 2,
           }}
         >
-          {/* Keyboard shortcut hint — only on desktop */}
           {!isMobile && (
             <Tooltip title="Отправить решение (⌘+Enter / Ctrl+Enter)">
               <Chip
@@ -220,14 +270,17 @@ const EditorPane: React.FC<EditorPaneProps> = ({
         </Box>
       </Box>
 
-      {/* Monaco editor — grows to fill all available space */}
+      {/* Monaco editor — grows to fill available space; overlay on submitting */}
       <Box
         sx={{
           flex: 1,
           minHeight: 0,
-          // On mobile give it a floor so code is usable
+          position: 'relative',
           ...(isMobile && { minHeight: '60vh' }),
         }}
+        {...(isReadOnly
+          ? { 'aria-label': 'Редактор кода, только чтение', 'aria-readonly': 'true' }
+          : {})}
       >
         <Editor
           height="100%"
@@ -237,6 +290,8 @@ const EditorPane: React.FC<EditorPaneProps> = ({
           theme={isDark ? 'vs-dark' : 'light'}
           onMount={onEditorMount}
           options={{
+            readOnly: isReadOnly,
+            domReadOnly: isReadOnly,
             minimap: { enabled: !isMobile && true },
             fontSize: isMobile ? 13 : 14,
             fontFamily: '"JetBrains Mono", "Fira Code", "Cascadia Code", monospace',
@@ -260,9 +315,22 @@ const EditorPane: React.FC<EditorPaneProps> = ({
             overviewRulerLanes: 0,
           }}
         />
+
+        {/* Submitting overlay */}
+        {showOverlay && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              bgcolor: isDark ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.5)',
+              pointerEvents: 'none',
+              zIndex: 1,
+            }}
+          />
+        )}
       </Box>
 
-      {/* Footer — submit button */}
+      {/* Footer */}
       <Box
         sx={{
           flexShrink: 0,
@@ -276,49 +344,82 @@ const EditorPane: React.FC<EditorPaneProps> = ({
           gap: 1.5,
         }}
       >
-        {/* Disabled hint */}
-        {!canSubmit && !submitting && code.trim().length === 0 && (
+        {/* Hint when editor is empty in idle state */}
+        {effectiveState === 'idle' && !code.trim() && (
           <Typography variant="caption" sx={{ color: 'text.disabled' }}>
             Напишите код перед отправкой
           </Typography>
         )}
 
-        <Button
-          variant="contained"
-          size="large"
-          disabled={!canSubmit}
-          onClick={onSubmit}
-          startIcon={
-            submitting ? (
-              <CircularProgress size={16} color="inherit" />
-            ) : (
-              <SendIcon sx={{ fontSize: 18 }} />
-            )
-          }
-          sx={{
-            minWidth: 200,
-            fontWeight: 700,
-            fontSize: '0.9rem',
-            background: canSubmit
-              ? `linear-gradient(135deg, ${brand.indigo} 0%, ${brand.indigoDark} 100%)`
-              : undefined,
-            boxShadow: canSubmit
-              ? `0 4px 16px ${alpha(brand.indigo, 0.4)}`
-              : undefined,
-            '&:hover': {
-              background: `linear-gradient(135deg, ${brand.indigoDark} 0%, ${brand.indigoDeep} 100%)`,
-              boxShadow: `0 6px 24px ${alpha(brand.indigo, 0.55)}`,
-            },
-            '&:disabled': {
-              background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-              color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-              boxShadow: 'none',
-            },
-            transition: 'all 0.2s',
-          }}
-        >
-          {submitting ? 'Отправляется...' : 'Отправить решение'}
-        </Button>
+        {/* In result state: show two buttons */}
+        {isResult ? (
+          <>
+            <Button
+              ref={resubmitBtnRef}
+              variant="contained"
+              size="large"
+              onClick={onSubmit}
+              startIcon={<SendIcon sx={{ fontSize: 18 }} />}
+              sx={{
+                flex: 1,
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                background: gradientBg,
+                boxShadow: `0 4px 16px ${alpha(brand.indigo, 0.4)}`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${brand.indigoDark} 0%, ${brand.indigoDeep} 100%)`,
+                  boxShadow: `0 6px 24px ${alpha(brand.indigo, 0.55)}`,
+                },
+                transition: 'all 0.2s',
+              }}
+            >
+              Отправить снова
+            </Button>
+            {onNavigateToTasks && (
+              <Button
+                variant="outlined"
+                size="large"
+                onClick={onNavigateToTasks}
+                startIcon={<ArrowBackIcon />}
+                sx={{
+                  flex: '0 0 auto',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                }}
+              >
+                Все задачи
+              </Button>
+            )}
+          </>
+        ) : (
+          // Idle / submitting / polling: single button
+          <Button
+            variant="contained"
+            size="large"
+            disabled={!canSubmit || isProcessing}
+            onClick={isProcessing ? undefined : onSubmit}
+            startIcon={btnIcon}
+            sx={{
+              minWidth: 200,
+              fontWeight: 700,
+              fontSize: '0.9rem',
+              background: canSubmit && !isProcessing ? gradientBg : undefined,
+              boxShadow: canSubmit && !isProcessing ? `0 4px 16px ${alpha(brand.indigo, 0.4)}` : undefined,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${brand.indigoDark} 0%, ${brand.indigoDeep} 100%)`,
+                boxShadow: `0 6px 24px ${alpha(brand.indigo, 0.55)}`,
+              },
+              '&:disabled': {
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+                color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                boxShadow: 'none',
+              },
+              transition: 'all 0.2s',
+            }}
+          >
+            {btnLabel}
+          </Button>
+        )}
       </Box>
     </Box>
   );

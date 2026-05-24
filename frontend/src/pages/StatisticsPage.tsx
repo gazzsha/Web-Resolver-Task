@@ -3,10 +3,10 @@ import {
   Box,
   Typography,
   Card,
-  CardContent,
   Grid,
   Alert,
   Skeleton,
+  Paper,
   alpha,
   useTheme,
 } from '@mui/material';
@@ -14,6 +14,8 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import SendIcon from '@mui/icons-material/Send';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
+import WhatshotOutlinedIcon from '@mui/icons-material/WhatshotOutlined';
 import {
   PieChart,
   Pie,
@@ -30,6 +32,11 @@ import {
 import { meService } from '@/services/api';
 import type { UserStats, SubmissionSummary } from '@/types';
 import { brand } from '@/theme/theme';
+import { buildLangData, buildStatusData, buildStreak } from '@/utils/submissionStats';
+import KpiCard from '@/components/statistics/KpiCard';
+import ActivityLineChart from '@/components/statistics/ActivityLineChart';
+import ErrorDistributionList from '@/components/statistics/ErrorDistributionList';
+import StreakCard from '@/components/statistics/StreakCard';
 
 // ── constants ─────────────────────────────────────────────────────────────────
 
@@ -39,114 +46,7 @@ const LANG_COLORS: Record<string, string> = {
   python: '#3572a5',
 };
 
-const STATUS_LABELS: Record<SubmissionSummary['status'], string> = {
-  SUCCESS: 'Принято',
-  PARTIAL_SUCCESS: 'Частично',
-  FAILED: 'Не принято',
-  ERROR: 'Ошибка',
-  PENDING: 'В ожидании',
-  PROCESSING: 'Выполняется',
-};
-
 const MIN_SUBMISSIONS_FOR_CHARTS = 5;
-
-// ── helpers ───────────────────────────────────────────────────────────────────
-
-function buildLangData(submissions: SubmissionSummary[]) {
-  const counts: Record<string, number> = {};
-  for (const s of submissions) {
-    counts[s.language] = (counts[s.language] ?? 0) + 1;
-  }
-  return Object.entries(counts).map(([name, value]) => ({ name, value }));
-}
-
-function buildStatusData(submissions: SubmissionSummary[]) {
-  const relevant: Array<SubmissionSummary['status']> = ['SUCCESS', 'PARTIAL_SUCCESS', 'FAILED', 'ERROR'];
-  const counts: Record<string, number> = {};
-  for (const s of submissions) {
-    if (relevant.includes(s.status)) {
-      const label = STATUS_LABELS[s.status];
-      counts[label] = (counts[label] ?? 0) + 1;
-    }
-  }
-  return Object.entries(counts).map(([name, value]) => ({ name, value }));
-}
-
-// ── stat card ─────────────────────────────────────────────────────────────────
-
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-  accentColor: string;
-  description: string;
-  loading: boolean;
-}
-
-const StatCard: React.FC<StatCardProps> = ({ label, value, icon, accentColor, description, loading }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-
-  return (
-    <Card
-      sx={{
-        height: '100%',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': {
-          transform: 'translateY(-3px)',
-          boxShadow: isDark
-            ? `0 8px 30px ${alpha(accentColor, 0.25)}`
-            : `0 8px 24px ${alpha(accentColor, 0.18)}`,
-        },
-      }}
-    >
-      <CardContent sx={{ p: 3 }}>
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            mb: 2,
-            color: accentColor,
-            background: alpha(accentColor, isDark ? 0.18 : 0.1),
-          }}
-        >
-          {icon}
-        </Box>
-        {loading ? (
-          <>
-            <Skeleton variant="text" width="50%" height={48} />
-            <Skeleton variant="text" width="70%" />
-          </>
-        ) : (
-          <>
-            <Typography
-              variant="h3"
-              sx={{
-                fontWeight: 700,
-                fontSize: '2rem',
-                mb: 0.5,
-                color: 'text.primary',
-                fontFamily: '"JetBrains Mono", monospace',
-              }}
-            >
-              {value}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary', mb: 0.25 }}>
-              {label}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              {description}
-            </Typography>
-          </>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
 
 // ── custom tooltip ────────────────────────────────────────────────────────────
 
@@ -238,10 +138,20 @@ const StatisticsPage = () => {
   const statusData = useMemo(() => buildStatusData(submissions), [submissions]);
   const hasEnoughData = submissions.length >= MIN_SUBMISSIONS_FOR_CHARTS;
 
+  const { currentStreak, maxStreak } = useMemo(() => buildStreak(submissions), [submissions]);
+
+  // KPI derived values
   const qualityValue =
     stats?.averageQuality != null ? `${stats.averageQuality.toFixed(0)}%` : '—';
   const qualityDescription =
     stats?.averageQuality != null ? 'Средний балл AI-анализатора' : 'AI-анализ не выполнялся';
+
+  const tasksInProgress = useMemo(() => {
+    const nonSuccess = submissions.filter((s) => s.status !== 'SUCCESS');
+    return new Set(nonSuccess.map((s) => s.taskId)).size;
+  }, [submissions]);
+
+  const bestStreak = maxStreak;
 
   // recharts colors
   const langColors = langData.map((d) => LANG_COLORS[d.name] ?? brand.indigo);
@@ -281,10 +191,10 @@ const StatisticsPage = () => {
         </Alert>
       )}
 
-      {/* Top stat cards */}
+      {/* ── 5 KPI cards ─────────────────────────────────────────────── */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={4}>
-          <StatCard
+        <Grid item xs={12} sm={6} md={2.4}>
+          <KpiCard
             label="Решено задач"
             value={stats?.tasksSolved ?? '—'}
             icon={<CheckCircleOutlineIcon sx={{ fontSize: 26 }} />}
@@ -293,8 +203,8 @@ const StatisticsPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <StatCard
+        <Grid item xs={12} sm={6} md={2.4}>
+          <KpiCard
             label="Всего попыток"
             value={stats?.totalSubmissions ?? '—'}
             icon={<SendIcon sx={{ fontSize: 26 }} />}
@@ -303,8 +213,8 @@ const StatisticsPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={4}>
-          <StatCard
+        <Grid item xs={12} sm={6} md={2.4}>
+          <KpiCard
             label="Среднее качество кода"
             value={qualityValue}
             icon={<AutoAwesomeIcon sx={{ fontSize: 26 }} />}
@@ -313,27 +223,47 @@ const StatisticsPage = () => {
             loading={loading}
           />
         </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <KpiCard
+            label="Задач в работе"
+            value={loading ? '—' : tasksInProgress}
+            icon={<PendingOutlinedIcon sx={{ fontSize: 26 }} />}
+            accentColor={brand.indigo}
+            description="Задач без успешного решения"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={2.4}>
+          <KpiCard
+            label="Лучшая серия"
+            value={loading ? '—' : `${bestStreak} дн.`}
+            icon={<WhatshotOutlinedIcon sx={{ fontSize: 26 }} />}
+            accentColor="#f97316"
+            description="Максимум дней подряд с активностью"
+            loading={loading}
+          />
+        </Grid>
       </Grid>
 
-      {/* Charts row */}
+      {/* ── Charts row ──────────────────────────────────────────────── */}
       {loading ? (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={5}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={4}>
             <Card sx={{ p: 3 }}>
               <Skeleton variant="text" width="50%" height={28} sx={{ mb: 2 }} />
               <Skeleton variant="circular" width={200} height={200} sx={{ mx: 'auto' }} />
             </Card>
           </Grid>
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={8}>
             <Card sx={{ p: 3 }}>
               <Skeleton variant="text" width="50%" height={28} sx={{ mb: 2 }} />
-              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 1 }} />
+              <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 1 }} />
             </Card>
           </Grid>
         </Grid>
       ) : !hasEnoughData ? (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={5}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={4}>
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                 По языкам
@@ -341,7 +271,7 @@ const StatisticsPage = () => {
               <ChartEmptyState isDark={isDark} />
             </Card>
           </Grid>
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={8}>
             <Card sx={{ p: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                 По статусам
@@ -351,14 +281,14 @@ const StatisticsPage = () => {
           </Grid>
         </Grid>
       ) : (
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
           {/* Pie chart — languages */}
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={4}>
             <Card sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                 Распределение по языкам
               </Typography>
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={langData}
@@ -392,12 +322,12 @@ const StatisticsPage = () => {
           </Grid>
 
           {/* Bar chart — statuses */}
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={8}>
             <Card sx={{ p: 3, height: '100%' }}>
               <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                 Распределение по статусам
               </Typography>
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                   data={statusData}
                   margin={{ top: 8, right: 16, left: -8, bottom: 0 }}
@@ -430,6 +360,39 @@ const StatisticsPage = () => {
             </Card>
           </Grid>
         </Grid>
+      )}
+
+      {/* ── Bottom analytic block ────────────────────────────────── */}
+      <Grid container spacing={3}>
+        {/* Activity line chart (md=5) */}
+        <Grid item xs={12} md={5}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <ActivityLineChart submissions={submissions} />
+          </Paper>
+        </Grid>
+
+        {/* Error distribution (md=4) */}
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <ErrorDistributionList submissions={submissions} />
+          </Paper>
+        </Grid>
+
+        {/* Streak card (md=3) */}
+        <Grid item xs={12} md={3}>
+          <Paper sx={{ p: 3, height: '100%' }}>
+            <StreakCard submissions={submissions} />
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Hint about current streak under KPI if active */}
+      {!loading && currentStreak > 0 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="caption" color="text.secondary">
+            Текущая серия: {currentStreak} дн. подряд
+          </Typography>
+        </Box>
       )}
     </Box>
   );
