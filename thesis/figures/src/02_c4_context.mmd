@@ -1,0 +1,21 @@
+flowchart TB
+    classDef actor fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef system fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+    classDef external fill:#eee,stroke:#555,stroke-dasharray:4 3,color:#111
+
+    S(("Студент")):::actor
+    T(("Преподаватель")):::actor
+
+    subgraph Service["Web-сервис автопроверки"]
+        WS["Backend + Frontend"]:::system
+    end
+
+    G["GigaChat API<br/>(Sberbank)"]:::external
+    DB["PostgreSQL"]:::external
+    SB["Docker Sandbox"]:::external
+
+    S -- "сдаёт решение" --> WS
+    T -- "управляет каталогом" --> WS
+    WS -- "AI-разбор кода" --> G
+    WS -- "хранение задач,<br/>пользователей,<br/>результатов" --> DB
+    WS -- "изолированный запуск<br/>пользовательского кода" --> SB

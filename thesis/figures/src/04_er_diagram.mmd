@@ -1,0 +1,60 @@
+erDiagram
+    USERS ||--o{ SUBMISSIONS : "сдаёт"
+    TASKS ||--o{ SUBMISSIONS : "решается"
+    TASKS ||--o{ TEST : "имеет тесты"
+    SUBMISSIONS ||--o{ TEST_RESOLVE : "порождает"
+    SUBMISSIONS ||--o| TASK_RESULTS : "агрегирует"
+    SUBMISSIONS ||--o| AI_ANALYSIS : "AI-разбор"
+    TEST ||--o{ TEST_RESOLVE : "проверяет"
+
+    USERS {
+        uuid id PK
+        text email UK
+        text password_hash
+        text role
+        timestamp created_at
+    }
+    TASKS {
+        uuid id PK
+        text title
+        text description
+        text difficulty
+        text category
+        timestamp created_at
+    }
+    TEST {
+        uuid id PK
+        uuid task_id FK
+        jsonb arguments
+        jsonb expected
+    }
+    SUBMISSIONS {
+        uuid id PK
+        uuid user_id FK
+        uuid task_id FK
+        text language
+        text source_code
+        text status
+        timestamp submitted_at
+    }
+    TEST_RESOLVE {
+        uuid id PK
+        uuid submission_id FK
+        uuid test_id FK
+        text verdict
+        int duration_ms
+        int memory_kb
+    }
+    TASK_RESULTS {
+        uuid submission_id PK
+        int total_tests
+        int passed
+        text overall_verdict
+    }
+    AI_ANALYSIS {
+        uuid submission_id PK
+        int code_quality
+        jsonb recommendations
+        text model
+        timestamp analyzed_at
+    }

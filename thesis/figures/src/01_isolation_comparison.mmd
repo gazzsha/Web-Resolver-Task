@@ -1,0 +1,18 @@
+flowchart LR
+    classDef weak fill:#fff,stroke:#777,stroke-dasharray:4 3,color:#111
+    classDef mid fill:#eee,stroke:#333,color:#111
+    classDef strong fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+
+    A["chroot<br/>(только FS)"]:::weak
+    B["FreeBSD jail<br/>(FS + PID + сеть)"]:::weak
+    C["Docker<br/>(namespace + cgroup)"]:::mid
+    D["nsjail<br/>(namespace + seccomp)"]:::mid
+    E["gVisor<br/>(user-space kernel)"]:::strong
+    F["Firecracker<br/>(micro-VM)"]:::strong
+
+    A --> B --> C --> D --> E --> F
+
+    A1[isolation: слабая]:::weak
+    F1[isolation: сильная]:::strong
+    A1 -.-> A
+    F -.-> F1

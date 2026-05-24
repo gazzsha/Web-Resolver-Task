@@ -25,6 +25,20 @@
 6. 3 разных `Verdict`-enum (sandbox / worker / db) + сгенерированный.
 7. Мёртвый код: `task-process/JavaJudgeRunner.kt`, `worker/SimpleTestEngine.kt`, `worker/DefaultTestEngine.kt`, `db/ src/` (с пробелом).
 
+### Техдолг smoke-тест 2026-05-13 → закрыт (live-проверено)
+
+| # | Что было | Что стало | Файл |
+|---|---|---|---|
+| P0-1 | Kotlin принимался → `kotlinc` cold start даёт TLE на компиляции | Frontend type `'java'\|'python'`, server отдаёт `400 Bad Request` на `language=kotlin` | `TaskResolverController.kt`, `EditorPane.tsx`, `Submission.tsx`, `types/index.ts`, `TaskPanel.tsx` |
+| P0-2 | `while True: pass` wall=15430ms, exit137→MLE | wall=**10398ms**, watchdog `docker kill -s SIGKILL` + `--stop-timeout=0`, `timedOut→TLE` раньше `exit==137` | `DockerSandboxService.kt` (watchdog + resolveVerdict reorder) |
+| P0-3 | GigaChat галлюцинировал (`StringBuffer`, `a/b`, `.get()` на Python-коде из-за base64-обёртки + отсутствия описания задачи и sandbox-вердикта) | User-prompt теперь содержит: `Условие задачи` + `Результат проверки sandbox (passed/total/verdict/firstError)` + `<AST_FACTS>` + plain-text код в `<<<STUDENT_CODE_BEGIN/END>>>` sentinel'ах. LLM возвращает task-specific критику | `AnalyzerPrompts.userPromptFull`, `AIAnalyzer.AnalyzeContext`, `GigaChatAnalyzer`, `AstHybridAnalyzer`, `SimpleRuleBasedAnalyzer`, `AiAnalyzerConfig` (AST-wiring), `WorkerService`, `WorkerTaskMessage`/`TaskMessage` (taskDescription), `TaskResolverProcessService` |
+| P0-4 | `codeQuality` 70+ при `passed=0/total=N` | `ALL_FAILED_CODE_QUALITY_CAP=40` каскадом поверх старого 60 для partial-fail | `GigaChatAnalyzer.mapPayload` |
+| P1-5 | `testResults[].passed` отсутствовал в JSON | Добавлено required-поле `passed: boolean` в OpenAPI `TestResultDetail`, маппинг `verdict == OK` | `task-results-api.yml`, `TaskResultService.kt:75` |
+| P1-6 | `memoryUsedKb=0` для программ <500ms (docker-stats polling 100ms их пропускает) | `wrapForPeakMemoryCapture` оборачивает команду, контейнер пишет `/sys/fs/cgroup/memory.peak` в `/app/.peak_memory_bytes`. `memoryUsedKb = maxOf(polledPeak, cgroupPeak) / 1024` (14536-14680KB для коротких) | `DockerSandboxService.kt` |
+| P1-7 | Fallback rule-based-путь не валидирован тестом | `GigaChatAnalyzerTest`: logback `ListAppender` ловит WARN `falling back to rule-based`, проверяет `modelVersion="rule-based"` + непустой `explanation` | `GigaChatAnalyzerTest.kt` |
+
+Также добавлены unit-тесты: `userPromptFull contains all expected blocks in order (P0-3 snapshot)`, `userPromptFull omits blocks when corresponding data is null`, `userPromptFull neutralises in-code sentinel-end injection`, `clamps codeQuality to 40 when ALL tests fail (P0-4 verdict guard)`. System-prompt секция «ПЕРЕДАЧА КОДА» переписана с base64-формата на sentinel'ы + добавлен блок «КОНТЕКСТ ЗАДАЧИ». OpenAPI lang-enum НЕ менялся — Kotlin остался в спеке для обратной совместимости с историческими submissions, дроп выполнен на уровне controller + UI.
+
 ## MVP scope
 
 **Один user-flow должен работать end-to-end:**

@@ -1,0 +1,23 @@
+flowchart LR
+    classDef src fill:#fff,stroke:#000,color:#111
+    classDef proc fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef out fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+
+    DS[/"Датасет:<br/>30 задач × 6 категорий<br/>180 решений"/]:::src
+    RN["Runner.kt"]:::proc
+    SV["Синтетический<br/>sandbox-вердикт<br/>(WA/TLE/RTE/STUB/...)"]:::proc
+    B1["B1: GigaChat<br/>(без AST, без guard)"]:::proc
+    B1F["B1f: GigaChat<br/>+ fallback rule-based"]:::proc
+    B2["B2: AstHybrid<br/>GigaChat + AST_FACTS<br/>+ verdict-guard"]:::proc
+    AGG["MetricsAggregator"]:::proc
+    OUT[/"_summary.json:<br/>structuralValidPct,<br/>injectionSuccessRate,<br/>latencyP50/P95,<br/>codeQuality"/]:::out
+
+    DS --> RN
+    RN --> SV
+    SV --> B1
+    SV --> B1F
+    SV --> B2
+    B1 --> AGG
+    B1F --> AGG
+    B2 --> AGG
+    AGG --> OUT

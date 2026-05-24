@@ -1,0 +1,41 @@
+flowchart TB
+    classDef ui fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef api fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef worker fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+    classDef data fill:#cfcfcf,stroke:#000,stroke-width:2px,color:#111
+    classDef ext fill:#fff,stroke:#555,stroke-dasharray:4 3,color:#111
+
+    subgraph Frontend["Frontend (React + Vite)"]
+        FE["UI:<br/>каталог, редактор<br/>Monaco, дашборды"]:::ui
+    end
+
+    subgraph Backend["Backend (Spring Boot)"]
+        MA["MainApplication<br/>(auth, REST)"]:::api
+        TR["task-resolver<br/>(каталог,<br/>импорт CSV)"]:::api
+        TP["task-process<br/>(оркестратор)"]:::api
+        WK["worker<br/>(Kafka consumer)"]:::worker
+        SR["scenario-runner<br/>(тесты в sandbox)"]:::worker
+        SB["sandbox<br/>(Docker host-side)"]:::worker
+        AI["ai-analyzer<br/>(GigaChat + AST)"]:::worker
+        DB["db<br/>(JPA + Flyway)"]:::api
+    end
+
+    PG[("PostgreSQL 16")]:::data
+    KF[("Kafka")]:::data
+    GIG["GigaChat API"]:::ext
+    DOCK["Docker daemon"]:::ext
+
+    FE -- "HTTPS JSON" --> MA
+    MA --> TR
+    MA --> TP
+    TP -- "task-execution" --> KF
+    KF --> WK
+    WK --> SR
+    SR --> SB
+    SB --> DOCK
+    WK --> AI
+    AI --> GIG
+    TR --> DB
+    MA --> DB
+    WK --> DB
+    DB --> PG

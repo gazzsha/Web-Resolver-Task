@@ -1,0 +1,30 @@
+flowchart TB
+    classDef term fill:#fff,stroke:#000,stroke-width:2px,color:#111,rx:30,ry:30
+    classDef proc fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef dec fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef io fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef err fill:#ccc,stroke:#000,stroke-width:2px,color:#111
+
+    A(["Старт"]):::term
+    B[/"Вход: код,<br/>язык, stdin, лимиты"/]:::io
+    C["Сборка флагов hardening:<br/>--cap-drop=ALL,<br/>--network=none,<br/>--read-only,<br/>--no-new-privileges,<br/>--pids-limit,<br/>--tmpfs noexec"]:::proc
+    D["docker run<br/>с измерением времени"]:::proc
+    E{"Превышен<br/>таймаут?"}:::dec
+    F["SIGKILL контейнера,<br/>verdict=TLE"]:::err
+    G["Чтение stdout/stderr,<br/>peak RSS"]:::proc
+    H{"Превышен<br/>memory_kb?"}:::dec
+    I["verdict=MLE"]:::err
+    J{"exit_code = 0?"}:::dec
+    K["verdict=RTE"]:::err
+    L["verdict=OK,<br/>сравнение output"]:::proc
+    M[/"Возврат:<br/>verdict, time, memory"/]:::io
+    Z(["Конец"]):::term
+
+    A --> B --> C --> D --> E
+    E -- да --> F --> M
+    E -- нет --> G --> H
+    H -- да --> I --> M
+    H -- нет --> J
+    J -- нет --> K --> M
+    J -- да --> L --> M
+    M --> Z
