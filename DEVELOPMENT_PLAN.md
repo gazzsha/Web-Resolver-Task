@@ -251,6 +251,69 @@ Phase 2 ↔ Phase 6 ↔ Phase 7 могут идти параллельно (ра
 - Багфиксы того, что репетиция найдёт.
 - Финальный pass по тексту записки.
 
+### Phase 14 — Production-grade наблюдаемость (закрыта)
+
+**Команда:** «monitoring rollout» (5 параллельных агентов на ресёрче,
+sequential на implementation). **Skill `monitoring-stack`.**
+
+Закрыто за один прогон. Артефакты:
+
+- Custom Micrometer-бины: `AiAnalyzerMetrics`, `SandboxMetrics`, `WorkerMetrics` —
+  histogram + counter по каждому из доменных слоёв (variant/outcome/verdict/status).
+- Инфраструктура: `alertmanager` + `postgres-exporter` + `kafka-exporter` +
+  `node-exporter` в `docker-compose.yml` под профилем `monitoring`.
+- Alert rules: `monitoring/rules/web-resolver.rules.yml` — 8 групп / 40 правил,
+  multi-window multi-burn-rate по Google SRE Workbook, проходит `promtool check rules`.
+- 6 Grafana-дашбордов auto-provisioned: SLO/SLA, JVM, Kafka, PostgreSQL,
+  Sandbox, AI Analyzer (Б.10–Б.15 в Приложении Б).
+- Hardening `/actuator/prometheus` — basic-auth (`prometheus-scraper`) + IP-allowlist
+  (`172.16/12 + 127.0.0.1 + ::1`), defense-in-depth.
+- Тесты: `MetricsExposureTest` (4 кейса) + `AlertRulesValidationTest`
+  (promtool через ProcessBuilder) — gated `RUN_INTEGRATION_TESTS=true`.
+
+Глава 3.6.3 ПЗ обновлена; Приложение Б получило рисунки Б.11–Б.15.
+
+### Phase 15 — Security audit (закрыта)
+
+**Команда:** 2 прохода `security-auditor` через skill `differential-review`.
+**Артефакт:** `DIFFERENTIAL_REVIEW_REPORT.md` в корне репозитория — 27 находок
+(1 CRITICAL, 1 HIGH-class CRITICAL, 6 HIGH, 10 MEDIUM, 8 LOW, 1 INFO).
+
+Все 27 закрыты в 6 fix-коммитах (F-1..F-14 — Pass 1; F-15..F-27 — Pass 2):
+
+**Critical / High (8 шт):**
+- F-1 — `prometheusAccess()` возвращал `null` на IP-deny, Spring Security 6
+  трактует это как «abstain → grant» (полное снятие защиты).
+- F-2 — `/actuator/metrics` экспонирован любому JWT.
+- F-3 — hardcoded дефолт `scraper-dev-pass` (fail-open at startup).
+- F-4 — trust-all `X509TrustManager` в `GigaChatClient` (MITM-уязвимость
+  на `ngw.devices.sberbank.ru`).
+- F-5 — нет multipart size limit + `findAll()` всего каталога в heap при импорте CSV.
+- F-6 — нет security-specific тестов SecurityConfig.
+- F-15 — JWT dev-secret fallback (повторение F-3 для JWT).
+- F-16 — `WorkerKafkaListener` ack'нул каждое исключение — silent loss
+  всех transient failures без DLQ.
+- F-17 — нет cap на `WorkerTaskMessage.code` size — concurrent OOM-vector.
+
+**Medium / Required (10 шт):** F-7 CSV-formula injection, F-8 prompt в INFO log,
+F-9 retry path слабее first attempt, F-10 dedup race на DB, F-18 publishResult
+swallows, F-19/F-20 AST parsers race (StaticJavaParser, KtPsiFactory),
+F-21 scenario-runner stub (always-PASSED), F-22 JWT subject не валидируется
+как UUID.
+
+**Low / Nice-to-have (9 шт):** F-11 generic error message, F-12/F-13/F-14
+guard comments, F-23 clock-skew + iss claim, F-24 errorMessage в WorkerTaskResult,
+F-25 DEBUG logging, F-26 scenario exact-match, F-27 sendSyncAndLog truncate.
+
+**Regression tests (Phase 15 финал):**
+- `JwtTokenProviderTest`: 11 кейсов (+7 новых для F-15/F-22/F-23 + tampered/expired/foreign-key)
+- `JavaAstAnalyzerConcurrentTest`: 150× параллельно, F-19 регрессия
+- `KotlinAstAnalyzerConcurrentTest`: 150× параллельно, F-20 регрессия
+- `WorkerServiceConfigTest`: pin scenario bean type
+- `KafkaWorkerConfigTest`: reflection-проверка commonErrorHandler
+- `WorkerKafkaListenerTest`: 5 кейсов F-16/F-17 (propagate-not-ack, payload-cap)
+- `SecurityConfigTest`: 5 MockMvc-кейсов F-1/F-2 (8.8.8.8 → 403; /metrics → 404)
+
 ## Agent-team пресеты
 
 | Фаза | Mode | Состав |
