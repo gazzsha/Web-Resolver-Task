@@ -1,0 +1,14 @@
+{
+  "itemId": "binary-search-style-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "explanation_quality_score": 4,
+  "rubric": {
+    "identification": 1,
+    "localisation": 1,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "корректно указано на стиль и предложено улучшение",
+  "judge": "gigachat-self:GigaChat"
+}

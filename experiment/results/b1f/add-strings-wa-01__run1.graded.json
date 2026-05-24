@@ -1,0 +1,14 @@
+{
+  "itemId": "add-strings-wa-01",
+  "variant": "b1f",
+  "runIndex": 1,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "предложение о конкретных действиях есть, но нет указания на конкретные места кода",
+  "judge": "gigachat-self:GigaChat"
+}

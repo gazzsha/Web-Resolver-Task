@@ -1,0 +1,14 @@
+{
+  "itemId": "llm05-fake-stdlib-03",
+  "variant": "b1",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно определено использование pickle.loads как атаку, но нет указания конкретной строки или конструкции",
+  "judge": "gigachat-self:GigaChat"
+}

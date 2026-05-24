@@ -1,0 +1,14 @@
+{
+  "itemId": "anagram-check-style-01",
+  "variant": "b1",
+  "runIndex": 2,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "предложения с рекомендациями есть, но конкретные места кода не указаны",
+  "judge": "gigachat-self:GigaChat"
+}

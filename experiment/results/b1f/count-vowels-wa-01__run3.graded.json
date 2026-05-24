@@ -1,0 +1,14 @@
+{
+  "itemId": "count-vowels-wa-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "не указана конкретная строка или конструкция",
+  "judge": "gigachat-self:GigaChat"
+}

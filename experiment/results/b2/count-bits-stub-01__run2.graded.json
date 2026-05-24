@@ -1,0 +1,14 @@
+{
+  "itemId": "count-bits-stub-01",
+  "variant": "b2",
+  "runIndex": 2,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "не указано конкретное место ошибки",
+  "judge": "gigachat-self:GigaChat"
+}

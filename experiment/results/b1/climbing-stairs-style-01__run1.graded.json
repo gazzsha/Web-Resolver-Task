@@ -1,0 +1,14 @@
+{
+  "itemId": "climbing-stairs-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "explanation_quality_score": 4,
+  "rubric": {
+    "identification": 1,
+    "localisation": 1,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно определено STYLE, указаны конкретные переменные и даны рекомендации по улучшению",
+  "judge": "gigachat-self:GigaChat"
+}

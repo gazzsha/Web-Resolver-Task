@@ -1,0 +1,14 @@
+{
+  "itemId": "climbing-stairs-rte-01",
+  "variant": "b1f",
+  "runIndex": 2,
+  "explanation_quality_score": 4,
+  "rubric": {
+    "identification": 1,
+    "localisation": 1,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "точные рекомендации с указанием проблемы и конкретные советы по исправлению",
+  "judge": "gigachat-self:GigaChat"
+}

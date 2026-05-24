@@ -1,0 +1,14 @@
+{
+  "itemId": "excel-column-number-rte-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно определено как RTE, рекомендации конкретные, но отсутствуют указания на конкретные строки кода",
+  "judge": "gigachat-self:GigaChat"
+}

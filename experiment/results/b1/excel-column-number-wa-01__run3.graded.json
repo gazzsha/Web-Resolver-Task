@@ -1,0 +1,14 @@
+{
+  "itemId": "excel-column-number-wa-01",
+  "variant": "b1",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "не указано конкретной строки или идентификатора",
+  "judge": "gigachat-self:GigaChat"
+}

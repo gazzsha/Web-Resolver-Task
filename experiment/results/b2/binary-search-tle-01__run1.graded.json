@@ -1,0 +1,14 @@
+{
+  "itemId": "binary-search-tle-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "explanation_quality_score": 4,
+  "rubric": {
+    "identification": 1,
+    "localisation": 1,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно определено TLE, указано конкретная проблема с циклом, даны конкретные рекомендации",
+  "judge": "gigachat-self:GigaChat"
+}

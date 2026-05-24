@@ -1,0 +1,14 @@
+{
+  "itemId": "anagram-check-stub-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно определена категория ошибки, но нет указания конкретной строки",
+  "judge": "gigachat-self:GigaChat"
+}

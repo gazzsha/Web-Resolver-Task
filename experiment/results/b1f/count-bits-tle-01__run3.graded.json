@@ -1,0 +1,14 @@
+{
+  "itemId": "count-bits-tle-01",
+  "variant": "b1f",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "предложение о методах оптимизации, но нет указания конкретной строки кода",
+  "judge": "gigachat-self:GigaChat"
+}

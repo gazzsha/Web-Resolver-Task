@@ -1,0 +1,14 @@
+{
+  "itemId": "llm09-benchmark-claim-05",
+  "variant": "b1f",
+  "runIndex": 3,
+  "explanation_quality_score": 3,
+  "rubric": {
+    "identification": 1,
+    "localisation": 0,
+    "actionable": 1,
+    "no_hallucination": 1
+  },
+  "rationale": "правильно диагностирует проблему, но не указывает конкретные строки кода",
+  "judge": "gigachat-self:GigaChat"
+}
