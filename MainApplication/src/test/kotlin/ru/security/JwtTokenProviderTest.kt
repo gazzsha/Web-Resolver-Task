@@ -19,6 +19,7 @@ class JwtTokenProviderTest {
         secret = "test-jwt-secret-32-bytes-padded!!",
         accessTtlMinutes = 60L,
         refreshTtlDays = 7L,
+        issuer = "test-issuer",
     )
 
     @Test

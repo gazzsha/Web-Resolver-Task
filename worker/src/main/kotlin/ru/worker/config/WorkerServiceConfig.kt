@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 import ru.worker.metrics.WorkerMetrics
 import ru.worker.service.*
 import ru.aianalyzer.service.AIAnalyzer
+import ru.scenarioplayer.DefaultScenarioRunnerImpl
 import ru.scenarioplayer.ScenarioRunner
 import ru.sandbox.metrics.SandboxMetrics
 import ru.sandbox.service.DockerSandboxService
@@ -35,41 +36,14 @@ class WorkerServiceConfig {
         return DockerTestEngine(dockerSandboxService)
     }
 
+    // F-21: wire the real DefaultScenarioRunnerImpl. The previous bean was an
+    // anonymous stub that returned status="PASSED" for every step regardless of
+    // code, language or input — silently bypassing scenario-based grading. A
+    // student submitting a stub that prints fixed output would have earned full
+    // marks for any task using scenarioTests.
     @Bean
-    fun scenarioRunner(): ScenarioRunner {
-        return object : ScenarioRunner {
-            override fun runScenario(code: String, language: String, scenario: ru.scenarioplayer.ScenarioTest): ru.scenarioplayer.ScenarioResult {
-                return ru.scenarioplayer.ScenarioResult(
-                    scenarioId = scenario.scenarioId,
-                    status = "PASSED",
-                    stepResults = scenario.steps.map { step ->
-                        ru.scenarioplayer.StepResult(
-                            stepNumber = step.stepNumber,
-                            status = "PASSED",
-                            actualOutput = "Mock output",
-                            expectedOutput = step.expectedOutput,
-                            stateMatches = true
-                        )
-                    },
-                    finalState = "completed"
-                )
-            }
-
-            override fun runStep(code: String, language: String, step: ru.scenarioplayer.ScenarioStep, currentState: String?): ru.scenarioplayer.StepResult {
-                return ru.scenarioplayer.StepResult(
-                    stepNumber = step.stepNumber,
-                    status = "PASSED",
-                    actualOutput = "Mock output",
-                    expectedOutput = step.expectedOutput,
-                    stateMatches = true
-                )
-            }
-
-            override fun extractState(output: String): String? {
-                return output
-            }
-        }
-    }
+    fun scenarioRunner(dockerSandboxService: DockerSandboxService): ScenarioRunner =
+        DefaultScenarioRunnerImpl(dockerSandboxService)
 
     @Bean
     fun workerService(

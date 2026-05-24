@@ -1,6 +1,6 @@
 package ru.aianalyzer.ast
 
-import com.github.javaparser.StaticJavaParser
+import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -31,7 +31,19 @@ import com.github.javaparser.ast.stmt.WhileStmt
 internal class JavaAstAnalyzer {
 
     fun analyze(code: String): AstFact {
-        val cu: CompilationUnit = StaticJavaParser.parse(code)
+        // F-19: use a local JavaParser instance — StaticJavaParser holds JVM-wide
+        // mutable ParserConfiguration that JavaParser explicitly documents as
+        // unsafe under concurrent use. Worker runs with concurrency=3 so any
+        // two simultaneous Java submissions race on shared parser state.
+        //
+        // Match StaticJavaParser semantics: throw on any parse problem (not only
+        // when no CU at all), so the caller's runSafely catches and returns
+        // AstFact.empty — matches the resilience contract documented in tests.
+        val parseResult = JavaParser().parse(code)
+        check(parseResult.isSuccessful) { "Java parse failed: ${parseResult.problems}" }
+        val cu: CompilationUnit = parseResult.result.orElseThrow {
+            IllegalStateException("Java parse succeeded but produced no CompilationUnit")
+        }
 
         return AstFact(
             language = "java",

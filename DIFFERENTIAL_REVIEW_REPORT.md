@@ -192,3 +192,93 @@ Recommended minimum additions:
 | 10 | DB unique index on `lower(title)` (F-10) | Recommended |
 | 11 | Generic error messages from `TaskImportService` (F-11) | Nice-to-have |
 | 12 | `category` length validation client-side (F-12) | Nice-to-have |
+
+---
+
+## Pass 2 (deferred scope)
+
+Reviewer: security-auditor sub-agent · Scope: JwtTokenProvider body, worker pipeline, AST extractors, scenario-runner, common.
+
+### Summary & verdict
+
+**Verdict: REQUEST-CHANGES** (1 CRITICAL-class, 2 HIGH, 5 MEDIUM, 4 LOW, 1 INFO).
+
+Pass-2 surfaces three blocking issues missed in Pass-1: a JWT dev-secret fallback (F-15) of identical severity to the now-fixed Prometheus dev-password F-3; a Kafka listener that silently swallows every error and ack's it (F-16); and an unbounded `code` field that lets concurrent submissions OOM the worker (F-17). Two further bugs are subtle correctness defects: `StaticJavaParser` and `KtPsiFactory` are used as JVM-wide singletons while the worker runs `concurrency=3` (F-19, F-20), and the `scenario-runner` bean is hard-coded to return PASSED for every step, silently bypassing what should be real interactive-task grading (F-21). The JWT body is otherwise sound: HMAC key length is enforced, `typ` is required, refresh-token type is enforced at the controller — but it has no clock skew, no issuer, no audience, no subject UUID validation. AST extractors are otherwise defensive (`runSafely` swallows parser bombs into empty facts) but the thread-safety story is wrong. `common/` is minimal; one nit.
+
+### Findings (continuing from F-15)
+
+#### F-15 HIGH (CRITICAL-class) — JWT dev-secret fallback allows boot with a publicly-known HMAC key
+- **File:** `MainApplication/src/main/kotlin/ru/security/JwtTokenProvider.kt:23-30`
+- **Attack scenario:** Operator deploys without `JWT_SECRET`. App falls back to baked-in string `dev-secret-32-bytes-padded-here!!`, logged at WARN, lost in noise. Attacker grabs constant from GitHub, forges TEACHER token, hits `/api/v1/admin/tasks/import`. Full auth bypass.
+- **Recommendation:** drop fallback, `require(secret.length >= 32) { … }`. Boot fails fast on misconfig.
+
+#### F-16 HIGH — `WorkerKafkaListener` ACKs on every exception; poison messages silently lost
+- **File:** `worker/src/main/kotlin/ru/worker/kafka/WorkerKafkaListener.kt:31-47`
+- **Attack scenario:** Transient Docker hiccup → exception → ack(). Submission lost. Student waits forever. Same shape for malformed JSON. No DLQ.
+- **Recommendation:** `DefaultErrorHandler` + `DeadLetterPublishingRecoverer` → `task-execution.DLT`. Ack only on success.
+
+#### F-17 HIGH — No bound on `WorkerTaskMessage.code`; concurrent submissions can OOM worker
+- **Files:** `worker/.../KafkaWorkerConfig.kt:29-37`, `worker/.../WorkerModels.kt:8-19`
+- **Attack scenario:** 900 kB code × 3 concurrency × AST allocation (≈20× source size) → OOMKill. F-16 then drops them silently.
+- **Recommendation:** task-resolver rejects `code.length > 65 536`; `MAX_PARTITION_FETCH_BYTES_CONFIG=1_048_576`, `MAX_POLL_RECORDS_CONFIG=1`. Worker also caps before invoking `processTask`.
+
+#### F-18 MEDIUM — `WorkerResultPublisher` swallows publish exceptions; result lost without surfacing
+- **File:** `worker/src/main/kotlin/ru/worker/kafka/WorkerResultPublisher.kt:23-43`
+- **Attack scenario:** Kafka rolling restart → `TimeoutException` swallowed → caller acks input → result never written. Student waits forever.
+- **Recommendation:** rethrow; let F-16's error handler DLQ. Or outbox-pattern persistence before input ack.
+
+#### F-19 MEDIUM — `StaticJavaParser` mutable JVM-wide singleton; not safe under `worker.concurrency=3`
+- **File:** `ai-analyzer/.../JavaAstAnalyzer.kt:34`
+- **Attack scenario:** Concurrent submissions corrupt shared parser state → wrong AST facts injected into wrong student's LLM prompt → degraded feedback. Caught by `runSafely`, masquerades as a non-issue.
+- **Recommendation:** `JavaParser().parse(code).result.orElseThrow()` — local instance per call.
+
+#### F-20 MEDIUM — `KotlinAstAnalyzer` admits `KtPsiFactory` not thread-safe; used as singleton
+- **File:** `ai-analyzer/.../KotlinAstAnalyzer.kt:35-37, 41`
+- **Evidence:** Javadoc literally warns "`KtPsiFactory` is NOT thread-safe". Plus `Disposer.newDisposable()` never registered for shutdown — classic Intellij `Disposable` leak.
+- **Recommendation:** `synchronized(psiFactory)` or `ThreadLocal`. Register disposable via `Disposer.register(applicationDisposable, …)` or `@PreDestroy`.
+
+#### F-21 MEDIUM — `scenario-runner` wired to hard-coded "always PASSED" stub
+- **Files:** `worker/.../WorkerServiceConfig.kt:39-72` (stub); `scenario-runner/.../DefaultScenarioRunnerImpl.kt` (real impl, never wired)
+- **Attack scenario:** Any task using `scenarioTests` gets PASSED for every step regardless of code. Student submission printing fixed output earns full marks.
+- **Recommendation:** delete the stub bean; inject `DefaultScenarioRunnerImpl(dockerSandboxService)`. If not ready, throw `UnsupportedOperationException`.
+
+#### F-22 MEDIUM — `JwtAuthenticationFilter` accepts arbitrary subject; `UUID.fromString` failure swallowed
+- **File:** `MainApplication/.../JwtAuthenticationFilter.kt:32-49`
+- **Recommendation:** in `JwtTokenProvider.parseAndValidate`, parse subject as UUID and throw `JwtException("invalid subject")` on failure.
+
+#### F-23 LOW — No clock skew tolerance; `nbf`, `iss`, `aud` claims absent
+- **File:** `MainApplication/.../JwtTokenProvider.kt:57-71`
+- **Recommendation:** `.clockSkewSeconds(30)`, `.issuer("web-resolver-task")` + `.requireIssuer(...)`, optionally `.audience()`.
+
+#### F-24 LOW — `WorkerService` swallows `processTask` exceptions and returns synthetic ERROR result
+- **File:** `worker/.../WorkerService.kt:119-132`
+- **Recommendation:** add `errorMessage: String?` to `WorkerTaskResult`, log full stack at ERROR with structured fields.
+
+#### F-25 LOW — `DockerTestEngine.runTest` logs user input/expected/output at INFO
+- **File:** `worker/.../DockerTestEngine.kt:22-24, 49`
+- **Recommendation:** drop to DEBUG.
+
+#### F-26 LOW — `DefaultScenarioRunnerImpl.runStep` uses `contains(ignoreCase=true)` for expected-output match
+- **File:** `scenario-runner/.../DefaultScenarioRunnerImpl.kt:137`
+- **Recommendation:** exact-trim equality. Moot until F-21.
+
+#### F-27 INFO — `common/utils/KafkaTemplateUtils.sendSyncAndLog` logs full payload at INFO
+- **File:** `common/.../KafkaTemplateUtils.kt:8-11`
+- **Recommendation:** `data.toString().take(256)`.
+
+### Updated approval checklist (continuing from §7)
+
+| # | Criterion | State |
+|---|---|---|
+| 13 | JWT dev-secret fallback removed (F-15) | **BLOCKING** |
+| 14 | Kafka listener uses DefaultErrorHandler + DLQ (F-16) | **BLOCKING** |
+| 15 | Worker consumer caps fetch size + code length on submit (F-17) | **BLOCKING** |
+| 16 | `WorkerResultPublisher` rethrows on failure (F-18) | Required |
+| 17 | AST parsers thread-safe (F-19, F-20) | Required |
+| 18 | `scenario-runner` wired to `DefaultScenarioRunnerImpl` (F-21) | Required |
+| 19 | JWT subject validated as UUID (F-22) | Recommended |
+| 20 | JWT clock skew + iss claim (F-23) | Recommended |
+| 21 | `WorkerTaskResult` carries error message (F-24) | Nice-to-have |
+| 22 | `DockerTestEngine` test-IO logging → DEBUG (F-25) | Nice-to-have |
+| 23 | Scenario-runner exact-trim match (F-26) | Nice-to-have |
+| 24 | `sendSyncAndLog` truncates payload (F-27) | Nice-to-have |

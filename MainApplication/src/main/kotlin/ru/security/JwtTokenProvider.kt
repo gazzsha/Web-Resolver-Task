@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import ru.db.entity.UserRole
@@ -12,27 +11,30 @@ import java.util.Date
 import java.util.UUID
 import javax.crypto.SecretKey
 
-private val logger = LoggerFactory.getLogger(JwtTokenProvider::class.java)
-
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}") secret: String,
     @Value("\${jwt.access-ttl-minutes}") private val accessTtlMinutes: Long,
     @Value("\${jwt.refresh-ttl-days}") private val refreshTtlDays: Long,
+    @Value("\${jwt.issuer:web-resolver-task}") private val issuer: String,
 ) {
-    private val key: SecretKey = if (secret.length >= 32) {
+    // F-15: fail-fast. Source-baked dev fallback removed — boot fails when
+    // JWT_SECRET is unset or shorter than 32 bytes (HS256 minimum). Previously
+    // the app would silently fall back to a publicly-known constant, allowing
+    // a TEACHER token to be forged from a copy of this repository.
+    private val key: SecretKey = run {
+        require(secret.length >= 32) {
+            "JWT_SECRET must be set and at least 32 bytes (got length=${secret.length}). " +
+                "Generate one with: openssl rand -hex 32"
+        }
         Keys.hmacShaKeyFor(secret.toByteArray(Charsets.UTF_8))
-    } else {
-        // WARNING: JWT_SECRET is not set or too short — using insecure dev key. Set JWT_SECRET in production.
-        logger.warn("JWT_SECRET is empty or shorter than 32 bytes — using insecure dev secret. DO NOT use in production.")
-        val devSecret = "dev-secret-32-bytes-padded-here!!"
-        Keys.hmacShaKeyFor(devSecret.toByteArray(Charsets.UTF_8))
     }
 
     fun generateAccess(userId: UUID, email: String, role: UserRole, username: String): String {
         val now = System.currentTimeMillis()
         return Jwts.builder()
             .subject(userId.toString())
+            .issuer(issuer)
             .claim("email", email)
             .claim("role", role.name)
             .claim("username", username)
@@ -47,6 +49,7 @@ class JwtTokenProvider(
         val now = System.currentTimeMillis()
         return Jwts.builder()
             .subject(userId.toString())
+            .issuer(issuer)
             .claim("typ", "refresh")
             .issuedAt(Date(now))
             .expiration(Date(now + refreshTtlDays * 24 * 60 * 60 * 1000))
@@ -55,14 +58,28 @@ class JwtTokenProvider(
     }
 
     fun parseAndValidate(token: String): JwtClaims {
+        // F-23: clockSkewSeconds(30) tolerates ±30 s wall-clock drift between
+        // pods. requireIssuer pins tokens to this deployment — a token from
+        // staging will not validate in prod even if the HMAC key was reused.
         val claims: Claims = Jwts.parser()
             .verifyWith(key)
+            .clockSkewSeconds(30)
+            .requireIssuer(issuer)
             .build()
             .parseSignedClaims(token)
             .payload
 
+        // F-22: subject must be a UUID — otherwise downstream UUID.fromString
+        // throws IllegalArgumentException inside the JwtAuthenticationFilter
+        // and the failure is swallowed at DEBUG, making forged-but-malformed
+        // tokens invisible to operators.
+        val subject = claims.subject ?: throw JwtException("Missing subject claim")
+        runCatching { UUID.fromString(subject) }.getOrElse {
+            throw JwtException("Subject is not a UUID: ${subject.take(40)}")
+        }
+
         return JwtClaims(
-            subject = claims.subject,
+            subject = subject,
             typ = claims.get("typ", String::class.java) ?: throw JwtException("Missing typ claim"),
             email = claims.get("email", String::class.java),
             role = claims.get("role", String::class.java)?.let { runCatching { UserRole.valueOf(it) }.getOrNull() },

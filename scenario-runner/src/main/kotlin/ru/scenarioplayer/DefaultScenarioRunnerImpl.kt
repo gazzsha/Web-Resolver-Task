@@ -132,9 +132,13 @@ class DefaultScenarioRunnerImpl(
             
             val status = when (sandboxResult.status) {
                 ExecutionStatus.SUCCESS -> {
-                    // Check if output matches expected
-                    if (step.expectedOutput == null || 
-                        sandboxResult.output?.contains(step.expectedOutput, ignoreCase = true) == true) {
+                    // F-26: exact-trim equality. The previous substring + ignoreCase
+                    // check let a student print "OK_PASSED_4" to pass a step expecting
+                    // "passed". Compare with WorkerService.determineTaskStatus which
+                    // uses exact-match semantics — scenario-runner must match that.
+                    val expected = step.expectedOutput
+                    val actual = sandboxResult.output?.trim()
+                    if (expected == null || expected.trim() == actual) {
                         "PASSED"
                     } else {
                         "FAILED"

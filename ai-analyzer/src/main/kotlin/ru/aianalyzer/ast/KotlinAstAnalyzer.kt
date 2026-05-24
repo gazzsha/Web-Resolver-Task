@@ -32,22 +32,28 @@ private val log = KotlinLogging.logger {}
  * The [KotlinCoreEnvironment] is initialised lazily on first use and reused across calls.
  * If initialisation fails (e.g. incompatible JVM), [analyze] returns [AstFact.empty] silently.
  *
- * Thread-safety: [KtPsiFactory] is NOT thread-safe. Callers should not share a single instance
- * across concurrent threads without external synchronisation. For the diploma project's
- * single-threaded analysis pipeline this is fine.
+ * Thread-safety: [KtPsiFactory] is NOT thread-safe. F-20 fix: every entry into
+ * [analyze] is serialised on [psiLock] so concurrent submissions (worker.concurrency=3)
+ * cannot corrupt the shared PSI tree. PSI parsing is microsecond-fast for typical
+ * student solutions; the lock is not a throughput bottleneck.
+ *
+ * The [KotlinCoreEnvironment] disposable is registered with a class-level
+ * [rootDisposable] that is disposed via [shutdown] — prevents the IntelliJ
+ * Disposable leak that would otherwise grow JVM heap every JVM restart cycle.
  */
-internal class KotlinAstAnalyzer {
+internal class KotlinAstAnalyzer : AutoCloseable {
 
+    private val psiLock = Any()
+    private val rootDisposable = Disposer.newDisposable("ru.aianalyzer.ast.KotlinAstAnalyzer")
     private val psiFactory: KtPsiFactory? by lazy { createPsiFactory() }
 
     private fun createPsiFactory(): KtPsiFactory? = try {
-        val disposable = Disposer.newDisposable()
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MODULE_NAME, "ast-analysis")
             put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
         }
         val env = KotlinCoreEnvironment.createForProduction(
-            disposable,
+            rootDisposable,
             configuration,
             EnvironmentConfigFiles.JVM_CONFIG_FILES,
         )
@@ -57,15 +63,19 @@ internal class KotlinAstAnalyzer {
         null
     }
 
-    fun analyze(code: String): AstFact {
+    fun analyze(code: String): AstFact = synchronized(psiLock) {
         val factory = psiFactory ?: return AstFact.empty("kotlin")
-        return try {
+        try {
             val file: KtFile = factory.createFile("Snippet.kt", code)
             extractFacts(code, file)
         } catch (e: Exception) {
             log.warn(e) { "Kotlin PSI analysis failed" }
             AstFact.empty("kotlin")
         }
+    }
+
+    override fun close() {
+        Disposer.dispose(rootDisposable)
     }
 
     private fun extractFacts(code: String, file: KtFile): AstFact {
