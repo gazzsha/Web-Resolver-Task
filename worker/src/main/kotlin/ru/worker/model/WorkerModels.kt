@@ -12,7 +12,10 @@ data class WorkerTaskMessage(
     val language: String,
     val className: String = "Solution",
     val testCases: List<TestCase>,
-    val scenarioTests: List<ScenarioTest>? = null
+    val scenarioTests: List<ScenarioTest>? = null,
+    // P0-3: условие задачи прокидывается из task-resolver через Kafka.
+    // null если сообщение опубликовано legacy-кодом без этого поля.
+    val taskDescription: String? = null
 )
 
 /**

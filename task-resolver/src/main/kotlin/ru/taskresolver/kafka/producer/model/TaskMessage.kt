@@ -8,7 +8,11 @@ data class TaskMessage(
     val code: String,
     val language: String,
     val testId: UUID,
-    val testCases: List<TestCase> = emptyList()
+    val testCases: List<TestCase> = emptyList(),
+    // P0-3: условие задачи для содержательного prompt'а AI-анализатора.
+    // Заполняется на producer-стороне из БД, без неё GigaChat галлюцинирует
+    // содержание кода и факт прохождения тестов.
+    val taskDescription: String? = null
 )
 
 data class TestCase(

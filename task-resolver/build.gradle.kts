@@ -10,6 +10,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation(libs.postgres)
     implementation(libs.spring.kafka)
+    implementation(libs.commons.csv)
     implementation(project(":api-generator"))
     implementation(project(":common"))
     implementation(project(":db"))

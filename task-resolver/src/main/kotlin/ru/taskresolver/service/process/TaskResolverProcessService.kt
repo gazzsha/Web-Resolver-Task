@@ -57,7 +57,9 @@ class TaskResolverProcessService(
             code = request.code,
             language = request.language.value,
             testId = test.testId,
-            testCases = testCases
+            testCases = testCases,
+            // P0-3: пробрасываем условие задачи, чтобы AI-аналайзер мог опираться на него.
+            taskDescription = test.description
         )
 
         taskClusterProducer.publish(taskMessage)

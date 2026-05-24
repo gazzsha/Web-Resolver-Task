@@ -8,10 +8,12 @@ private val logger = KotlinLogging.logger {}
 class SandboxImageManager {
 
     private val knownImages = setOf(
-        // DockerSandboxService currently supports java + python only.
-        // Kotlin support was dropped (host-side metrics rewrite in Phase 14).
+        // DockerSandboxService supports java + python + kotlin.
+        // Kotlin uses a custom image built from sandbox/docker/kotlin/Dockerfile (Kotlin 1.9.22 on JDK 21).
+        // ensureImage() will skip the pull for the local-only kotlin tag and rely on the local cache.
         "eclipse-temurin:21-jdk-alpine",
-        "python:3.11-alpine"
+        "python:3.11-alpine",
+        "web-resolver/kotlin:1.9.22"
     )
 
     /**
@@ -22,6 +24,12 @@ class SandboxImageManager {
      */
     fun prewarm() {
         for (image in knownImages) {
+            // Skip pre-warm pull for images that are already local (e.g. custom-built kotlin tag
+            // that doesn't exist in any registry).
+            if (isImageLocal(image)) {
+                logger.info { "Pre-warm skipped — image already cached locally: $image" }
+                continue
+            }
             logger.info { "Pre-warming image: $image" }
             try {
                 val process = ProcessBuilder("docker", "pull", "--platform", "linux/amd64", image)

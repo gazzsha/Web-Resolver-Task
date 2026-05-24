@@ -14,14 +14,28 @@ class TestService(
     fun getTestById(testId: UUID): Test =
         testRepository.getTestByTestId(testId)
 
-    fun getAllTasks(): List<TaskInfo> {
-        return testRepository.findAllByOrderByDifficulty().map { test ->
-            TaskInfo(test.testId, test.title, test.description, Difficulty.fromValue(test.difficulty.name))
+    fun getAllTasks(category: String? = null, difficulty: Difficulty? = null): List<TaskInfo> {
+        val dbDifficulty = difficulty?.let { ru.db.entity.Difficulty.valueOf(it.value) }
+        val items = if (category == null && dbDifficulty == null) {
+            testRepository.findAllByOrderByDifficulty()
+        } else {
+            testRepository.searchByFilters(category?.trim()?.takeIf { it.isNotEmpty() }, dbDifficulty)
         }
+        return items.map(::toTaskInfo)
     }
 
     fun getTaskById(testId: UUID): TaskInfo {
         val test = getTestById(testId)
-        return TaskInfo(test.testId, test.title, test.description, Difficulty.fromValue(test.difficulty.name))
+        return toTaskInfo(test)
     }
+
+    fun getAllCategories(): List<String> = testRepository.findAllCategories()
+
+    private fun toTaskInfo(test: Test): TaskInfo =
+        TaskInfo(
+            test.testId,
+            test.title,
+            test.description,
+            Difficulty.fromValue(test.difficulty.name),
+        ).apply { category = test.category }
 }

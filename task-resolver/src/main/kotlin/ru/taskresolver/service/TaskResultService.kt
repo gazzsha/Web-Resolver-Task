@@ -69,10 +69,12 @@ class TaskResultService(
             .totalExecutionTimeMs(entity.totalExecutionTimeMs.toInt())
             .memoryUsedKb(entity.memoryUsedKb.toInt())
             .testResults(entity.testResults.map { testResult ->
+                val verdict = Verdict.fromValue(testResult.verdict.name)
                 TestResultDetail()
                     .testId(testResult.testId)
                     .status(TestStatus.fromValue(testResult.status.name))
-                    .verdict(Verdict.fromValue(testResult.verdict.name))
+                    .verdict(verdict)
+                    .passed(verdict == Verdict.OK)
                     .output(testResult.output)
                     .error(testResult.error)
                     .executionTimeMs(testResult.executionTimeMs.toInt())
