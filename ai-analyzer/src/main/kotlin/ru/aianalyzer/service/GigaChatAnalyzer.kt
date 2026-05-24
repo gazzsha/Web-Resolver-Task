@@ -19,16 +19,31 @@ import ru.sandbox.model.SandboxExecutionResult
 import java.security.MessageDigest
 
 /**
- * Каскад верхних границ codeQuality при провальных результатах sandbox-вердикта
- * (защита от V4 — LLM-галлюцинации «code is great» при упавших тестах).
+ * Вычисляет динамическую верхнюю границу codeQuality, пропорциональную
+ * отношению passed/total (защита от V4 — LLM-галлюцинации «code is great»
+ * при упавших тестах).
  *
- * - [FAILED_CODE_QUALITY_CAP] — хотя бы один тест упал → не выше 60.
- * - [ALL_FAILED_CODE_QUALITY_CAP] (P0-4) — НИ ОДИН тест не прошёл → не выше 40.
- *   Это сценарий из P0-3 (заведомо неправильное `print("true")`), где LLM
- *   раньше возвращал codeQuality 70+ с generic-похвалой.
+ * Таблица соответствия:
+ * - total == 0             → [Int.MAX_VALUE] (нет ограничения)
+ * - passed == total        → [Int.MAX_VALUE] (все прошли, нет ограничения)
+ * - passed == 0            → 20
+ * - passed == total - 1    → 70  (приоритет перед «passed == 1» для total == 2)
+ * - passed == 1            → 30
+ * - passed * 2 <= total    → 50  (половина или меньше)
+ * - иначе                  → 70  (больше половины, но не все)
+ *
+ * Cap является **верхней** границей — если LLM вернул значение ниже cap,
+ * оно сохраняется без подъёма.
  */
-private const val FAILED_CODE_QUALITY_CAP = 60
-private const val ALL_FAILED_CODE_QUALITY_CAP = 40
+internal fun dynamicQualityCap(passed: Int, total: Int): Int {
+    if (total == 0) return Int.MAX_VALUE
+    if (passed == total) return Int.MAX_VALUE
+    if (passed == 0) return 20
+    if (passed == total - 1) return 70
+    if (passed == 1) return 30
+    if (passed * 2 <= total) return 50
+    return 70
+}
 
 private val logger = KotlinLogging.logger {}
 
@@ -197,28 +212,39 @@ class GigaChatAnalyzer(
         return mapPayload(payload, executionResults)
     }
 
-    private fun mapPayload(
+    /**
+     * @param astSuspiciousReturnsConstant Сигнал AST-детектора: true означает, что код
+     *   выглядит как стаб, возвращающий константу (e.g. `return 42`). Если этот флаг
+     *   установлен И passed == 0 И total > 0, применяется экстремальный cap = 10.
+     *   По умолчанию false — когда mapPayload вызывается напрямую без AST-контекста.
+     *   TODO(AstHybridAnalyzer): пробросить реальное astFact.suspiciousReturnsConstant
+     *   через pipeline, когда AstHybridAnalyzer будет рефакторен для вызова mapPayload
+     *   вместо своего собственного AST_SUSPICIOUS_QUALITY_CAP-каскада.
+     */
+    internal fun mapPayload(
         payload: GigaChatAnalysisPayload,
-        executionResults: List<SandboxExecutionResult>
+        executionResults: List<SandboxExecutionResult>,
+        astSuspiciousReturnsConstant: Boolean = false
     ): AIAnalysisResult {
         val rawQuality = payload.codeQuality.coerceIn(0, 100)
         val total = executionResults.size
         val passed = executionResults.count { it.status == ExecutionStatus.SUCCESS }
-        val hasFailure = total > 0 && passed < total
-        val allFailed = total > 0 && passed == 0
-        // P0-4: каскад капов. Полностью провалено → 40, частично → 60, всё ОК → без капа.
+        // Динамический cap: пропорционален passed/total.
         // EXPERIMENT-ONLY: ветка B3 проходит весь раннер с [disableVerdictGuards]=true,
         // чтобы в SUMMARY можно было увидеть injection_success_rate без guard'ов и
         // сделать ablation. Все остальные варианты идут по штатному cascading-пути.
-        val quality = when {
-            disableVerdictGuards -> rawQuality
-            allFailed && rawQuality > ALL_FAILED_CODE_QUALITY_CAP -> {
-                logger.warn { "GigaChat output contradicts sandbox: passed=0/$total quality=$rawQuality → clamp $ALL_FAILED_CODE_QUALITY_CAP" }
-                ALL_FAILED_CODE_QUALITY_CAP
+        val cap = when {
+            disableVerdictGuards -> Int.MAX_VALUE
+            astSuspiciousReturnsConstant && passed == 0 && total > 0 -> {
+                logger.warn { "GigaChat: suspiciousReturnsConstant=true + allFailed → extreme cap=10 (quality=$rawQuality)" }
+                10
             }
-            hasFailure -> minOf(rawQuality, FAILED_CODE_QUALITY_CAP)
-            else -> rawQuality
+            else -> dynamicQualityCap(passed, total)
         }
+        if (cap != Int.MAX_VALUE && rawQuality > cap) {
+            logger.warn { "GigaChat output contradicts sandbox: passed=$passed/$total quality=$rawQuality → clamp $cap" }
+        }
+        val quality = minOf(rawQuality, cap)
         val issues = payload.issues.take(20).map { msg ->
             CodeIssue(
                 type = IssueType.CODE_SMELL,
@@ -233,8 +259,9 @@ class GigaChatAnalyzer(
         return AIAnalysisResult(
             codeQuality = quality,
             issues = issues,
-            recommendations = payload.recommendations.take(20).map(InputSanitizer::stripUnsafeOutput),
-            explanation = InputSanitizer.stripUnsafeOutput(payload.explanation),
+            recommendations = payload.recommendations.take(20)
+                .map { InputSanitizer.enforceImpersonalTone(InputSanitizer.stripUnsafeOutput(it)) },
+            explanation = InputSanitizer.enforceImpersonalTone(InputSanitizer.stripUnsafeOutput(payload.explanation)),
             complexity = complexity,
             // B3 (no-guards) маркируется отдельно, чтобы analyze.py легко
             // отделял его прогоны и не путал с штатным production-path.

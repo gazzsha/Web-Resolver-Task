@@ -14,10 +14,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
+import ru.aianalyzer.client.GigaChatAnalysisPayload
 import ru.aianalyzer.client.GigaChatClient
 import ru.aianalyzer.client.GigaChatException
+import ru.aianalyzer.prompt.PromptVariant
 import ru.aianalyzer.validation.SchemaValidator
 import ru.sandbox.model.ExecutionStatus
 import ru.sandbox.model.SandboxExecutionResult
@@ -198,20 +201,20 @@ class GigaChatAnalyzerTest {
     }
 
     @Test
-    fun `clamps codeQuality to 40 when ALL tests fail (P0-4 verdict guard)`() {
-        // P0-4: passed=0/total=1 → строгий cap 40 (раньше был 60 для любой ошибки).
+    fun `clamps codeQuality to 20 when ALL tests fail (dynamic cap 0 of N)`() {
+        // passed=0/total=1 → динамический cap = 20 (было 40 до введения пропорциональной шкалы).
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns
             """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
 
         val result = analyzer(client).analyze("code", "java", failedExecResults())
 
-        assertEquals(40, result.codeQuality)
+        assertEquals(20, result.codeQuality)
     }
 
     @Test
-    fun `clamps codeQuality to 60 when some tests pass and some fail (V4 cross-check)`() {
-        // Частичный провал — мягкий cap 60.
+    fun `clamps codeQuality to 70 when N-1 of N tests pass (dynamic cap N-1 of N)`() {
+        // passed=1/total=2 → N-1/N → динамический cap = 70 (было 60 за любой частичный провал).
         val client = mockk<GigaChatClient>()
         every { client.chatCompletion(any(), any()) } returns
             """{"codeQuality":95,"issues":[],"recommendations":[],"explanation":"perfect","complexity":"LOW"}"""
@@ -219,7 +222,7 @@ class GigaChatAnalyzerTest {
         val mixed = execResults() + failedExecResults()
         val result = analyzer(client).analyze("code", "java", mixed)
 
-        assertEquals(60, result.codeQuality)
+        assertEquals(70, result.codeQuality)
     }
 
     @Test
@@ -256,5 +259,191 @@ class GigaChatAnalyzerTest {
 
         assertNotNull(result)
         verify(exactly = 0) { client.chatCompletion(any(), any()) }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Dynamic cap tests (proportional to passed/total).
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Nested
+    inner class MapPayloadCap {
+
+        /** Строит analyzer с указанным [disableVerdictGuards]. */
+        private fun analyzerWithFlags(
+            client: GigaChatClient,
+            disableVerdictGuards: Boolean = false
+        ): GigaChatAnalyzer {
+            val cache = Caffeine.newBuilder()
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .maximumSize(50)
+                .build<String, AIAnalysisResult>()
+            return GigaChatAnalyzer(
+                client = client,
+                objectMapper = mapper,
+                fallback = SimpleRuleBasedAnalyzer(),
+                cache = cache,
+                schemaValidator = schemaValidator,
+                promptVariant = PromptVariant.ZERO_SHOT,
+                disableVerdictGuards = disableVerdictGuards
+            )
+        }
+
+        /** Генерирует [count] результатов с SUCCESS-статусом. */
+        private fun successResults(count: Int) = List(count) {
+            SandboxExecutionResult(
+                requestId = UUID.randomUUID(),
+                status = ExecutionStatus.SUCCESS,
+                output = "ok",
+                error = null,
+                executionTimeMs = 10,
+                memoryUsedKb = 512
+            )
+        }
+
+        /** Генерирует [count] результатов с RUNTIME_ERROR-статусом. */
+        private fun failedResults(count: Int) = List(count) {
+            SandboxExecutionResult(
+                requestId = UUID.randomUUID(),
+                status = ExecutionStatus.RUNTIME_ERROR,
+                output = "",
+                error = "error",
+                executionTimeMs = 10,
+                memoryUsedKb = 512
+            )
+        }
+
+        private fun llmReturning(quality: Int): GigaChatClient {
+            val client = mockk<GigaChatClient>()
+            every { client.chatCompletion(any(), any()) } returns
+                """{"codeQuality":$quality,"issues":[],"recommendations":[],"explanation":"test","complexity":"LOW"}"""
+            return client
+        }
+
+        @Test
+        fun `dynamicCap returns 20 when zero tests pass`() {
+            // 0/5 → cap=20; LLM=80 → clamp to 20
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", failedResults(5))
+
+            assertEquals(20, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap returns 30 when one test passes out of many`() {
+            // 1/5 → cap=30; LLM=80 → clamp to 30
+            val results = successResults(1) + failedResults(4)
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", results)
+
+            assertEquals(30, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap returns 50 at half threshold with 2 passed of 5`() {
+            // 2/5 → passed*2=4 <= 5 → cap=50; LLM=80 → clamp to 50
+            val results = successResults(2) + failedResults(3)
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", results)
+
+            assertEquals(50, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap returns 50 at half threshold with 3 passed of 6`() {
+            // 3/6 → passed*2=6 <= 6 → cap=50; LLM=80 → clamp to 50
+            val results = successResults(3) + failedResults(3)
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", results)
+
+            assertEquals(50, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap is permissive at all-but-one passed`() {
+            // 4/5 → passed == total-1 → cap=70; LLM=80 → clamp to 70
+            val results = successResults(4) + failedResults(1)
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", results)
+
+            assertEquals(70, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap is MAX_VALUE on all passed`() {
+            // 5/5 → no cap; LLM=95 → preserved
+            val result = analyzerWithFlags(llmReturning(95))
+                .analyze("code", "java", successResults(5))
+
+            assertEquals(95, result.codeQuality)
+        }
+
+        @Test
+        fun `dynamicCap is MAX_VALUE when total is zero`() {
+            // no execution results → no cap; LLM=90 → preserved
+            val result = analyzerWithFlags(llmReturning(90))
+                .analyze("code", "java", emptyList())
+
+            assertEquals(90, result.codeQuality)
+        }
+
+        @Test
+        fun `mapPayload clamps LLM=80 to 20 when 0 of 5 passed`() {
+            // Explicit check: cap is upper bound, LLM above cap → clamped
+            val result = analyzerWithFlags(llmReturning(80))
+                .analyze("code", "java", failedResults(5))
+
+            assertEquals(20, result.codeQuality)
+        }
+
+        @Test
+        fun `mapPayload preserves LLM=15 when 0 of 5 passed — cap is upper bound not floor`() {
+            // Cap=20 is upper bound; LLM=15 is below cap → preserved unchanged
+            val result = analyzerWithFlags(llmReturning(15))
+                .analyze("code", "java", failedResults(5))
+
+            assertEquals(15, result.codeQuality)
+        }
+
+        @Test
+        fun `mapPayload returns rawQuality when disableVerdictGuards=true`() {
+            // B3 experiment mode: guards bypassed entirely, LLM=85 on 0/5 → 85
+            val result = analyzerWithFlags(llmReturning(85), disableVerdictGuards = true)
+                .analyze("code", "java", failedResults(5))
+
+            assertEquals(85, result.codeQuality)
+            assertEquals("gigachat-no-guards", result.modelVersion)
+        }
+
+        @Test
+        fun `mapPayload applies extreme cap=10 when suspiciousReturnsConstant and allFailed`() {
+            // astSuspiciousReturnsConstant=true + passed=0/total=5 → cap=10; LLM=80 → clamp to 10.
+            // mapPayload is internal, so we can call it directly from the same module's test scope.
+            val cache = Caffeine.newBuilder()
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .maximumSize(50)
+                .build<String, AIAnalysisResult>()
+            val gigaChatAnalyzer = GigaChatAnalyzer(
+                client = llmReturning(80),
+                objectMapper = mapper,
+                fallback = SimpleRuleBasedAnalyzer(),
+                cache = cache,
+                schemaValidator = schemaValidator
+            )
+            val payload = ru.aianalyzer.client.GigaChatAnalysisPayload(
+                codeQuality = 80,
+                issues = emptyList(),
+                recommendations = emptyList(),
+                explanation = "stub",
+                complexity = "LOW"
+            )
+
+            val result = gigaChatAnalyzer.mapPayload(
+                payload = payload,
+                executionResults = failedResults(5),
+                astSuspiciousReturnsConstant = true
+            )
+
+            assertEquals(10, result.codeQuality)
+        }
     }
 }
