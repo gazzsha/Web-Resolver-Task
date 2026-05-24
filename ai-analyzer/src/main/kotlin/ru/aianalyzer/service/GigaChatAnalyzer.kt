@@ -43,7 +43,16 @@ class GigaChatAnalyzer(
     // (без AstHybridAnalyzer-обёртки). Если null — AST блок в user-message не добавляется.
     private val astMetricsService: AstMetricsService? = null,
     // Метрики Prometheus: null когда работает experiment runner без Spring context.
-    private val metrics: AiAnalyzerMetrics? = null
+    private val metrics: AiAnalyzerMetrics? = null,
+    // ── EXPERIMENT-ONLY ────────────────────────────────────────────────────────
+    // Когда true — отключает каскад verdict-cap'ов в [mapPayload]. Используется
+    // ИСКЛЮЧИТЕЛЬНО в experiment Runner для варианта B3 (no-guards), чтобы
+    // изолировать вклад verdict-guard слоя в защиту от prompt-injection
+    // (см. PRE_REGISTRATION.md, H4). В production-конфигурации
+    // [ru.aianalyzer.config.AiAnalyzerConfig] этот флаг НЕ выставляется
+    // (значение по умолчанию `false`), а unit-тесты в
+    // GigaChatAnalyzerTest проверяют, что cap'ы работают.
+    private val disableVerdictGuards: Boolean = false
 ) : AIAnalyzer {
 
     override fun analyze(
@@ -198,7 +207,11 @@ class GigaChatAnalyzer(
         val hasFailure = total > 0 && passed < total
         val allFailed = total > 0 && passed == 0
         // P0-4: каскад капов. Полностью провалено → 40, частично → 60, всё ОК → без капа.
+        // EXPERIMENT-ONLY: ветка B3 проходит весь раннер с [disableVerdictGuards]=true,
+        // чтобы в SUMMARY можно было увидеть injection_success_rate без guard'ов и
+        // сделать ablation. Все остальные варианты идут по штатному cascading-пути.
         val quality = when {
+            disableVerdictGuards -> rawQuality
             allFailed && rawQuality > ALL_FAILED_CODE_QUALITY_CAP -> {
                 logger.warn { "GigaChat output contradicts sandbox: passed=0/$total quality=$rawQuality → clamp $ALL_FAILED_CODE_QUALITY_CAP" }
                 ALL_FAILED_CODE_QUALITY_CAP
@@ -223,7 +236,9 @@ class GigaChatAnalyzer(
             recommendations = payload.recommendations.take(20).map(InputSanitizer::stripUnsafeOutput),
             explanation = InputSanitizer.stripUnsafeOutput(payload.explanation),
             complexity = complexity,
-            modelVersion = "gigachat"
+            // B3 (no-guards) маркируется отдельно, чтобы analyze.py легко
+            // отделял его прогоны и не путал с штатным production-path.
+            modelVersion = if (disableVerdictGuards) "gigachat-no-guards" else "gigachat"
         )
     }
 
