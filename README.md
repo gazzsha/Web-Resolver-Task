@@ -19,7 +19,10 @@ cp .env.example .env                       # править необязател
 # 2. Стек инфраструктуры
 docker compose up -d postgres kafka zookeeper
 
-# 3. Backend (включает worker как модуль — отдельный процесс не нужен)
+# 3. Backend (модульный монолит: worker, task-resolver, ai-analyzer, sandbox
+# и scenario-runner упакованы в один процесс через MainApplication. Отдельного
+# :worker:bootRun нет — у `worker/` нет своего `@SpringBootApplication`,
+# модуль работает только в контексте MainApplication.)
 ./gradlew :MainApplication:bootRun         # терминал 1, http://localhost:8080
 
 # 4. Frontend
@@ -149,6 +152,37 @@ WITH_SUBMISSION=1 ./e2e_smoke.sh                     # +Kafka/worker/sandbox
 ```bash
 sudo ln -s ~/.docker/run/docker.sock /var/run/docker.sock
 ```
+
+---
+
+## Kafka DLT (Dead Letter Topic)
+
+Worker-listener (`WorkerKafkaListener`) обёрнут в `DefaultErrorHandler` + `DeadLetterPublishingRecoverer` (см. `worker/.../KafkaWorkerConfig`, F-16): после 3 неудачных fast-retry сообщение уходит в топик `task-execution.DLT` с сохранением оригинального ключа/значения и заголовков. Этот же путь используется для «отравленных» сообщений (например, невалидный JSON).
+
+```bash
+# Посмотреть содержимое DLT (требует kafkacat / kcat):
+docker exec -it $(docker ps -qf name=kafka) kafka-console-consumer \
+  --bootstrap-server localhost:9092 --topic task-execution.DLT --from-beginning --max-messages 5
+
+# Ре-обработка одного сообщения вручную: скопировать payload и опубликовать
+# обратно в task-execution тем же ключом.
+docker exec -i $(docker ps -qf name=kafka) kafka-console-producer \
+  --bootstrap-server localhost:9092 --topic task-execution --property "parse.key=true" \
+  --property "key.separator=:"
+```
+
+Дашборд **Kafka** в Grafana содержит панель **«DLT messages per second (task-execution.DLT)»** (Step 6a / B.7). Скачок на этой панели = upstream-сбой обработки.
+
+---
+
+## Покрытие тестами (JaCoCo)
+
+```bash
+./gradlew jacocoTestReport                       # report HTML/XML по всем модулям
+open MainApplication/build/reports/jacoco/test/html/index.html   # пример
+```
+
+XML-отчёты лежат в `<module>/build/reports/jacoco/test/jacocoTestReport.xml` и подходят для CI-интеграции (Codecov / SonarCloud / GitHub Actions).
 
 ---
 

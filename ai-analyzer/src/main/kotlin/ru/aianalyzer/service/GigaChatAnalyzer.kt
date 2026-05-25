@@ -67,7 +67,15 @@ class GigaChatAnalyzer(
     // [ru.aianalyzer.config.AiAnalyzerConfig] этот флаг НЕ выставляется
     // (значение по умолчанию `false`), а unit-тесты в
     // GigaChatAnalyzerTest проверяют, что cap'ы работают.
-    private val disableVerdictGuards: Boolean = false
+    private val disableVerdictGuards: Boolean = false,
+    // ── Feature flag (P0-X, Step 6a/B.6) ───────────────────────────────────────
+    // Когда true — методы [explainError] и [assessCodeQuality] делают
+    // отдельный (короткий) вызов LLM с компактным промптом вместо немедленной
+    // делегации в rule-based fallback. При любой ошибке/таймауте/невалидном
+    // ответе вызовы всё равно возвращают результат fallback, поэтому фича
+    // безопасна для прода. analyze()-pipeline (использованный в Level-2
+    // эксперименте) этим флагом НЕ затрагивается.
+    private val explainViaLlm: Boolean = false
 ) : AIAnalyzer {
 
     override fun analyze(
@@ -155,11 +163,77 @@ class GigaChatAnalyzer(
         }
     }
 
-    override fun explainError(code: String, language: String, error: String, testInput: String): String =
-        fallback.explainError(code, language, error, testInput)
+    override fun explainError(code: String, language: String, error: String, testInput: String): String {
+        if (!explainViaLlm) return fallback.explainError(code, language, error, testInput)
+        return explainErrorWithLlm(code, language, error, testInput)
+            ?: fallback.explainError(code, language, error, testInput)
+    }
 
-    override fun assessCodeQuality(code: String, language: String): CodeQualityAssessment =
-        fallback.assessCodeQuality(code, language)
+    override fun assessCodeQuality(code: String, language: String): CodeQualityAssessment {
+        if (!explainViaLlm) return fallback.assessCodeQuality(code, language)
+        return assessCodeQualityWithLlm(code, language)
+            ?: fallback.assessCodeQuality(code, language)
+    }
+
+    /**
+     * Короткий LLM-вызов с компактным промптом «объясни одну ошибку».
+     * Не использует analyze()-pipeline и не затрагивает Level-2-эксперимент.
+     *
+     * Защитные слои сохранены: normalizeUnicode, enforceSizeLimit (на code),
+     * sentinel-маркеры в промпте, stripUnsafeOutput + enforceImpersonalTone
+     * на ответе LLM. JSON-схему не используем — здесь нужен plain-text абзац.
+     *
+     * @return объяснение от LLM или null при ошибке/таймауте/слишком большом
+     *   коде — вызывающая сторона должна сделать fallback.
+     */
+    private fun explainErrorWithLlm(code: String, language: String, error: String, testInput: String): String? {
+        val normalized = InputSanitizer.normalizeUnicode(code)
+        val sanitized = runCatching { InputSanitizer.enforceSizeLimit(normalized) }.getOrElse { return null }
+        val sanitizedError = InputSanitizer.normalizeUnicode(error).take(2000)
+        val sanitizedInput = InputSanitizer.normalizeUnicode(testInput).take(1000)
+        return runCatching {
+            val raw = client.chatCompletion(
+                systemPrompt = AnalyzerPrompts.explainErrorSystemPrompt(),
+                userPrompt = AnalyzerPrompts.explainErrorUserPrompt(sanitized, language, sanitizedError, sanitizedInput)
+            )
+            val cleaned = stripJsonFences(raw).trim()
+            if (cleaned.isBlank()) return@runCatching null
+            InputSanitizer.enforceImpersonalTone(InputSanitizer.stripUnsafeOutput(cleaned)).take(4000)
+        }.onFailure { logger.warn(it) { "explainErrorWithLlm failed, will fallback to rule-based" } }
+            .getOrNull()
+    }
+
+    /**
+     * Короткий LLM-вызов «оцени качество кода по 5 осям». Возвращает
+     * [CodeQualityAssessment] либо null при сбое — вызывающая сторона должна
+     * сделать fallback. Защитные слои аналогичны [explainErrorWithLlm].
+     */
+    private fun assessCodeQualityWithLlm(code: String, language: String): CodeQualityAssessment? {
+        val normalized = InputSanitizer.normalizeUnicode(code)
+        val sanitized = runCatching { InputSanitizer.enforceSizeLimit(normalized) }.getOrElse { return null }
+        return runCatching {
+            val raw = client.chatCompletion(
+                systemPrompt = AnalyzerPrompts.assessQualitySystemPrompt(),
+                userPrompt = AnalyzerPrompts.assessQualityUserPrompt(sanitized, language)
+            )
+            val cleaned = stripJsonFences(raw)
+            val node = objectMapper.readTree(cleaned)
+            CodeQualityAssessment(
+                overallScore = node.get("overallScore")?.asInt(70)?.coerceIn(0, 100) ?: 70,
+                readability = node.get("readability")?.asInt(70)?.coerceIn(0, 100) ?: 70,
+                maintainability = node.get("maintainability")?.asInt(70)?.coerceIn(0, 100) ?: 70,
+                efficiency = node.get("efficiency")?.asInt(70)?.coerceIn(0, 100) ?: 70,
+                security = node.get("security")?.asInt(70)?.coerceIn(0, 100) ?: 70,
+                strengths = node.get("strengths")?.mapNotNull { it?.asText() }?.take(8)
+                    ?.map { InputSanitizer.enforceImpersonalTone(InputSanitizer.stripUnsafeOutput(it)) }
+                    ?: emptyList(),
+                weaknesses = node.get("weaknesses")?.mapNotNull { it?.asText() }?.take(8)
+                    ?.map { InputSanitizer.enforceImpersonalTone(InputSanitizer.stripUnsafeOutput(it)) }
+                    ?: emptyList()
+            )
+        }.onFailure { logger.warn(it) { "assessCodeQualityWithLlm failed, will fallback to rule-based" } }
+            .getOrNull()
+    }
 
     private fun callAndParse(
         code: String,

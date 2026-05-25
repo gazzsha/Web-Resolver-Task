@@ -95,7 +95,11 @@ class AiAnalyzerConfig {
         // is loaded alongside the metrics @Component via @SpringBootApplication
         // scan, so this is non-null at runtime.
         aiAnalyzerMetrics: AiAnalyzerMetrics?,
-        @Value("\${ai.prompt.variant:zero-shot}") promptVariantProp: String
+        @Value("\${ai.prompt.variant:zero-shot}") promptVariantProp: String,
+        // Step 6a / B.6: feature-flag для explainError / assessCodeQuality через LLM.
+        // По умолчанию false — оба метода идут в rule-based fallback (как и до правки).
+        // analyze()-pipeline этим флагом не затрагивается.
+        @Value("\${ai.explain-via-llm:false}") explainViaLlm: Boolean
     ): GigaChatAnalyzer {
         val variant = when (promptVariantProp.lowercase().trim()) {
             "few-shot", "few_shot", "fewshot" -> PromptVariant.FEW_SHOT
@@ -104,7 +108,17 @@ class AiAnalyzerConfig {
         // P0-3: подключаем AST-extractor по умолчанию, чтобы в любом production-пути
         // (через AstHybridAnalyzer или прямой GigaChatAnalyzer) prompt содержал
         // блок <AST_FACTS> с детерминированными структурными фактами кода.
-        return GigaChatAnalyzer(client, objectMapper, fallback, cache, schemaValidator, variant, astMetricsService, aiAnalyzerMetrics)
+        return GigaChatAnalyzer(
+            client = client,
+            objectMapper = objectMapper,
+            fallback = fallback,
+            cache = cache,
+            schemaValidator = schemaValidator,
+            promptVariant = variant,
+            astMetricsService = astMetricsService,
+            metrics = aiAnalyzerMetrics,
+            explainViaLlm = explainViaLlm,
+        )
     }
 
     @Bean

@@ -14,7 +14,6 @@ COPY MainApplication MainApplication
 COPY common common
 COPY api-generator api-generator
 COPY task-resolver task-resolver
-COPY task-process task-process
 COPY db db
 COPY worker worker
 COPY sandbox sandbox

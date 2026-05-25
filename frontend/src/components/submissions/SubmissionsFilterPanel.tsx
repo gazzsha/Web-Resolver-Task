@@ -52,7 +52,9 @@ const STATUS_OPTIONS: Array<{ value: SubmissionSummary['status']; label: string 
   { value: 'ERROR', label: 'Ошибка' },
 ];
 
-const LANG_OPTIONS = ['java', 'kotlin', 'python'];
+// P0-1: Kotlin исключён из MVP. Фильтр предлагает только активные языки;
+// исторические Kotlin-submissions всё ещё отображаются в списке (тип SubmissionSummary).
+const LANG_OPTIONS = ['java', 'python'];
 
 const SubmissionsFilterPanel: React.FC<SubmissionsFilterPanelProps> = ({
   filters,

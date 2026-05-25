@@ -8,7 +8,7 @@ Kotlin 2.2.21 on JDK 21, Spring Boot 3.5.0, Gradle (Kotlin DSL) multi-module bui
 
 ## Module layout
 
-10 Gradle subprojects, declared in [settings.gradle.kts](settings.gradle.kts):
+9 Gradle subprojects, declared in [settings.gradle.kts](settings.gradle.kts):
 
 - **`api-generator`** — Not a runtime artifact. Runs the `org.openapi.generator` plugin to convert OpenAPI YAML specs in [api-generator/resources/api/](api-generator/resources/api/) into Spring interfaces + DTOs at `api-generator/build/generated/openapi/`. The generated dir is added to `sourceSets.main.java.srcDirs`, so generated code is compiled as part of this module and exported to dependents.
 - **`task-resolver`** — Spring Boot application implementing the generated API. Depends on `:api-generator` (e.g. [TaskResolverController](task-resolver/src/main/kotlin/ru/taskresolver/web/TaskResolverController.kt) implements `web.TaskResolverApi`).
@@ -19,7 +19,8 @@ Kotlin 2.2.21 on JDK 21, Spring Boot 3.5.0, Gradle (Kotlin DSL) multi-module bui
 - **`worker`** — background job processing.
 - **`ai-analyzer`** — **integration with external LLM APIs** (Claude / OpenAI / Yandex GPT) for AI-driven solution evaluation.
 - **`scenario-runner`** — runs test scenarios against submitted solutions.
-- **`task-process`** — orchestrator of the per-task processing pipeline.
+
+The per-submission pipeline is orchestrated by `WorkerService` (module `worker`); the REST→Kafka edge is handled by `TaskResolverProcessService` (module `task-resolver`). There is no separate `task-process` module — references to it in older docs are stale.
 
 `task-resolver` does **not** define its own controllers from scratch — controllers must implement the interface produced by the generator. Adding or changing an endpoint means editing the YAML spec first, then implementing the regenerated interface.
 
