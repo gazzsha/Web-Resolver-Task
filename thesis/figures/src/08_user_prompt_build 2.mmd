@@ -1,0 +1,26 @@
+flowchart TB
+    Start([Начало:<br/>AnalyzeContext,<br/>code, language])
+    Lang["Блок 1: Язык программирования<br/>фильтрация по isLetterOrDigit + плюс минус<br/>защита от инъекций в атрибут language"]
+    TaskDesc{"taskDescription<br/>не пуст?"}
+    TaskDescAdd["Блок 2: Условие задачи<br/>обрезка до 4000 символов"]
+    SandboxData{"агрегаты<br/>sandbox<br/>есть?"}
+    SandboxAdd["Блок 3: Результат проверки sandbox<br/>passed / total, verdict, firstError<br/>обрезка firstError до 500 символов<br/>через stripUnsafeOutput"]
+    AstData{"astFactsBlock<br/>предоставлен?"}
+    AstAdd["Блок 4: AST-факты<br/>с обёрткой AST_FACTS"]
+    Code["Блок 5: Код студента<br/>обрамление sentinel-маркерами<br/>STUDENT_CODE_BEGIN ... STUDENT_CODE_END<br/>замена внутреннего STUDENT_CODE_END<br/>на STUDENT_CODE_END_LITERAL"]
+    Validate["Валидация: длина не более 16 КБ,<br/>нормализация Unicode NFKC,<br/>удаление управляющих символов"]
+    End([userPromptFull:<br/>готовый промпт<br/>для GigaChat])
+
+    Start --> Lang
+    Lang --> TaskDesc
+    TaskDesc -->|да| TaskDescAdd
+    TaskDesc -->|нет| SandboxData
+    TaskDescAdd --> SandboxData
+    SandboxData -->|да| SandboxAdd
+    SandboxData -->|нет| AstData
+    SandboxAdd --> AstData
+    AstData -->|да| AstAdd
+    AstData -->|нет| Code
+    AstAdd --> Code
+    Code --> Validate
+    Validate --> End

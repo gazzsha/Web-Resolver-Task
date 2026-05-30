@@ -1,0 +1,39 @@
+flowchart TB
+    Start([Начало:<br/>code, language,<br/>testCases])
+    Prepare["Подготовка рабочей<br/>директории /tmp/work-XXX"]
+    DockerRun["docker run в detached:<br/>--network=none<br/>--read-only<br/>--cap-drop=ALL<br/>--tmpfs /tmp:noexec,nosuid<br/>--pids-limit=64<br/>--security-opt no-new-privileges<br/>-m memoryLimitMb<br/>--cpus cpuLimit"]
+    StartWatchdog["Запуск watchdog:<br/>ScheduledExecutorService<br/>отложенная задача<br/>на timeoutSeconds"]
+    StartPolling["Запуск polling:<br/>docker stats каждые 100 мс<br/>обновление peakMemoryBytes"]
+    Wait["docker wait<br/>с таймаутом timeoutSeconds + 2 с"]
+    CheckTimeout{"Сработал<br/>watchdog?"}
+    Kill["docker kill<br/>--signal=SIGKILL"]
+    Inspect["docker inspect<br/>exitCode, OOMKilled, finishedAt"]
+    ReadCgroup["Чтение /app/.peak_memory_bytes<br/>из cgroup v2"]
+    Resolve{"Разрешение вердикта<br/>в порядке приоритета"}
+    Verdict1["timedOut to TIME_LIMIT_EXCEEDED"]
+    Verdict2["oomKilled to MEMORY_LIMIT_EXCEEDED"]
+    Verdict3["exitCode 137 to MEMORY_LIMIT_EXCEEDED"]
+    Verdict4["exitCode 124 to TIME_LIMIT_EXCEEDED"]
+    Verdict5["exitCode not 0 to RUNTIME_ERROR"]
+    Verdict6["иначе to OK<br/>(сравнение с эталоном)"]
+    Cleanup["docker rm<br/>удаление контейнера<br/>и рабочей директории"]
+    End([Конец:<br/>SandboxExecutionResult])
+
+    Start --> Prepare --> DockerRun --> StartWatchdog --> StartPolling --> Wait
+    Wait --> CheckTimeout
+    CheckTimeout -->|да| Kill --> Inspect
+    CheckTimeout -->|нет| Inspect
+    Inspect --> ReadCgroup --> Resolve
+    Resolve --> Verdict1
+    Resolve --> Verdict2
+    Resolve --> Verdict3
+    Resolve --> Verdict4
+    Resolve --> Verdict5
+    Resolve --> Verdict6
+    Verdict1 --> Cleanup
+    Verdict2 --> Cleanup
+    Verdict3 --> Cleanup
+    Verdict4 --> Cleanup
+    Verdict5 --> Cleanup
+    Verdict6 --> Cleanup
+    Cleanup --> End

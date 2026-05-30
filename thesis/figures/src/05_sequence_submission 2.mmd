@@ -1,0 +1,43 @@
+sequenceDiagram
+    participant U as Студент<br/>(браузер)
+    participant F as Frontend<br/>React + Monaco
+    participant T as task-resolver
+    participant DB as PostgreSQL
+    participant K as Apache Kafka
+    participant W as worker
+    participant S as sandbox<br/>(Docker)
+    participant A as ai-analyzer
+    participant G as GigaChat API
+
+    U->>F: Нажатие «Отправить»
+    F->>T: POST /api/v1/submissions<br/>{taskId, code, language}
+    T->>DB: INSERT submissions<br/>status=PENDING
+    T->>K: publish task.submitted
+    T-->>F: 202 Accepted<br/>{submissionId}
+    F->>F: Запуск polling
+
+    K->>W: consume task.submitted
+    W->>DB: UPDATE status=PROCESSING
+    W->>S: запуск Docker-контейнера<br/>с hardening-флагами
+
+    loop по тестовым случаям
+        S->>S: docker run<br/>--network=none<br/>--read-only
+        S-->>W: SandboxExecutionResult<br/>(verdict, time, memory)
+    end
+
+    W->>A: analyze(code, language,<br/>sandboxResults)
+    A->>A: AST-извлечение фактов
+    A->>G: POST /chat/completions<br/>{user-prompt, system-prompt}
+    G-->>A: JSON-ответ
+    A->>A: JSON-Schema валидация
+    A->>A: применение dynamicQualityCap
+    A-->>W: AIAnalysisResult<br/>(quality, complexity, explanation)
+
+    W->>DB: INSERT task_results, ai_analysis
+    W->>DB: UPDATE status=COMPLETED
+    W->>K: publish task.completed
+
+    F->>T: GET /api/v1/submissions/{id}<br/>(каждую секунду)
+    T->>DB: SELECT *
+    T-->>F: {status: COMPLETED,<br/>verdict, aiAnalysis}
+    F-->>U: Экран результатов

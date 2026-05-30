@@ -1,0 +1,36 @@
+flowchart TB
+    classDef topLayer fill:#08427B,stroke:#073B6F,color:#fff
+    classDef midLayer fill:#1168BD,stroke:#0E5BA6,color:#fff
+    classDef botLayer fill:#438DD5,stroke:#2E6295,color:#fff
+    classDef external fill:#999999,stroke:#6B6B6B,color:#fff
+
+    Input["Входные данные:<br/>код студента, язык,<br/>результаты sandbox"]
+
+    subgraph Hierarchy["Иерархия авторитетности"]
+        direction TB
+        Sandbox["1. Sandbox-вердикт<br/>(высший приоритет)<br/>Результат фактического запуска"]:::topLayer
+        AST["2. AST-факты<br/>(средний приоритет)<br/>Структурные свойства кода"]:::midLayer
+        LLM["3. LLM-суждение<br/>(низший приоритет)<br/>Текстовый разбор от GigaChat"]:::botLayer
+
+        Sandbox -->|"ограничивает"| AST
+        AST -->|"ограничивает"| LLM
+    end
+
+    subgraph Chain["Цепочка обработчиков"]
+        direction TB
+        Hybrid["AstHybridAnalyzer<br/>(основной)"]
+        Giga["GigaChatAnalyzer<br/>(LLM-обращение)"]
+        Rule["SimpleRuleBased<br/>(резерв)"]
+        Hybrid -->|"fallback"| Giga
+        Giga -->|"fallback"| Rule
+    end
+
+    GigaChat["GigaChat API"]:::external
+
+    Output["Итоговая оценка:<br/>codeQuality, complexity,<br/>issues, recommendations,<br/>explanation"]
+
+    Input --> Hierarchy
+    Hierarchy --> Chain
+    Giga -.->|"HTTPS"| GigaChat
+    Chain --> VerdictGuards["Verdict-guards:<br/>dynamicQualityCap,<br/>AST-clamp,<br/>stripUnsafeOutput,<br/>enforceImpersonalTone"]
+    VerdictGuards --> Output

@@ -1,0 +1,31 @@
+stateDiagram-v2
+    [*] --> PENDING : POST /submissions<br/>создание записи
+
+    PENDING --> PROCESSING : публикация<br/>в Kafka<br/>task.submitted
+    PENDING --> FAILED : ошибка<br/>публикации<br/>в Kafka
+
+    PROCESSING --> COMPLETED : пайплайн<br/>завершён успешно
+    PROCESSING --> FAILED : необратимая<br/>ошибка<br/>пайплайна
+
+    COMPLETED --> [*]
+    FAILED --> [*]
+
+    note right of PENDING
+        Решение принято
+        сервером,
+        ожидает обработки
+    end note
+
+    note right of PROCESSING
+        Sandbox-исполнение,
+        AST-извлечение,
+        обращение к GigaChat,
+        применение
+        verdict-guard'ов
+    end note
+
+    note right of COMPLETED
+        Результат записан
+        в task_results
+        и ai_analysis
+    end note
