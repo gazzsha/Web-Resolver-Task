@@ -1,4 +1,0 @@
-{
-  "executablePath": "/Applications/Yandex.app/Contents/MacOS/Yandex",
-  "args": ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
-}
