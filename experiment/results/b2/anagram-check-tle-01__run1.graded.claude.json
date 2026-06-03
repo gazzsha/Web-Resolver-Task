@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "e43b3fd6-0195-47d7-ab09-ba1f24a36c90",
+  "judge_call_id": "4ae0a7ab-45e4-4fa6-8a52-b0dc92bc2814",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Permutations + факториал опознаны, sorted — actionable."
+  "judge_rationale": "permutations факториальная сложность, sorted — верно"
 }

@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "697712c5-1531-4217-8e70-78cb49ddfda0",
+  "judge_call_id": "009df20f-6348-42c4-a47e-ba7291dbf43b",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "n=0 + NegativeArraySize опознаны, проверка n<=1 actionable."
+  "judge_rationale": "массив отрицательного размера при n=0 названо точно"
 }

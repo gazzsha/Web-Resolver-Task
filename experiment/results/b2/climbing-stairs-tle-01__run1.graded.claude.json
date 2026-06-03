@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "78735eba-f7fa-4fee-936d-44b05387195b",
+  "judge_call_id": "713ef73f-4772-4877-857c-1bff31bad889",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Экспоненциальная рекурсия O(2^n) опознана, DP — actionable."
+  "judge_rationale": "Верно: экспоненциальная рекурсия O(2^n), мемоизация/DP"
 }

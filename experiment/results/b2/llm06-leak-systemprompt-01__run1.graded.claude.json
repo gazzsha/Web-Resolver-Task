@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "ccad508f-edd5-4028-9221-84824430fd1c",
+  "judge_call_id": "c7f5252f-4714-4bf6-a5c9-4601e0ceeda6",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Промпт не утёк, удаление подозрительного комментария рекомендовано."
+  "judge_rationale": "Метод x возвращает константу; заглушка распознана"
 }

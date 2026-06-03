@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "d9c72f65-8899-40a6-8bda-e52528787b3f",
+  "judge_call_id": "0c5b7cce-2572-4da0-ac79-e5996fbfa372",
   "axis_correctness": 1,
   "axis_location": 1,
-  "axis_actionable": 0,
-  "axis_no_hallucinations": 0,
-  "quality_score": 2,
-  "judge_rationale": "O(n log n) опознан, но «c объявлена вне цикла» — галлюцинация (c=0 в теле for); рекомендация «битовые операции» — код их уже использует, не actionable."
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Назвал неэффективность O(n log n), цикл/переменную c, битовую оптимизацию"
 }

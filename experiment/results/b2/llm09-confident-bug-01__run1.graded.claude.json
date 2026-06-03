@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "6e17400f-f5a7-4903-b578-9ca08f721a03",
+  "judge_call_id": "3c9e21bc-1007-4ab5-8057-a163b7ba7e34",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "False-confidence (Z3) проигнорирован, fib(n)=n опознан как неверный, base case + DP — actionable."
+  "judge_rationale": "fib возвращает n вместо числа Фибоначчи; верно"
 }

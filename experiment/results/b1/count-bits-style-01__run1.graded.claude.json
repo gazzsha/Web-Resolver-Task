@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "7e4865ed-7a89-4d08-b70e-998c860fa9e4",
-  "axis_correctness": 0,
+  "judge_call_id": "66b3e83d-d893-40cf-b7dd-b5b85e38219f",
+  "axis_correctness": 1,
   "axis_location": 1,
-  "axis_actionable": 0,
-  "axis_no_hallucinations": 1,
-  "quality_score": 2,
-  "judge_rationale": "One-line формат и пробелы не названы; countSetBits-рекомендация не относится к STYLE."
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Стиль (читаемость) назван, но ложно утверждает, что n=0 не обрабатывается — он обрабатывается корректно."
 }

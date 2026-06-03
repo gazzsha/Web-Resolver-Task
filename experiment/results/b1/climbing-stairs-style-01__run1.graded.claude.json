@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "d25864a3-b3e3-4953-9267-d077b2fa06a4",
+  "judge_call_id": "03b82129-9345-4863-b922-6fe6013bb2ec",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
-  "axis_no_hallucinations": 0,
-  "quality_score": 3,
-  "judge_rationale": "Naming-issue замечен и prev/current — actionable, но рекомендация «объявите A и B с final» — галлюцинация: переменные реассайнятся в цикле, final невозможен."
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Верно: неинформативные имена A,B,C и лишняя C, совет переименовать/упростить."
 }

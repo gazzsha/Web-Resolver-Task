@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "940d3a26-69a7-4998-b559-2abcf502da8c",
+  "judge_call_id": "2a0c43f1-9fe7-4b12-89cf-db8a6ec5a842",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
-  "axis_no_hallucinations": 1,
-  "quality_score": 4,
-  "judge_rationale": "Long-overflow для очень больших чисел опознан, BigInteger — точная рекомендация."
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Переполнение long верно, но ложь: parseLong не падает на ведущих нулях NumberFormatException"
 }

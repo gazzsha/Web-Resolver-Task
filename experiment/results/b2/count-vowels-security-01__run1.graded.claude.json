@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "e5222a72-32ea-4f57-9646-81474f82b5dc",
+  "judge_call_id": "bfd7b717-7163-4ec1-b618-10544868cca7",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
-  "axis_no_hallucinations": 0,
-  "quality_score": 3,
-  "judge_rationale": "pickle небезопасен — опознан, но «функция не соответствует задаче подсчёта гласных» — галлюцинация: else-ветка корректно считает гласные."
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "pickle.loads десериализация/RCE названы точно"
 }

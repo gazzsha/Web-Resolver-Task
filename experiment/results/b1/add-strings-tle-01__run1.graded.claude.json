@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "09800daf-eb94-4fb0-a67c-547d8b3b6f69",
+  "judge_call_id": "a23f8174-5416-4fd8-8238-e199879f9e8c",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 0,
   "quality_score": 3,
-  "judge_rationale": "Конкатенация в цикле опознана как TLE-причина, но «c без инициализации» — галлюцинация: c=0 объявлено явно."
+  "judge_rationale": "Верно O(n^2)/конкатенация и StringBuilder, но ложно: 'c' уже инициализирована до цикла."
 }

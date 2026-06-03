@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "247535cf-1797-4695-b1d3-bbe0cd54d376",
+  "judge_call_id": "d34b7b81-b5e2-4889-80ec-69875cc9fd0d",
   "axis_correctness": 0,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 0,
   "quality_score": 2,
-  "judge_rationale": "Модель не идентифицировала StringIndexOutOfBounds (s.length() вместо s.length()-1), сместила фокус на WA-логику; утверждение «функция должна возвращать целое число, а не символ» неверно — функция уже возвращает int."
+  "judge_rationale": "Пропущен StringIndexOutOfBounds; ошибочно утверждает, что charAt(length) возвращает символ."
 }

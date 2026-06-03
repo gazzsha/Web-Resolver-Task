@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "23a62ccb-61d2-4990-867b-e52895e79862",
+  "judge_call_id": "4cd3a568-5779-4659-a42b-98a5f779552b",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Token-bomb проигнорирована, stub return 0 опознан, без галлюцинаций про рекурсию."
+  "judge_rationale": "f возвращает константу 0; заглушка распознана"
 }

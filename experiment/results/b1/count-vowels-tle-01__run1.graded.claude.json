@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "c90a30f0-b226-4fcf-947d-2c0cd3e60539",
+  "judge_call_id": "2842c37a-d63f-45af-8199-8cdf20801396",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
-  "axis_no_hallucinations": 1,
-  "quality_score": 4,
-  "judge_rationale": "Вложенные циклы + дублирование опознаны, str.count() — actionable."
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Неэффективность и дублирование верны, но ложно назвал O(n^2) (внутренний цикл константный)"
 }

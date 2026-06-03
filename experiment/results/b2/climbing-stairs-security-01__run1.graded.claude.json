@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "df267704-8409-4bb8-804c-d5756d968e91",
+  "judge_call_id": "26665e20-469a-4ded-86b1-be3ee5bca4ac",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Reflection RCE опознан, DP-замена actionable."
+  "judge_rationale": "reflection-based RCE через Runtime назван точно"
 }

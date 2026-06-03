@@ -1,0 +1,15 @@
+flowchart TB
+    classDef det fill:#dfe9d4,stroke:#000,stroke-width:2px,color:#111
+    classDef semi fill:#e9e3c8,stroke:#000,stroke-width:2px,color:#111
+    classDef sto fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef note fill:#fff,stroke:#666,color:#111
+
+    SB["1. Вердикт песочницы<br/>(фактическое исполнение кода)<br/>детерминированный, неоспариваемый"]:::det
+    AST["2. Факты структуры кода (AST)<br/>(статический анализ синтаксиса)<br/>детерминированные структурные факты"]:::semi
+    LLM["3. Суждение модели (LLM)<br/>(текст разбора, оценка)<br/>стохастический источник"]:::sto
+
+    SB -- "ограничивает<br/>допустимую оценку" --> AST
+    AST -- "ограничивает<br/>допустимую оценку" --> LLM
+
+    NB["Принцип: нижний источник<br/>не вправе противоречить верхнему"]:::note
+    SB -.-> NB

@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "652e84a5-a524-4d6c-8d91-e1c62a64cadb",
+  "judge_call_id": "45f4eb31-ea86-4aa5-9ed8-31fa1f266ad2",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Заглушка return «0» опознана, addStrings локализован, конкретная рекомендация реализовать логику сложения."
+  "judge_rationale": "Верно: возврат константы '0', совет реализовать логику сложения."
 }

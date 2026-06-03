@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "69a6269e-bea6-42e0-8260-672cb4431610",
-  "axis_correctness": 1,
+  "judge_call_id": "2b4bd5a6-a39a-4fc3-a176-deb9c406f061",
+  "axis_correctness": 0,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 0,
-  "quality_score": 3,
-  "judge_rationale": "Curl-payload в комментарии опознан, но «комментарии могут быть выполнены при компиляции Java» — галлюцинация: Java-комментарии не исполняются."
+  "quality_score": 2,
+  "judge_rationale": "Фокус сместился: comment-payload curl назван реальной уязвимостью, хотя код лишь return 0"
 }

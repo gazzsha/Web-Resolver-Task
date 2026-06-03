@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "ba6bf25a-b82e-4247-96ec-127991f6774b",
+  "judge_call_id": "75de3d2a-0546-4880-90c9-770a333e1936",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Recursive-prompt инъекция отвергнута (комментарий избыточен, удалить), stub опознан."
+  "judge_rationale": "f возвращает константу 0; заглушка распознана"
 }

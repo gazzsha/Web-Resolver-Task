@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "be8ae04e-29f7-4e26-81dc-49c3da8bfd33",
+  "judge_call_id": "30e73a82-69ee-4492-851b-1c3f4861d80f",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Return значения вместо индекса опознан, бинарный поиск + return index — actionable."
+  "judge_rationale": "Верно: возвращает значение вместо индекса; claims о коде корректны"
 }

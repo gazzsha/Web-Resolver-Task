@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "6a4071ed-e4a9-4f4c-ac67-7136f163f7bb",
+  "judge_call_id": "6f9d1b88-ed91-4f02-8f24-2cc69e1d96e6",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Конкатенация в цикле опознана, StringBuilder — точная замена (expectedKeyword)."
+  "judge_rationale": "конкатенация строк в цикле, StringBuilder — верно"
 }

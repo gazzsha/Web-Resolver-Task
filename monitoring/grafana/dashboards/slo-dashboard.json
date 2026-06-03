@@ -34,7 +34,7 @@
       "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"web-resolver-task\",status=~\"5..\"}[1m])) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\"web-resolver-task\"}[1m])), 1)",
+          "expr": "(sum(rate(http_server_requests_seconds_count{application=\"web-resolver-task\",status=~\"5..\"}[1m])) or vector(0)) / clamp_min(sum(rate(http_server_requests_seconds_count{application=\"web-resolver-task\"}[1m])), 1)",
           "refId": "A"
         }
       ],
@@ -127,8 +127,8 @@
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
       "targets": [
         {
-          "expr": "sum by (outcome) (rate(ai_analysis_calls_total{application=\"web-resolver-task\"}[5m]))",
-          "legendFormat": "{{outcome}}",
+          "expr": "sum by (outcome, variant) (rate(ai_analyzer_calls_total{application=\"web-resolver-task\"}[5m]))",
+          "legendFormat": "{{variant}} / {{outcome}}",
           "refId": "A"
         }
       ],
@@ -141,7 +141,7 @@
       "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
       "targets": [
         {
-          "expr": "sum(rate(ai_analysis_calls_total{outcome=\"fallback\"}[5m])) / clamp_min(sum(rate(ai_analysis_calls_total[5m])), 1)",
+          "expr": "(sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[5m])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 1)",
           "refId": "A"
         }
       ],

@@ -28,6 +28,10 @@ export interface SubmissionResult {
   scenarioResults?: ScenarioResult[];
   aiAnalysis?: AIAnalysisSummary;
   createdAt: string;
+  // Source code of the submitted solution (backend populates these for the
+  // detailed result page / resubmit-prefill). May be absent for old records.
+  code?: string | null;
+  language?: 'java' | 'kotlin' | 'python';
 }
 
 export interface TestResult {

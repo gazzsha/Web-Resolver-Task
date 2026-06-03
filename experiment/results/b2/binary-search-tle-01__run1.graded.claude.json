@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "e46c9283-6623-45c3-9ab6-987515446fe7",
+  "judge_call_id": "b06f721c-180c-4fa8-a5aa-149f6b314e62",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
-  "axis_no_hallucinations": 1,
-  "quality_score": 4,
-  "judge_rationale": "O(n) линейный опознан, Arrays.binarySearch — actionable."
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "линейный поиск/бинарный — верно, но сложность O(n^2) ошибочна (это O(n))"
 }

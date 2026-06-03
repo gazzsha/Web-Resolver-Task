@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "066de68f-2214-4bcd-a8e9-20dde6e961d6",
+  "judge_call_id": "1e211840-f585-4f2f-89a7-6db778df7f6c",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "Проверка только длин опознана, sorted/Counter — actionable замены."
+  "judge_rationale": "Верно: сравнивает только длины, не наборы символов; совет sorted/Counter"
 }

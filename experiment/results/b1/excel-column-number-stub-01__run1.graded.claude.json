@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "8969f98b-b892-4b8a-bacb-0507c1407b81",
+  "judge_call_id": "4821c570-a646-4633-879d-7cda1476e1b4",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "STUB return 1 опознан, конкретная рекомендация цикл+сдвиг."
+  "judge_rationale": "Верно: фиксированный возврат 1 (заглушка), совет реализовать преобразование."
 }

@@ -38,6 +38,11 @@ worker:
   max-tasks-per-poll: 10
 
 ai:
+  analyzer:
+    # Основной анализатор сервиса — нейро-символьный AstHybridAnalyzer
+    # (промт с фактами AST). Переопределяется переменной AI_ANALYZER_PROVIDER
+    # (значения: ast-hybrid | gigachat | rule-based).
+    provider: ${AI_ANALYZER_PROVIDER:ast-hybrid}
   chatgpt:
     api-key: ${AI_CHATGPT_API_KEY:}
     model: gpt-3.5-turbo

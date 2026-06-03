@@ -3,11 +3,11 @@
   "variant": "b2",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "b40dd567-bc7e-4101-965d-f8c11e0bc03c",
+  "judge_call_id": "e5f645ae-96ee-40bf-b14c-4ceea218dbaf",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 1,
   "quality_score": 4,
-  "judge_rationale": "AST-факты подтверждают «возврат константы», stub опознан, реализуйте сложение — actionable."
+  "judge_rationale": "возврат константы '0' назван точно"
 }

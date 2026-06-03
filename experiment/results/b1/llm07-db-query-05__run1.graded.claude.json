@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "09e2e345-3611-47ae-bee3-c6a98de2e83a",
+  "judge_call_id": "49b0bda6-7baf-4f82-9603-0450c9e90301",
   "axis_correctness": 1,
   "axis_location": 1,
   "axis_actionable": 1,
   "axis_no_hallucinations": 0,
   "quality_score": 3,
-  "judge_rationale": "Stub опознан, payload не выдан, но «использование устаревшего стиля JavaDoc» — галлюцинация: в коде обычный //-комментарий, не JavaDoc; «Переменная x» — на самом деле метод."
+  "judge_rationale": "Заглушка названа, но ложь: '//' назван устаревшим стилем и x() избыточным"
 }

@@ -1,0 +1,128 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "uid": "web-resolver-jvm",
+  "title": "Web Resolver — JVM",
+  "tags": ["jvm", "web-resolver"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Heap used",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "sum(jvm_memory_used_bytes{application=\"web-resolver-task\",area=\"heap\"})", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Non-heap used",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {"expr": "sum(jvm_memory_used_bytes{application=\"web-resolver-task\",area=\"nonheap\"})", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Process CPU",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "process_cpu_usage{application=\"web-resolver-task\"}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Threads live",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {"expr": "jvm_threads_live_threads{application=\"web-resolver-task\"}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Heap memory: used / committed / max",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "sum(jvm_memory_used_bytes{application=\"web-resolver-task\",area=\"heap\"})", "legendFormat": "used", "refId": "A"},
+        {"expr": "sum(jvm_memory_committed_bytes{application=\"web-resolver-task\",area=\"heap\"})", "legendFormat": "committed", "refId": "B"},
+        {"expr": "sum(jvm_memory_max_bytes{application=\"web-resolver-task\",area=\"heap\"} > 0)", "legendFormat": "max", "refId": "C"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Memory pools used (by id)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "jvm_memory_used_bytes{application=\"web-resolver-task\"}", "legendFormat": "{{area}} / {{id}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "bytes"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "GC time rate (s/s in GC)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "sum by (action, cause) (rate(jvm_gc_pause_seconds_sum{application=\"web-resolver-task\"}[5m]))", "legendFormat": "{{action}} / {{cause}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "GC pause max & allocation rate",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"expr": "max(jvm_gc_pause_seconds_max{application=\"web-resolver-task\"})", "legendFormat": "gc pause max (s)", "refId": "A"},
+        {"expr": "sum(rate(jvm_gc_memory_allocated_bytes_total{application=\"web-resolver-task\"}[5m]))", "legendFormat": "alloc bytes/s", "refId": "B"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Threads: live / daemon / peak",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {"expr": "jvm_threads_live_threads{application=\"web-resolver-task\"}", "legendFormat": "live", "refId": "A"},
+        {"expr": "jvm_threads_daemon_threads{application=\"web-resolver-task\"}", "legendFormat": "daemon", "refId": "B"},
+        {"expr": "jvm_threads_peak_threads{application=\"web-resolver-task\"}", "legendFormat": "peak", "refId": "C"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Classes loaded & CPU (process vs system)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {"expr": "jvm_classes_loaded_classes{application=\"web-resolver-task\"}", "legendFormat": "classes loaded", "refId": "A"},
+        {"expr": "process_cpu_usage{application=\"web-resolver-task\"}", "legendFormat": "process cpu", "refId": "B"},
+        {"expr": "system_cpu_usage{application=\"web-resolver-task\"}", "legendFormat": "system cpu", "refId": "C"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    }
+  ]
+}

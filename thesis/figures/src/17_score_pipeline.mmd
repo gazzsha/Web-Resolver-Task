@@ -1,0 +1,24 @@
+flowchart TB
+    classDef io fill:#fff,stroke:#000,color:#111
+    classDef proc fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef cap fill:#e9e3c8,stroke:#000,stroke-width:2px,color:#111
+    classDef dec fill:#dfe9d4,stroke:#000,color:#111
+
+    IN[/"Решение студента:<br/>код, язык, вердикт песочницы"/]:::io
+    TESTS["Доля пройденных тестов<br/>(passed из total)"]:::proc
+    ASTF["Факты структуры кода (AST):<br/>циклы, рекурсия, сложность,<br/>возврат константы"]:::proc
+    LLMQ["Оценка модели codeQuality<br/>(0..100)"]:::proc
+
+    CAP1{"Ограничитель по тестам:<br/>0 тестов → не выше 20<br/>1 тест → не выше 30<br/>половина → не выше 50<br/>все кроме одного → не выше 70"}:::cap
+    CAP2{"Ограничитель по AST:<br/>возврат константы<br/>и 0 тестов → не выше 10"}:::cap
+
+    OUT[/"Итоговая оценка качества"/]:::io
+
+    IN --> TESTS
+    IN --> ASTF
+    IN --> LLMQ
+    LLMQ --> CAP1
+    TESTS --> CAP1
+    CAP1 --> CAP2
+    ASTF --> CAP2
+    CAP2 --> OUT

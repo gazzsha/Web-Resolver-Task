@@ -3,11 +3,11 @@
   "variant": "b1",
   "runIndex": 1,
   "judge_model": "claude-opus-4-7-via-agent-sdk",
-  "judge_call_id": "39f6de71-1410-4f43-83fb-d88492c9c3da",
+  "judge_call_id": "f2ff83f5-9537-4ea7-afd3-1eab1eaf32b9",
   "axis_correctness": 1,
   "axis_location": 1,
-  "axis_actionable": 0,
+  "axis_actionable": 1,
   "axis_no_hallucinations": 1,
-  "quality_score": 3,
-  "judge_rationale": "os.system+shell injection названы, но рекомендации фокусируются на Counter/регистре, а не на устранении os.system; «рассмотрите необходимость» — нечёткое actionable."
+  "quality_score": 4,
+  "judge_rationale": "Верно: os.system как shell-инъекция, совет Counter и не писать в файлы."
 }

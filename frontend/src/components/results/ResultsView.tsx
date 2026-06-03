@@ -46,6 +46,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ReplayIcon from '@mui/icons-material/Replay';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import type { SubmissionResult, AIAnalysisFull } from '@/types';
 import { submissionService, aiService } from '@/services/api';
 import { brand } from '@/theme/theme';
@@ -143,6 +144,86 @@ const readSubmittedCode = (id: string | undefined, locState: unknown): Submitted
     }
   }
   return null;
+};
+
+// ──── AST facts (structural analysis) ────
+// The ai-analyzer prepends a deterministic line to `explanation`, e.g.:
+//   "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=39\n\n<текст>"
+// We parse it out to render structured chips and show the rest as prose.
+type AstFacts = {
+  language?: string;
+  hasLoop?: boolean;
+  hasRecursion?: boolean;
+  cyclomaticComplexity?: number;
+  lineCount?: number;
+  suspiciousConst?: boolean;
+  fallback?: boolean;
+};
+
+const boolFrom = (s: string | undefined): boolean | undefined =>
+  s === 'true' ? true : s === 'false' ? false : undefined;
+
+const parseAstFacts = (explanation?: string | null): { facts: AstFacts | null; rest: string } => {
+  if (!explanation) return { facts: null, rest: '' };
+  const lines = explanation.split('\n');
+  const idx = lines.findIndex((l) => l.trim().startsWith('AST-факты:'));
+  if (idx === -1) return { facts: null, rest: explanation };
+
+  const line = lines[idx].trim();
+  const grab = (re: RegExp): string | undefined => re.exec(line)?.[1];
+  const cc = grab(/CC=(\d+)/);
+  const ln = grab(/строк=(\d+)/);
+  const facts: AstFacts = {
+    language: grab(/язык=([^,]+)/)?.trim(),
+    hasLoop: boolFrom(grab(/цикл=(true|false)/)),
+    hasRecursion: boolFrom(grab(/рекурсия=(true|false)/)),
+    cyclomaticComplexity: cc != null ? Number(cc) : undefined,
+    lineCount: ln != null ? Number(ln) : undefined,
+    suspiciousConst: /подозрение: возврат константы/.test(line),
+    fallback: /использован fallback-анализатор/.test(line),
+  };
+  // Drop the AST line (and any leading blank lines it left behind) from the prose.
+  const rest = [...lines.slice(0, idx), ...lines.slice(idx + 1)].join('\n').replace(/^\s+/, '');
+  return { facts, rest };
+};
+
+const AstFactsChips: React.FC<{ facts: AstFacts }> = ({ facts }) => {
+  const items: { label: string; color: 'default' | 'success' | 'warning' | 'info' | 'error' }[] = [];
+  if (facts.language) items.push({ label: `язык: ${facts.language}`, color: 'default' });
+  if (facts.hasLoop !== undefined)
+    items.push({ label: `цикл: ${facts.hasLoop ? 'да' : 'нет'}`, color: facts.hasLoop ? 'info' : 'default' });
+  if (facts.hasRecursion !== undefined)
+    items.push({ label: `рекурсия: ${facts.hasRecursion ? 'да' : 'нет'}`, color: facts.hasRecursion ? 'warning' : 'default' });
+  if (facts.cyclomaticComplexity !== undefined)
+    items.push({ label: `CC: ${facts.cyclomaticComplexity}`, color: facts.cyclomaticComplexity > 10 ? 'warning' : 'success' });
+  if (facts.lineCount !== undefined) items.push({ label: `строк: ${facts.lineCount}`, color: 'default' });
+  if (facts.suspiciousConst) items.push({ label: 'возврат константы', color: 'error' });
+  if (items.length === 0) return null;
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.75 }}
+      >
+        <AccountTreeIcon sx={{ fontSize: 15 }} /> Структурный анализ (AST)
+      </Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+        {items.map((it, i) => (
+          <Chip
+            key={i}
+            label={it.label}
+            color={it.color}
+            size="small"
+            variant="outlined"
+            sx={{ fontWeight: 600, fontFamily: '"JetBrains Mono", monospace' }}
+          />
+        ))}
+        {facts.fallback && <Chip label="fallback-анализатор" size="small" variant="outlined" />}
+      </Box>
+    </Box>
+  );
 };
 
 export interface ResultsViewProps {
@@ -290,7 +371,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
 
   // ──── Code preview panel (standalone mode only) ────
   const CodePanel = () => {
-    if (!submitted || embedded) return null;
+    if (!effectiveSubmitted || embedded) return null;
     return (
       <Accordion
         expanded={codeOpen}
@@ -311,7 +392,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               Отправленное решение
             </Typography>
             <Chip
-              label={submitted.language}
+              label={effectiveSubmitted.language}
               size="small"
               sx={{ ml: 1, textTransform: 'uppercase', fontWeight: 600, fontSize: '0.7rem' }}
             />
@@ -328,8 +409,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             >
               <MonacoEditor
                 height="100%"
-                language={submitted.language}
-                value={submitted.code}
+                language={effectiveSubmitted.language}
+                value={effectiveSubmitted.code}
                 theme={isDark ? 'vs-dark' : 'light'}
                 options={{
                   readOnly: true,
@@ -411,10 +492,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   const statusColor = getStatusColor(result.status);
   const isSuccess = result.status === 'SUCCESS';
 
+  // Submitted code: prefer the in-session source (navigation state / sessionStorage),
+  // fall back to the code returned by the API so direct links to /results/:id work too.
+  const effectiveSubmitted: SubmittedCode | null =
+    submitted ?? (result.code ? { code: result.code, language: result.language ?? 'java' } : null);
+
   const summaryAI = result.aiAnalysis;
   const displayedQuality = aiFullAnalysis?.codeQuality ?? summaryAI?.codeQuality;
   const displayedComplexity = aiFullAnalysis?.complexity ?? summaryAI?.complexity;
   const displayedExplanation = aiFullAnalysis?.explanation ?? summaryAI?.explanation;
+  // Split deterministic AST facts out of the LLM explanation for structured display.
+  const { facts: astFacts, rest: explanationText } = parseAstFacts(displayedExplanation);
   const hasAIBlock =
     displayedQuality != null ||
     displayedComplexity != null ||
@@ -674,10 +762,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               </Box>
             )}
 
-            {displayedExplanation && (
+            {astFacts && <AstFactsChips facts={astFacts} />}
+
+            {explanationText && (
               <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2, background: isDark ? alpha('#ffffff', 0.03) : alpha('#000000', 0.02) }}>
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-                  {displayedExplanation}
+                  {explanationText}
                 </Typography>
               </Paper>
             )}
@@ -1150,7 +1240,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               </Box>
             )}
 
-            {displayedExplanation && (
+            {astFacts && <AstFactsChips facts={astFacts} />}
+
+            {explanationText && (
               <Paper
                 variant="outlined"
                 sx={{
@@ -1161,7 +1253,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 }}
               >
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
-                  {displayedExplanation}
+                  {explanationText}
                 </Typography>
               </Paper>
             )}
