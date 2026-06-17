@@ -1,0 +1,25 @@
+flowchart LR
+    classDef client fill:#fff,stroke:#000,color:#111
+    classDef svc fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef infra fill:#e9e3c8,stroke:#000,stroke-width:2px,color:#111
+    classDef ext fill:#dfe9d4,stroke:#000,color:#111
+
+    FE["Браузер студента<br/>(React)"]:::client
+    TR["task-resolver<br/>(приём REST, фиксация)"]:::svc
+    KAFKA[("Kafka<br/>task-execution /<br/>task-results")]:::infra
+    WK["worker<br/>(оркестрация конвейера)"]:::svc
+    SBX["sandbox<br/>(изолированное исполнение)"]:::svc
+    AI["ai-analyzer<br/>(нейро-символьный анализ)"]:::svc
+    DB[("PostgreSQL")]:::infra
+    GIGA["GigaChat API"]:::ext
+
+    FE -- "1. отправка решения" --> TR
+    TR -- "2. сообщение" --> KAFKA
+    KAFKA -- "3. приём" --> WK
+    WK -- "4. прогон тестов" --> SBX
+    WK -- "5. запрос анализа" --> AI
+    AI -- "6. разбор" --> GIGA
+    WK -- "7. результат" --> KAFKA
+    KAFKA -- "8. готовый результат" --> TR
+    TR -- "9. сохранение" --> DB
+    FE -- "10. опрос статуса" --> TR

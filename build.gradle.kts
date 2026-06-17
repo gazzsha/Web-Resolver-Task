@@ -6,11 +6,37 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.2.21"
+    kotlin("jvm") version "2.2.21" apply false
+    jacoco
 }
 
 subprojects {
-
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "jacoco")
 
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        }
+    }
+
+    // Step 6a / B.8: единая конфигурация JaCoCo для всех модулей.
+    // api-generator пропускаем — модуль состоит из сгенерированного OpenAPI-кода,
+    // покрытие там не репрезентативно. Остальные модули покрываются автоматически.
+    extensions.configure<JacocoPluginExtension> {
+        toolVersion = "0.8.11"
+    }
+
+    tasks.withType<JacocoReport>().configureEach {
+        dependsOn(tasks.withType<Test>())
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+        }
+    }
+
+    tasks.withType<Test>().configureEach {
+        finalizedBy(tasks.withType<JacocoReport>())
+    }
 }
+

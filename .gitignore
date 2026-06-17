@@ -1,0 +1,47 @@
+# Idea
+.idea
+
+# Gradle
+.gradle
+build
+
+# Kotlin compiler cache
+.kotlin
+.nessy
+
+# Macos
+.DS_Store
+
+
+# Dumps
+heapdump*
+javacore*
+Snap*
+
+# Local env
+.env
+
+# Secrets (Prometheus scraper password, etc.)
+secrets/
+
+# Claude Code: настройки, агенты, скиллы, worktrees, runtime
+.claude/
+# Инструкции проекта для Claude
+CLAUDE.md
+# MCP-конфигурации
+.mcp.json
+**/.mcp.json
+# Прочие AI-ассистенты
+.cursor/
+.windsurf/
+.aider*
+# Claude-генерируемые файлы (в т.ч. оценки судьи-Claude в эксперименте)
+*.claude.json
+**/*.graded.claude.json
+
+experiment
+
+thesis/build
+thesis/sources
+thesis/*.md
+thesis/*.docx

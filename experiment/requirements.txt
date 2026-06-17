@@ -1,0 +1,11 @@
+# Pinned for reproducibility of the Level-2 confirmatory analysis.
+# Install:  pip install -r experiment/requirements.txt
+#
+# Stdlib-only scripts (generate_dataset.py, recompute_summary.py) need NO deps.
+# grade_explanations.py needs only httpx (for Claude / GigaChat judge paths).
+# analyze.py NEEDS scipy + numpy + matplotlib for the full output.
+
+numpy>=1.26,<3
+scipy>=1.11,<2
+matplotlib>=3.8,<4
+httpx>=0.27,<1

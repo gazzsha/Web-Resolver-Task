@@ -1,0 +1,64 @@
+# Worker Service Configuration
+
+server:
+  port: 8081
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: ${KAFKA_WORKER_GROUP_ID:worker-group}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      max-poll-interval-ms: 300000
+      session-timeout-ms: 30000
+    producer:
+      acks: all
+      retries: 3
+
+kafka:
+  worker:
+    topic: task-execution
+  result:
+    topic: task-results
+
+sandbox:
+  docker:
+    enabled: true
+    network: none
+    read-only: true
+    memory-limit-mb: 256
+    cpu-limit: 1.0
+  timeout-seconds: 5
+  max-memory-limit-mb: 512
+  max-timeout-seconds: 10
+
+worker:
+  concurrency: 3
+  max-tasks-per-poll: 10
+
+ai:
+  analyzer:
+    # Основной анализатор сервиса — нейро-символьный AstHybridAnalyzer
+    # (промт с фактами AST). Переопределяется переменной AI_ANALYZER_PROVIDER
+    # (значения: ast-hybrid | gigachat | rule-based).
+    provider: ${AI_ANALYZER_PROVIDER:ast-hybrid}
+  chatgpt:
+    api-key: ${AI_CHATGPT_API_KEY:}
+    model: gpt-3.5-turbo
+
+logging:
+  level:
+    root: INFO
+    ru.worker: DEBUG
+    ru.sandbox: DEBUG
+    ru.aianalyzer: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: always

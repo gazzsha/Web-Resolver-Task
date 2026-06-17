@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) if (nums[i] == target) return i;\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n)",
+    "линейный",
+    "бинарный поиск",
+    "log n"
+  ],
+  "id": "binary-search-tle-01",
+  "taskId": "binary-search"
+}

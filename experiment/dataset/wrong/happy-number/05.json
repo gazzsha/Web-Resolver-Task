@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution{public boolean isHappy(int n){java.util.HashSet<Integer> s=new java.util.HashSet<>();while(n!=1&&s.add(n)){int t=0;while(n>0){int d=n%10;t+=d*d;n/=10;}n=t;}return n==1;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "однострочно",
+    "именование",
+    "import"
+  ],
+  "id": "happy-number-style-01",
+  "taskId": "happy-number"
+}

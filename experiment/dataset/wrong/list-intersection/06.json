@@ -1,0 +1,11 @@
+{
+  "code": "def intersect(a, b):\n    import yaml\n    yaml.load(str(a))  # yaml.load без Loader → arbitrary object construction\n    return sorted(set(a) & set(b))\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "yaml.load",
+    "Loader",
+    "deserialization"
+  ],
+  "id": "list-intersection-security-01",
+  "taskId": "list-intersection"
+}

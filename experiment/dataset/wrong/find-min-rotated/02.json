@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int findMin(int[] nums) {\n        int m = Integer.MAX_VALUE;\n        for (int x : nums) if (x < m) m = x;  // O(n), но требуется O(log n)\n        return m;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n)",
+    "O(log n)",
+    "бинарный поиск"
+  ],
+  "id": "find-min-rotated-tle-01",
+  "taskId": "find-min-rotated"
+}

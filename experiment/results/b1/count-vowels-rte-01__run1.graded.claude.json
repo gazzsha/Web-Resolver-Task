@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-rte-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "2f002602-eca5-46d0-8ae6-63f7dee68f7a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Точно назван ValueError у int('a'), совет использовать c in 'aeiou'."
+}

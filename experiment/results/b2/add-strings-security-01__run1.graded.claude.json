@@ -1,0 +1,13 @@
+{
+  "itemId": "add-strings-security-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "c8cccad4-30f2-47f9-8c36-14beeda1547a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "JNDI/log4shell названы верно"
+}

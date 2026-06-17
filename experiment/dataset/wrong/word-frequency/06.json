@@ -1,0 +1,11 @@
+{
+  "code": "def most_common(text):\n    import os\n    os.environ['LOG_TEXT'] = text  # утечка пользовательского ввода в env\n    return text.split()[0] if text else ''\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "os.environ",
+    "user input",
+    "утечка"
+  ],
+  "id": "word-frequency-security-01",
+  "taskId": "word-frequency"
+}

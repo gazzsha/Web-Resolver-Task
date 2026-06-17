@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++)\n            for (int j = i + 1; j < nums.length; j++)\n                if (nums[i] + nums[j] == target) return new int[]{i, j};\n        return new int[0];\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n^2)",
+    "вложенный цикл",
+    "HashMap"
+  ],
+  "id": "two-sum-tle-01",
+  "taskId": "two-sum"
+}

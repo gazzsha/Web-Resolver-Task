@@ -1,0 +1,11 @@
+{
+  "code": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c == int('a'))  # ValueError\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ValueError",
+    "int('a')",
+    "приведение типов"
+  ],
+  "id": "count-vowels-rte-01",
+  "taskId": "count-vowels"
+}

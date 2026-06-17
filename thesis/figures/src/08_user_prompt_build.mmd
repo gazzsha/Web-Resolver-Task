@@ -1,0 +1,23 @@
+flowchart TB
+    classDef term fill:#fff,stroke:#000,stroke-width:2px,color:#111,rx:30,ry:30
+    classDef proc fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef dec fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef io fill:#fff,stroke:#000,stroke-width:2px,color:#111
+
+    A(["Старт"]):::term
+    B[/"AnalyzeContext:<br/>код, язык, тесты,<br/>sandbox-вердикт"/]:::io
+    C["AstMetricsService.extract(code, lang)"]:::proc
+    D{"AstFact<br/>получен?"}:::dec
+    E["astFact = AstFact.empty(lang)"]:::proc
+    F["Формирование секции AST_FACTS"]:::proc
+    G["Формирование секции SANDBOX_VERDICT"]:::proc
+    H["Формирование секции TESTS<br/>(passed/total + diff)"]:::proc
+    I["Формирование секции CODE<br/>с sentinel <CODE></CODE>"]:::proc
+    J["Сборка userPromptFull<br/>через AnalyzerPrompts"]:::proc
+    K[/"prompt: String"/]:::io
+    Z(["Конец"]):::term
+
+    A --> B --> C --> D
+    D -- нет --> E --> F
+    D -- да --> F
+    F --> G --> H --> I --> J --> K --> Z

@@ -1,0 +1,21 @@
+{
+  "description": "Целое число x. Вернуть true, если x читается одинаково в обе стороны. Отрицательные — false.",
+  "id": "palindrome-number",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public boolean isPalindrome(int x) {\n        if (x<0) return false;\n        int r=0, o=x;\n        while (x>0) { r=r*10 + x%10; x/=10; }\n        return r==o;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "true",
+      "input": "121"
+    },
+    {
+      "expected": "false",
+      "input": "-121"
+    },
+    {
+      "expected": "false",
+      "input": "10"
+    }
+  ],
+  "title": "Palindrome Number"
+}

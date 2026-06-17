@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPalindrome(int x) {\n        if (x < 0) return false;\n        String s = \"\";\n        for (int i = 0; i < x; i++) s = s + i;  // бесполезный O(x)\n        String r = new StringBuilder(Integer.toString(x)).reverse().toString();\n        return Integer.toString(x).equals(r);\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "бесполезный цикл",
+    "до x",
+    "оптимизация"
+  ],
+  "id": "palindrome-number-tle-01",
+  "taskId": "palindrome-number"
+}

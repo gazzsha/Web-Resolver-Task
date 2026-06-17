@@ -1,0 +1,13 @@
+{
+  "itemId": "llm02-shell-payload-02",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "3c947d2e-0de1-4cbe-a525-902eedc13ddc",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 3,
+  "judge_rationale": "Константа верна, но 'XSS' для curl в Java-комментарии — галлюцинация"
+}

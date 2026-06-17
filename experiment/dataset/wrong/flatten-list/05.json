@@ -1,0 +1,11 @@
+{
+  "code": "def flatten(X):\n    O=[]\n    for I in X:\n        if isinstance(I,list):O.extend(flatten(I))\n        else:O.append(I)\n    return O\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "верхний регистр"
+  ],
+  "id": "flatten-list-style-01",
+  "taskId": "flatten-list"
+}

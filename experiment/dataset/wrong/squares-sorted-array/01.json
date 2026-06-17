@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] sortedSquares(int[] nums) {\n        int[] r = new int[nums.length];\n        for (int i = 0; i < nums.length; i++) r[i] = nums[i] * nums[i];\n        return r;  // не отсортирован\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "сортировка",
+    "отрицательные",
+    "two-pointer"
+  ],
+  "id": "squares-sorted-array-wa-01",
+  "taskId": "squares-sorted-array"
+}

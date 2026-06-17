@@ -1,0 +1,17 @@
+{
+  "description": "Для каждого числа от 1 до n: вывести 'Fizz' если делится на 3, 'Buzz' если на 5, 'FizzBuzz' если на 15, иначе само число.",
+  "id": "fizzbuzz",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public String fizzBuzz(int n) {\n        StringBuilder sb = new StringBuilder();\n        for (int i = 1; i <= n; i++) {\n            if (i > 1) sb.append('\\n');\n            if (i % 15 == 0) sb.append(\"FizzBuzz\");\n            else if (i % 3 == 0) sb.append(\"Fizz\");\n            else if (i % 5 == 0) sb.append(\"Buzz\");\n            else sb.append(i);\n        }\n        return sb.toString();\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "1\n2\nFizz\n4\nBuzz",
+      "input": "5"
+    },
+    {
+      "expected": "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz",
+      "input": "15"
+    }
+  ],
+  "title": "FizzBuzz"
+}

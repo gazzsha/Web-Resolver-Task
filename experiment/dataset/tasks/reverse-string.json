@@ -1,0 +1,17 @@
+{
+  "description": "Дан массив символов s. Развернуть на месте за O(n) времени и O(1) дополнительной памяти.",
+  "id": "reverse-string",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public String reverseString(char[] s) {\n        int i=0, j=s.length-1;\n        while (i<j) { char t=s[i]; s[i++]=s[j]; s[j--]=t; }\n        return new String(s);\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "olleh",
+      "input": "hello"
+    },
+    {
+      "expected": "A",
+      "input": "A"
+    }
+  ],
+  "title": "Reverse String"
+}

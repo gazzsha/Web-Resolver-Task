@@ -1,0 +1,21 @@
+{
+  "description": "Вычислить НОД двух неотрицательных целых через алгоритм Евклида.",
+  "id": "gcd",
+  "language": "python",
+  "reference_solution": "def gcd(a: int, b: int) -> int:\n    while b:\n        a, b = b, a % b\n    return a\n",
+  "tests": [
+    {
+      "expected": "6",
+      "input": "12\n18"
+    },
+    {
+      "expected": "1",
+      "input": "17\n5"
+    },
+    {
+      "expected": "7",
+      "input": "0\n7"
+    }
+  ],
+  "title": "Greatest Common Divisor"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.*;\npublic class Solution {\n    public int singleNumber(int[] nums) {\n        for (int x : nums) { int c=0; for (int y : nums) if (x==y) c++; if (c==1) return x; }\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n^2)",
+    "XOR",
+    "HashMap"
+  ],
+  "id": "single-number-tle-01",
+  "taskId": "single-number"
+}

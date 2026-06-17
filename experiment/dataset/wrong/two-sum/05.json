@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.*;\npublic class Solution {\n    public int[] twoSum(int[] a, int t) {\n        // godfunction, magic numbers, no naming\n        HashMap<Integer, Integer> m = new HashMap<Integer, Integer>();\n        for (int x = 0; x < a.length; x = x + 1) { if (m.get(t - a[x]) != null) { return new int[]{m.get(t - a[x]), x}; } m.put(a[x], x); }\n        return new int[]{};\n    }\n}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "именование",
+    "форматирование",
+    "читаемость"
+  ],
+  "id": "two-sum-style-01",
+  "taskId": "two-sum"
+}

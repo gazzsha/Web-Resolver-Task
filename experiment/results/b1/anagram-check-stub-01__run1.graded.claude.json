@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-stub-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "dd1cf518-0151-4bf8-8dc6-e8e21008443a",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Верно: всегда возвращает False (заглушка), совет реализовать сравнение."
+}

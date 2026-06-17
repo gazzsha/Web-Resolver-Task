@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.*;\npublic class Solution {\n    public int[] sortedSquares(int[] nums) {\n        Integer[] r = new Integer[nums.length];\n        for (int i = 0; i < nums.length; i++) r[i] = nums[i]*nums[i];\n        Arrays.sort(r, (a,b)->a-b);  // O(n log n) boxing + sort\n        int[] x = new int[r.length]; for (int i=0;i<r.length;i++) x[i]=r[i]; return x;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n log n)",
+    "two-pointer",
+    "O(n)"
+  ],
+  "id": "squares-sorted-array-tle-01",
+  "taskId": "squares-sorted-array"
+}

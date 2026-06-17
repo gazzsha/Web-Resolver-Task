@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public void moveZeroes(int[] nums) {\n        for (int i = 0; i <= nums.length; i++) if (nums[i] == 0) nums[i+1] = 0;  // OOB\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "границы",
+    "off-by-one"
+  ],
+  "id": "move-zeroes-rte-01",
+  "taskId": "move-zeroes"
+}

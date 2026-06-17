@@ -1,0 +1,17 @@
+{
+  "description": "Каждый элемент встречается дважды, кроме одного. Найти его за O(n) и O(1) памяти.",
+  "id": "single-number",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int singleNumber(int[] nums) {\n        int r = 0;\n        for (int x : nums) r ^= x;\n        return r;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "1",
+      "input": "[2,2,1]"
+    },
+    {
+      "expected": "4",
+      "input": "[4,1,2,1,2]"
+    }
+  ],
+  "title": "Single Number"
+}

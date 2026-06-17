@@ -1,0 +1,11 @@
+{
+  "code": "def intersect(a, b):\n    r = []\n    for x in a:\n        if x in b and x not in r: r.append(x)  # O(n*m)\n    return sorted(r)\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n*m)",
+    "set",
+    "O(n+m)"
+  ],
+  "id": "list-intersection-tle-01",
+  "taskId": "list-intersection"
+}

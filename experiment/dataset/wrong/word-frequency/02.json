@@ -1,0 +1,11 @@
+{
+  "code": "def most_common(text):\n    words = text.split()\n    best = ''\n    for w in words:\n        c1 = sum(1 for x in words if x == w)\n        c2 = sum(1 for x in words if x == best)\n        if c1 > c2: best = w\n    return best\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n^2)",
+    "sum",
+    "Counter"
+  ],
+  "id": "word-frequency-tle-01",
+  "taskId": "word-frequency"
+}

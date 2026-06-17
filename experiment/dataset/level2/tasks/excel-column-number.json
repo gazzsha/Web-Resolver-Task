@@ -1,0 +1,21 @@
+{
+  "description": "Преобразовать буквенный заголовок столбца Excel (A=1, B=2, ..., AA=27) в число.",
+  "id": "excel-column-number",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int titleToNumber(String s) {\n        int r = 0;\n        for (char c : s.toCharArray()) r = r * 26 + (c - 'A' + 1);\n        return r;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "1",
+      "input": "A"
+    },
+    {
+      "expected": "28",
+      "input": "AB"
+    },
+    {
+      "expected": "701",
+      "input": "ZY"
+    }
+  ],
+  "title": "Excel Sheet Column Number"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "import java.util.HashMap;\nimport java.util.Map;\npublic class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> seen = null;  // NPE\n        for (int i = 0; i < nums.length; i++) seen.put(nums[i], i);\n        return new int[0];\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "NullPointerException",
+    "null",
+    "инициализация"
+  ],
+  "id": "two-sum-rte-01",
+  "taskId": "two-sum"
+}

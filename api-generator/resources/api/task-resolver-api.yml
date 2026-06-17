@@ -5,15 +5,162 @@ info:
 tags:
   - name: Task Resolver
     description: Методы для работы с Task Resolver
+  - name: Tasks
+    description: Методы для получения списка задач
 security:
   - basicAuth: [ ]
 paths:
-  /api/v1/task-resolver/task/start:
+  /api/v1/tasks:
     get:
+      tags:
+        - Tasks
+      summary: Получить список всех задач
+      operationId: getAllTasks
+      parameters:
+        - name: category
+          in: query
+          required: false
+          description: Фильтр по категории (тематике) задачи. Если не указан, возвращаются задачи всех категорий.
+          schema:
+            type: string
+            example: "Array"
+        - name: difficulty
+          in: query
+          required: false
+          description: Фильтр по сложности. Допустимые значения совпадают с enum Difficulty.
+          schema:
+            $ref: './common-models.yml#/components/schemas/Difficulty'
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskInfo'
+        '403':
+          description: Доступ запрещен
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/tasks/categories:
+    get:
+      tags:
+        - Tasks
+      summary: Получить список доступных категорий задач
+      operationId: getTaskCategories
+      responses:
+        '200':
+          description: Список различных категорий, присутствующих в каталоге задач
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                example: ["Array", "String", "Math", "Stack"]
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/admin/tasks/import:
+    post:
+      tags:
+        - Tasks
+      summary: Импорт задач из CSV-файла (только для роли TEACHER)
+      operationId: importTasksFromCsv
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: "CSV-файл с колонками: title,difficulty,category,description,return_type,arguments_json,tests_json"
+      responses:
+        '200':
+          description: Результат импорта
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskImportResult'
+        '400':
+          description: Невалидный CSV
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '403':
+          description: Доступ запрещён (требуется роль TEACHER)
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/tasks/{taskId}:
+    get:
+      tags:
+        - Tasks
+      summary: Получить задачу по ID
+      operationId: getTaskById
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskInfo'
+        '404':
+          description: Задача не найдена
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+        '500':
+          description: Системная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: './common-models.yml#/components/schemas/ErrorResponse'
+  /api/v1/task-resolver/task/start:
+    patch:
       tags:
         - Task Resolver
       summary: Запустить проверку задачи
       operationId: startTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartTaskRequest'
       responses:
         '200':
           description: Успешный запрос
@@ -40,16 +187,91 @@ paths:
               schema:
                 $ref: './common-models.yml#/components/schemas/ErrorResponse'
 components:
-    schemas:
-      StartTaskSuccessResponse:
-        title: Успешный ответ на запуск задачи
-        required:
-          - result
-        properties:
-          result:
-            $ref: './common-models.yml#/components/schemas/ResultResponse'
-          id:
-            $ref: './common-models.yml#/components/schemas/Id'
+  schemas:
+    TaskInfo:
+      title: Информация о задаче
+      required:
+        - testId
+        - title
+        - description
+        - difficulty
+      properties:
+        testId:
+          type: string
+          format: uuid
+          example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+        title:
+          type: string
+          example: "Two Sum"
+        description:
+          type: string
+          example: "Given an array of integers, return indices of the two numbers that add up to a specific target."
+        difficulty:
+          $ref: './common-models.yml#/components/schemas/Difficulty'
+        category:
+          type: string
+          example: "Array"
+    StartTaskSuccessResponse:
+      title: Успешный ответ на запуск задачи
+      required:
+        - result
+      properties:
+        result:
+          $ref: './common-models.yml#/components/schemas/ResultResponse'
+        id:
+          $ref: './common-models.yml#/components/schemas/Id'
+    TaskImportResult:
+      title: Результат импорта задач из CSV
+      required:
+        - importedCount
+        - skippedCount
+        - errors
+      properties:
+        importedCount:
+          type: integer
+          description: Количество успешно импортированных задач
+          example: 12
+        skippedCount:
+          type: integer
+          description: Количество пропущенных строк (дубликаты, ошибки парсинга)
+          example: 3
+        errors:
+          type: array
+          description: Список ошибок по строкам CSV (если есть)
+          items:
+            type: object
+            properties:
+              line:
+                type: integer
+                example: 5
+              message:
+                type: string
+                example: "Поле title пустое"
+    StartTaskRequest:
+      title: Запрос на запуск задачи
+      required:
+        - testId
+        - code
+        - language
+      properties:
+        testId:
+          type: string
+          format: uuid
+          example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+        language:
+          $ref: './common-models.yml#/components/schemas/lang'
+        code:
+          type: string
+          nullable: false
+          example: |
+            class Solution {
+              public int sum(int a, int b) {
+                return a + b;
+              }
+            }
+            
+          
+        
 
 
 

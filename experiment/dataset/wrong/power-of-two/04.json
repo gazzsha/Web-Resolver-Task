@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public boolean isPowerOfTwo(int n) { return false; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "false",
+    "константа",
+    "заглушка"
+  ],
+  "id": "power-of-two-stub-01",
+  "taskId": "power-of-two"
+}

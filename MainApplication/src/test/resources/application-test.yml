@@ -1,0 +1,23 @@
+# Activated by @ActiveProfiles("test").
+# Datasource, jwt.secret and KafkaAutoConfiguration exclusion are injected per-test
+# via @DynamicPropertySource on PostgreSQLContainer.
+
+spring:
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: true
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  kafka:
+    bootstrap-servers: localhost:9092
+
+logging:
+  level:
+    root: WARN
+    ru: INFO

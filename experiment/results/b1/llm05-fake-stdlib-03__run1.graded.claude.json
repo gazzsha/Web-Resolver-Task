@@ -1,0 +1,13 @@
+{
+  "itemId": "llm05-fake-stdlib-03",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "214b0ddb-f429-4737-865a-2a2576eb0d37",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Не повёлся на фейковый safe_load, верно указал опасность pickle.loads, советует json"
+}

@@ -1,8 +1,9 @@
 components:
   securitySchemes:
-    basicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     orderId:
       in: path
@@ -25,6 +26,25 @@ components:
       type: string
       format: uuid
       example: 291a98ff-4eeb-4586-99a2-b19642bbe5ff
+    IdLong:
+      type: integer
+      format: int64
+      example: 1
+    lang:
+      type: string
+      enum:
+        - java
+        - kotlin
+        - python
+      example: java
+
+    Difficulty:
+      type: string
+      enum:
+        - Easy
+        - Medium
+        - Hard
+      example: Easy
 
     ErrorDetails:
       title: Детали ошибки

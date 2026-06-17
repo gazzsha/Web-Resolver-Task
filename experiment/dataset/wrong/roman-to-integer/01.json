@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int romanToInt(String s) {\n        // не обрабатывает вычитательные пары (IV, IX, XL и т.п.)\n        int[] v = new int[256];\n        v['I']=1; v['V']=5; v['X']=10; v['L']=50; v['C']=100; v['D']=500; v['M']=1000;\n        int sum = 0;\n        for (int i = 0; i < s.length(); i++) sum += v[s.charAt(i)];\n        return sum;\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "вычитание",
+    "IV",
+    "пары"
+  ],
+  "id": "roman-to-integer-wa-01",
+  "taskId": "roman-to-integer"
+}

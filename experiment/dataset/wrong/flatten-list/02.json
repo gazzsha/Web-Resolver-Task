@@ -1,0 +1,11 @@
+{
+  "code": "def flatten(x):\n    out = []\n    stack = [x]\n    while stack:\n        cur = stack.pop(0)  # O(n) на каждый pop из списка\n        if isinstance(cur, list):\n            for it in cur: stack.insert(0, it)  # O(n) каждый insert\n        else: out.append(cur)\n    return out\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "list.pop(0)",
+    "insert(0)",
+    "deque"
+  ],
+  "id": "flatten-list-tle-01",
+  "taskId": "flatten-list"
+}

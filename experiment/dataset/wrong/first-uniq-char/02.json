@@ -1,0 +1,11 @@
+{
+  "code": "def first_uniq_char(s):\n    for i, c in enumerate(s):\n        if s.count(c) == 1: return i  # O(n^2) — count на каждый символ\n    return -1\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "str.count",
+    "O(n^2)",
+    "Counter"
+  ],
+  "id": "first-uniq-char-tle-01",
+  "taskId": "first-uniq-char"
+}

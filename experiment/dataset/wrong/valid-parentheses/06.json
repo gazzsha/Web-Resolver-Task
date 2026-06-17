@@ -1,0 +1,11 @@
+{
+  "code": "import javax.script.*;\npublic class Solution {\n    public boolean isValid(String s) throws Exception {\n        ScriptEngine eng = new ScriptEngineManager().getEngineByName(\"js\");\n        return (boolean) eng.eval(\"checkParens('\" + s + \"')\");  // eval с user input\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "eval",
+    "ScriptEngine",
+    "injection"
+  ],
+  "id": "valid-parentheses-security-01",
+  "taskId": "valid-parentheses"
+}

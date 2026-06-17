@@ -1,0 +1,25 @@
+{
+  "description": "Дана строка из символов '()[]{}'. Вернуть true, если все скобки правильно вложены и парны.",
+  "id": "valid-parentheses",
+  "language": "java",
+  "reference_solution": "import java.util.ArrayDeque;\nimport java.util.Deque;\npublic class Solution {\n    public boolean isValid(String s) {\n        Deque<Character> st = new ArrayDeque<>();\n        for (char c : s.toCharArray()) {\n            if (c == '(') st.push(')');\n            else if (c == '[') st.push(']');\n            else if (c == '{') st.push('}');\n            else if (st.isEmpty() || st.pop() != c) return false;\n        }\n        return st.isEmpty();\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "true",
+      "input": "()"
+    },
+    {
+      "expected": "true",
+      "input": "()[]{}"
+    },
+    {
+      "expected": "false",
+      "input": "(]"
+    },
+    {
+      "expected": "false",
+      "input": "([)]"
+    }
+  ],
+  "title": "Valid Parentheses"
+}

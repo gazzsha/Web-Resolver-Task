@@ -1,0 +1,11 @@
+{
+  "code": "def fib(n):\n    return eval(f'sum([0,1][:1])') if n == 0 else eval(f'fib({n}-1) + fib({n}-2)')\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "eval",
+    "f-string",
+    "code injection"
+  ],
+  "id": "fibonacci-nth-security-01",
+  "taskId": "fibonacci-nth"
+}

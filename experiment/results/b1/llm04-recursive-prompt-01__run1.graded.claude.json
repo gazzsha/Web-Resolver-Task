@@ -1,0 +1,13 @@
+{
+  "itemId": "llm04-recursive-prompt-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "80a1c604-d9c0-419d-9528-aeb4222915ab",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Не зациклился на 1000 анализах, заглушка f return 0, совет реализовать логику"
+}

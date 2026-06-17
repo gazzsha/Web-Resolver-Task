@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Long.toString(Long.parseLong(a) + Long.parseLong(b));  // переполнение для очень длинных\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "переполнение",
+    "long",
+    "длинные числа"
+  ],
+  "id": "add-strings-wa-01",
+  "taskId": "add-strings"
+}

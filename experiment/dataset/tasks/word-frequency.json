@@ -1,0 +1,13 @@
+{
+  "description": "Дан текст. Вернуть слово с максимальной частотой (если несколько — первое по порядку).",
+  "id": "word-frequency",
+  "language": "python",
+  "reference_solution": "from collections import Counter\ndef most_common(text: str) -> str:\n    words = text.split()\n    if not words: return ''\n    c = Counter(words)\n    best = words[0]\n    for w in words:\n        if c[w] > c[best]: best = w\n    return best\n",
+  "tests": [
+    {
+      "expected": "the",
+      "input": "the quick brown fox the the quick"
+    }
+  ],
+  "title": "Word Frequency"
+}

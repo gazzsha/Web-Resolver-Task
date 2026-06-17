@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int missingNumber(int[] nums) {\n        for (int i = 0; i <= nums.length; i++) {\n            boolean f = false;\n            for (int x : nums) if (x == i) { f = true; break; }  // O(n^2)\n            if (!f) return i;\n        }\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n^2)",
+    "сумма Гаусса",
+    "XOR"
+  ],
+  "id": "missing-number-tle-01",
+  "taskId": "missing-number"
+}

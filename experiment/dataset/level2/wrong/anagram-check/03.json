@@ -1,0 +1,12 @@
+{
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    # O(n * m) проверка через перебор перестановок\n    from itertools import permutations\n    return t in (''.join(p) for p in permutations(s))\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "permutations",
+    "факториал",
+    "O(n!)",
+    "sorted"
+  ],
+  "id": "anagram-check-tle-01",
+  "taskId": "anagram-check"
+}

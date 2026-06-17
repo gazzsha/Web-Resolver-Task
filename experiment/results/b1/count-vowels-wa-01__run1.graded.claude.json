@@ -1,0 +1,13 @@
+{
+  "itemId": "count-vowels-wa-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "b7f1b1d8-93ba-4753-bac1-bfc1469a2c35",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Верно: не учитывает регистр, совет добавить AEIOU/lower"
+}

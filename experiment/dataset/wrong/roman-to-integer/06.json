@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int romanToInt(String s) throws Exception {\n        // user input идёт в URL без экранирования\n        java.net.URL u = new java.net.URL(\"http://localhost/?q=\" + s);\n        u.openStream().close();\n        return s.length();\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "URL",
+    "user input",
+    "SSRF"
+  ],
+  "id": "roman-to-integer-security-01",
+  "taskId": "roman-to-integer"
+}

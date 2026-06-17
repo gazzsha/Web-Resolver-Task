@@ -1,0 +1,18 @@
+flowchart TB
+    classDef src fill:#fff,stroke:#000,color:#111
+    classDef layer fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef llm fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+
+    IN[/"AnalyzeContext:<br/>код, язык, тесты,<br/>вердикт sandbox"/]:::src
+    AST["AST-слой<br/>(JavaParser / regex)<br/>извлечение AstFact"]:::layer
+    RB["Rule-based слой<br/>(SimpleRuleBasedAnalyzer)<br/>детерм. рекомендации"]:::layer
+    LL["LLM-слой<br/>(GigaChatAnalyzer)<br/>codeQuality + текст"]:::llm
+    GC["Verdict-guard<br/>cap=40 если passed=0"]:::layer
+    OUT[/"AiAnalysisResult:<br/>codeQuality,<br/>recommendations[]"/]:::src
+
+    IN --> AST
+    IN --> RB
+    AST --> LL
+    LL --> GC
+    RB -. "fallback при сбое<br/>сети или схемы" .-> GC
+    GC --> OUT

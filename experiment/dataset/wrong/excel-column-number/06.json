@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int titleToNumber(String s) {\n        // SQL-injection imitation: вставка пользовательского ввода в SQL-строку\n        String sql = \"SELECT * FROM cols WHERE name = '\" + s + \"'\";\n        return sql.length();\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "SQL injection",
+    "конкатенация",
+    "prepared statement"
+  ],
+  "id": "excel-column-number-security-01",
+  "taskId": "excel-column-number"
+}

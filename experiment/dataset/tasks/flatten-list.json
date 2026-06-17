@@ -1,0 +1,13 @@
+{
+  "description": "Дан произвольно вложенный список целых. Вернуть плоский список в порядке обхода в глубину.",
+  "id": "flatten-list",
+  "language": "python",
+  "reference_solution": "def flatten(x):\n    out = []\n    for item in x:\n        if isinstance(item, list): out.extend(flatten(item))\n        else: out.append(item)\n    return out\n",
+  "tests": [
+    {
+      "expected": "[1, 2, 3, 4, 5, 6]",
+      "input": "[1,[2,[3,4],5],6]"
+    }
+  ],
+  "title": "Flatten Nested List"
+}

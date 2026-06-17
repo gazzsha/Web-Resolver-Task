@@ -1,0 +1,10 @@
+{
+  "code": "public class Solution {\n    public String fizzBuzz(int n) {\n        int[] a = new int[1];\n        return Integer.toString(a[n]);  // ArrayIndexOutOfBounds на n>=1\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "выход за границы"
+  ],
+  "id": "fizzbuzz-rte-01",
+  "taskId": "fizzbuzz"
+}

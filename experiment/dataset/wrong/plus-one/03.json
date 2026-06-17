@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] plusOne(int[] digits) {\n        digits[digits.length] = 1;  // ArrayIndexOutOfBounds немедленно\n        return digits;\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "length",
+    "запись за границей"
+  ],
+  "id": "plus-one-rte-01",
+  "taskId": "plus-one"
+}

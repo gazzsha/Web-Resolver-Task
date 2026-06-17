@@ -1,0 +1,11 @@
+{
+  "code": "def flatten(x):\n    return [item for item in x if not isinstance(item, list)]  # выкидывает вложенные\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "рекурсия",
+    "вложенные",
+    "list comprehension"
+  ],
+  "id": "flatten-list-wa-01",
+  "taskId": "flatten-list"
+}

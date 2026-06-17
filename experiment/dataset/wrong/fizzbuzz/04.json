@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String fizzBuzz(int n) {\n        return \"\";\n    }\n}\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустая строка",
+    "заглушка",
+    "не реализован"
+  ],
+  "id": "fizzbuzz-stub-01",
+  "taskId": "fizzbuzz"
+}

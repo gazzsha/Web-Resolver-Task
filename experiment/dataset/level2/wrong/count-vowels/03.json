@@ -1,0 +1,11 @@
+{
+  "code": "def count_vowels(s):\n    n = 0\n    for c in s:\n        for v in 'aeiouAEIOU':\n            if c == v:\n                n += 1  # O(n*5) — не TLE на крошечных, но индикатор плохого стиля\n    # Намеренно ещё раз: повторим всё трижды\n    for _ in range(3):\n        for c in s:\n            for v in 'aeiouAEIOU': pass\n    return n\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "вложенный цикл",
+    "in 'aeiou'",
+    "оптимизация"
+  ],
+  "id": "count-vowels-tle-01",
+  "taskId": "count-vowels"
+}

@@ -14,9 +14,6 @@ dependencies {
     implementation(libs.swagger.annotations.jakarta)
     implementation(libs.jakarta.annotation.api)
     implementation(libs.jakarta.validation.api)
-
-    implementation(libs.springdoc.openapi.starter.webmvc.ui)
-    implementation(libs.springdoc.openapi.starter.webmvc.api)
 }
 
 
@@ -47,7 +44,9 @@ val resourcesDir = "$projectDir/resources"
 val generatedDir = "$buildDir/generated/openapi/"
 
 val openApiFilesGroupByProcess = mapOf(
-    "task-resolver-api.yml" to "TaskResolver"
+    "task-resolver-api.yml" to "TaskResolver",
+    "task-results-api.yml" to "TaskResults",
+    "auth-api.yml" to "Auth"
 )
 
 val generatorTaskNames = openApiFilesGroupByProcess.map { registerGenerateTask(it.key, it.value) }

@@ -1,0 +1,43 @@
+flowchart TB
+    classDef ui fill:#fff,stroke:#000,stroke-width:2px,color:#111
+    classDef api fill:#eee,stroke:#000,stroke-width:2px,color:#111
+    classDef worker fill:#ddd,stroke:#000,stroke-width:2px,color:#111
+    classDef data fill:#cfcfcf,stroke:#000,stroke-width:2px,color:#111
+    classDef ext fill:#fff,stroke:#555,stroke-dasharray:4 3,color:#111
+
+    subgraph Frontend["Frontend (React + Vite)"]
+        FE["UI:<br/>каталог, редактор<br/>Monaco, дашборды"]:::ui
+    end
+
+    subgraph Backend["Backend (Spring Boot, 9 Gradle-модулей)"]
+        MA["MainApplication<br/>(auth, REST,<br/>Spring Security)"]:::api
+        TR["task-resolver<br/>(каталог, импорт CSV,<br/>оркестратор REST→Kafka)"]:::api
+        WK["worker<br/>(Kafka consumer,<br/>per-submission orchestrator)"]:::worker
+        SR["scenario-runner<br/>(псевдо-сценарии)"]:::worker
+        SB["sandbox<br/>(Docker host-side)"]:::worker
+        AI["ai-analyzer<br/>(GigaChat + AST)"]:::worker
+        DB["db<br/>(JPA + Flyway)"]:::api
+        CM["common<br/>(shared DTO)"]:::api
+        AG["api-generator<br/>(OpenAPI codegen)"]:::api
+    end
+
+    PG[("PostgreSQL 16")]:::data
+    KF[("Kafka:<br/>task-execution,<br/>task-results,<br/>task-execution.DLT")]:::data
+    GIG["GigaChat API"]:::ext
+    DOCK["Docker daemon"]:::ext
+
+    FE -- "HTTPS JSON" --> MA
+    MA --> TR
+    TR -- "task-execution" --> KF
+    KF --> WK
+    WK --> SR
+    SR --> SB
+    SB --> DOCK
+    WK --> AI
+    AI --> GIG
+    WK -- "task-results" --> KF
+    KF --> TR
+    TR --> DB
+    MA --> DB
+    WK --> DB
+    DB --> PG

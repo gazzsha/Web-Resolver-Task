@@ -1,0 +1,21 @@
+{
+  "description": "Преобразовать римское число (I, V, X, L, C, D, M) в арабское. 1 ≤ n ≤ 3999.",
+  "id": "roman-to-integer",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int romanToInt(String s) {\n        int[] v = new int[256];\n        v['I']=1; v['V']=5; v['X']=10; v['L']=50; v['C']=100; v['D']=500; v['M']=1000;\n        int sum = 0;\n        for (int i = 0; i < s.length(); i++) {\n            int cur = v[s.charAt(i)];\n            int next = i+1 < s.length() ? v[s.charAt(i+1)] : 0;\n            sum += cur < next ? -cur : cur;\n        }\n        return sum;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "3",
+      "input": "III"
+    },
+    {
+      "expected": "4",
+      "input": "IV"
+    },
+    {
+      "expected": "1994",
+      "input": "MCMXCIV"
+    }
+  ],
+  "title": "Roman to Integer"
+}

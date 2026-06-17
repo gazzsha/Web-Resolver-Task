@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution {\n    public String fizzBuzz(int n) {\n        StringBuilder sb = new StringBuilder();\n        for (int i = 1; i <= n; i++) {\n            if (i > 1) sb.append('\\n');\n            if (i % 3 == 0) sb.append(\"Fizz\");\n            else if (i % 5 == 0) sb.append(\"Buzz\");\n            else if (i % 15 == 0) sb.append(\"FizzBuzz\");\n            else sb.append(i);\n        }\n        return sb.toString();\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "порядок",
+    "15",
+    "Fizz",
+    "Buzz"
+  ],
+  "id": "fizzbuzz-wa-01",
+  "taskId": "fizzbuzz"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def count_vowels(s):\n    return 0\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "count-vowels-stub-01",
+  "taskId": "count-vowels"
+}

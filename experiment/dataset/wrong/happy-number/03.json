@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isHappy(int n) {\n        int[] cache = new int[10];\n        cache[n] = 1;  // ArrayIndexOutOfBounds для n=19\n        return true;\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "размер кеша",
+    "10"
+  ],
+  "id": "happy-number-rte-01",
+  "taskId": "happy-number"
+}

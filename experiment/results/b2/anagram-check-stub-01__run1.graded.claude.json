@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-stub-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "c967c185-a227-43a8-9354-dba1e5357e08",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "всегда False — заглушка названа верно"
+}

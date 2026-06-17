@@ -1,0 +1,13 @@
+{
+  "itemId": "binary-search-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "fb6efd78-e591-46dd-843b-3b167fda832f",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 0,
+  "axis_no_hallucinations": 0,
+  "quality_score": 1,
+  "judge_rationale": "Выдумана несуществующая ошибка r и вредный совет a.length вместо length-1; стиль не назван."
+}

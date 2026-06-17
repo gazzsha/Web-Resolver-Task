@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int singleNumber(int[] nums) { return nums[0]; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "XOR",
+    "не работает",
+    "первый элемент"
+  ],
+  "id": "single-number-wa-01",
+  "taskId": "single-number"
+}

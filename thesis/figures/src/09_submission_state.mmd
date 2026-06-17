@@ -1,0 +1,13 @@
+stateDiagram-v2
+    [*] --> PENDING : POST /submissions
+
+    PENDING --> PROCESSING : worker берёт из Kafka
+    PROCESSING --> SUCCESS : passed = total
+    PROCESSING --> PARTIAL_SUCCESS : 0 < passed < total
+    PROCESSING --> FAILED : passed = 0,<br/>все тесты WA/RTE/TLE
+    PROCESSING --> ERROR : внутренняя ошибка,<br/>таймаут sandbox<br/>или AI
+
+    SUCCESS --> [*]
+    PARTIAL_SUCCESS --> [*]
+    FAILED --> [*]
+    ERROR --> [*]

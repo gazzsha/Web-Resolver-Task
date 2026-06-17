@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isPalindrome(int x) {\n        return Integer.toString(x).charAt(100) == '0';  // StringIndexOutOfBounds\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "StringIndexOutOfBounds",
+    "charAt",
+    "100"
+  ],
+  "id": "palindrome-number-rte-01",
+  "taskId": "palindrome-number"
+}

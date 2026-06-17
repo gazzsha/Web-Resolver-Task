@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] countBits(int n) {\n        int[] r = new int[n+1];\n        for (int i = 0; i <= n; i++) {\n            int x = i, c = 0;\n            while (x > 0) { c += x & 1; x >>= 1; }  // O(n log n), для n=10^5 ok, но 10^7 — TLE\n            r[i] = c;\n        }\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "O(n log n)",
+    "DP",
+    "r[i>>1]"
+  ],
+  "id": "count-bits-tle-01",
+  "taskId": "count-bits"
+}

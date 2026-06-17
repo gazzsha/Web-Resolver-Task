@@ -1,0 +1,17 @@
+{
+  "description": "Массив длины n содержит различные числа из [0..n], одного не хватает. Найти его за O(n).",
+  "id": "missing-number",
+  "language": "java",
+  "reference_solution": "public class Solution {\n    public int missingNumber(int[] nums) {\n        int n = nums.length;\n        int sum = n * (n + 1) / 2;\n        for (int x : nums) sum -= x;\n        return sum;\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "2",
+      "input": "[3,0,1]"
+    },
+    {
+      "expected": "8",
+      "input": "[9,6,4,2,3,5,7,0,1]"
+    }
+  ],
+  "title": "Missing Number"
+}

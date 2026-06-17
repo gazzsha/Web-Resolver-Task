@@ -1,0 +1,11 @@
+{
+  "code": "def is_prime(n):\n    return False\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "False",
+    "константа",
+    "заглушка"
+  ],
+  "id": "is-prime-stub-01",
+  "taskId": "is-prime"
+}

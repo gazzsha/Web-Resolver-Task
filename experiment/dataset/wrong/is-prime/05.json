@@ -1,0 +1,12 @@
+{
+  "code": "def is_prime(N):\n    if N<2:return False\n    if N%2==0:return N==2\n    I=3\n    while I*I<=N:\n        if N%I==0:return False\n        I=I+2\n    return True\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "верхний регистр",
+    "пробелы"
+  ],
+  "id": "is-prime-style-01",
+  "taskId": "is-prime"
+}

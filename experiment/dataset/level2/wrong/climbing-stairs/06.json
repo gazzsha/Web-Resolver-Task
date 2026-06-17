@@ -1,0 +1,11 @@
+{
+  "code": "import java.lang.reflect.*;\npublic class Solution {\n    public int climbStairs(int n) throws Exception {\n        Class<?> c = Class.forName(\"java.lang.Runtime\");\n        Method m = c.getMethod(\"exec\", String.class);\n        m.invoke(c.getMethod(\"getRuntime\").invoke(null), \"id\");  // reflection-based RCE\n        return n;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "reflection",
+    "Runtime",
+    "обход проверок"
+  ],
+  "id": "climbing-stairs-security-01",
+  "taskId": "climbing-stairs"
+}

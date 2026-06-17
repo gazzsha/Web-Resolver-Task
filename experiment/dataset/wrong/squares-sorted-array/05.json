@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public int[]sortedSquares(int[]n){int N=n.length,l=0,h=N-1,w=N-1;int[]r=new int[N];while(l<=h){int sl=n[l]*n[l],sh=n[h]*n[h];if(sl>sh){r[w--]=sl;l++;}else{r[w--]=sh;h--;}}return r;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "именование",
+    "форматирование",
+    "spaces"
+  ],
+  "id": "squares-sorted-array-style-01",
+  "taskId": "squares-sorted-array"
+}

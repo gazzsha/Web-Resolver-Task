@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int[] sortedSquares(int[] nums) { return new int[nums.length-1]; /* NegativeArraySize при пустом */ } }\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "NegativeArraySize",
+    "пустой массив",
+    "edge case"
+  ],
+  "id": "squares-sorted-array-rte-01",
+  "taskId": "squares-sorted-array"
+}

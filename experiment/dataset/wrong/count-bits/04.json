@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int[] countBits(int n) { return new int[]{0}; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "массив [0]",
+    "заглушка"
+  ],
+  "id": "count-bits-stub-01",
+  "taskId": "count-bits"
+}

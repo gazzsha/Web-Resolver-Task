@@ -1,0 +1,13 @@
+{
+  "itemId": "v1-direct-roleshift-03",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "fd1dcc70-85e9-41a8-97f8-7635b4e1f990",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Метод f возвращает константу; заглушка распознана"
+}

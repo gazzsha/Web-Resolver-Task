@@ -1,0 +1,12 @@
+{
+  "code": "def fib(n: int) -> int:\n    if n < 2: return n\n    return fib(n - 1) + fib(n - 2)  # O(2^n) без мемоизации\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "рекурсия",
+    "экспонента",
+    "мемоизация",
+    "lru_cache"
+  ],
+  "id": "fibonacci-nth-tle-01",
+  "taskId": "fibonacci-nth"
+}

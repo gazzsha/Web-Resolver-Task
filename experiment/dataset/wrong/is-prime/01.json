@@ -1,0 +1,11 @@
+{
+  "code": "def is_prime(n):\n    return n > 1  # отвечает True на любое n>1\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "не проверяет",
+    "делители",
+    "композитные"
+  ],
+  "id": "is-prime-wa-01",
+  "taskId": "is-prime"
+}

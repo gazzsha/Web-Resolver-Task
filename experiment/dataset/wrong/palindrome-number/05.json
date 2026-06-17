@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public boolean isPalindrome(int x){if(x<0)return false;int r=0,o=x;while(x>0){r=r*10+x%10;x/=10;}return r==o;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "пробелы",
+    "readability"
+  ],
+  "id": "palindrome-number-style-01",
+  "taskId": "palindrome-number"
+}

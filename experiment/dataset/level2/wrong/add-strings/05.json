@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public String addStrings(String a,String b){StringBuilder sb=new StringBuilder();int i=a.length()-1,j=b.length()-1,c=0;while(i>=0||j>=0||c>0){int x=i>=0?a.charAt(i--)-'0':0,y=j>=0?b.charAt(j--)-'0':0,s=x+y+c;c=s/10;sb.append(s%10);}return sb.reverse().toString();}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "однострочно",
+    "пробелы"
+  ],
+  "id": "add-strings-style-01",
+  "taskId": "add-strings"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int findMin(int[] nums) { return nums[0]; } }\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "поворот",
+    "первый элемент",
+    "бинарный поиск"
+  ],
+  "id": "find-min-rotated-wa-01",
+  "taskId": "find-min-rotated"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public String addStrings(String a, String b) {\n        return Integer.toString(Integer.parseInt(a) + Integer.parseInt(b));  // NumberFormatException на больших\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "NumberFormatException",
+    "Integer.parseInt",
+    "переполнение"
+  ],
+  "id": "add-strings-rte-01",
+  "taskId": "add-strings"
+}

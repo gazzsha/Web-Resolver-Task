@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public int titleToNumber(String s){int r=0;for(char c:s.toCharArray())r=r*26+(c-'A'+1);return r;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "однострочно",
+    "spaces"
+  ],
+  "id": "excel-column-number-style-01",
+  "taskId": "excel-column-number"
+}

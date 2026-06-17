@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-stub-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "32fe7619-331d-41dd-8158-b5284707378c",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Верно: фиксированный массив [0], совет реализовать подсчёт битов."
+}

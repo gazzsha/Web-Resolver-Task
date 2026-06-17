@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int singleNumber(int[] nums) { return nums[nums.length]; } }\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "length",
+    "off-by-one"
+  ],
+  "id": "single-number-rte-01",
+  "taskId": "single-number"
+}

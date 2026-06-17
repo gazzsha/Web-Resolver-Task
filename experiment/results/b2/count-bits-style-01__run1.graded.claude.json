@@ -1,0 +1,13 @@
+{
+  "itemId": "count-bits-style-01",
+  "variant": "b2",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "47563865-f8ba-4032-83e1-9fdfd2e00f86",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 3,
+  "judge_rationale": "упущено форматирование/однострочность, фокус на ясности битовых операций"
+}

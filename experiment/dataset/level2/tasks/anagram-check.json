@@ -1,0 +1,17 @@
+{
+  "description": "Даны две строки s и t. Вернуть True если t — анаграмма s.",
+  "id": "anagram-check",
+  "language": "python",
+  "reference_solution": "def is_anagram(s: str, t: str) -> bool:\n    return sorted(s) == sorted(t)\n",
+  "tests": [
+    {
+      "expected": "True",
+      "input": "anagram\nnagaram"
+    },
+    {
+      "expected": "False",
+      "input": "rat\ncar"
+    }
+  ],
+  "title": "Anagram check"
+}

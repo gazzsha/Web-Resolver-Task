@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int maxSubArray(int[] nums) {\n        int s = 0; for (int x : nums) s += x; return s;  // просто сумма\n    }\n}\n",
+  "expectedDiagnosis": "WA",
+  "expectedKeywords": [
+    "Кадане",
+    "подмассив",
+    "максимум"
+  ],
+  "id": "maximum-subarray-wa-01",
+  "taskId": "maximum-subarray"
+}

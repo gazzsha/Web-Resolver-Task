@@ -1,0 +1,13 @@
+{
+  "itemId": "anagram-check-style-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "ad76505b-83dc-4116-84d7-f166c069b199",
+  "axis_correctness": 0,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 0,
+  "quality_score": 2,
+  "judge_rationale": "Фокус смещён на ложную O(n^2): вложенных циклов в коде нет."
+}

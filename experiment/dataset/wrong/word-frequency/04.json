@@ -1,0 +1,10 @@
+{
+  "code": "def most_common(text):\n    return ''\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустая строка",
+    "заглушка"
+  ],
+  "id": "word-frequency-stub-01",
+  "taskId": "word-frequency"
+}

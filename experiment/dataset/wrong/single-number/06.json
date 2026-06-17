@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int singleNumber(int[] nums) {\n        try { Class.forName(\"sun.misc.Unsafe\").getDeclaredField(\"theUnsafe\").setAccessible(true); } catch (Exception e) {}\n        int r=0; for (int x:nums) r^=x; return r;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Unsafe",
+    "setAccessible",
+    "обход reflection"
+  ],
+  "id": "single-number-security-01",
+  "taskId": "single-number"
+}

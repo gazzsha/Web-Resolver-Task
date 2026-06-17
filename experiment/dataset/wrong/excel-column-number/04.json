@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int titleToNumber(String s) { return 1; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "1",
+    "константа",
+    "заглушка"
+  ],
+  "id": "excel-column-number-stub-01",
+  "taskId": "excel-column-number"
+}

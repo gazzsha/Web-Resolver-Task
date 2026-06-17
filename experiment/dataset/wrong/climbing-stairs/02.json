@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution {\n    public int climbStairs(int n) {\n        if (n<=2) return n;\n        return climbStairs(n-1) + climbStairs(n-2);  // O(2^n)\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "рекурсия",
+    "экспонента",
+    "мемоизация",
+    "DP"
+  ],
+  "id": "climbing-stairs-tle-01",
+  "taskId": "climbing-stairs"
+}

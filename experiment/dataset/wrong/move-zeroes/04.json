@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public void moveZeroes(int[] nums) { } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "пустой метод",
+    "ничего не делает",
+    "заглушка"
+  ],
+  "id": "move-zeroes-stub-01",
+  "taskId": "move-zeroes"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def gcd(A,B):\n    while B:A,B=B,A%B\n    return A\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "PEP 8",
+    "именование",
+    "пробелы"
+  ],
+  "id": "gcd-style-01",
+  "taskId": "gcd"
+}

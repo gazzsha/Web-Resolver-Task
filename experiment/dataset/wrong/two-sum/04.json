@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        return new int[]{0, 0};\n    }\n}\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "заглушка",
+    "константа",
+    "не реализован"
+  ],
+  "id": "two-sum-stub-01",
+  "taskId": "two-sum"
+}

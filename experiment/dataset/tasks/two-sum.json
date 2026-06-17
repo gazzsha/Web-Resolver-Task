@@ -1,0 +1,21 @@
+{
+  "description": "Дан массив целых чисел nums и целое target. Верни индексы двух элементов, сумма которых равна target. Решение существует и единственно. Один и тот же элемент дважды использовать нельзя.",
+  "id": "two-sum",
+  "language": "java",
+  "reference_solution": "import java.util.HashMap;\nimport java.util.Map;\npublic class Solution {\n    public int[] twoSum(int[] nums, int target) {\n        Map<Integer, Integer> seen = new HashMap<>();\n        for (int i = 0; i < nums.length; i++) {\n            int need = target - nums[i];\n            if (seen.containsKey(need)) return new int[]{seen.get(need), i};\n            seen.put(nums[i], i);\n        }\n        return new int[0];\n    }\n}\n",
+  "tests": [
+    {
+      "expected": "[0,1]",
+      "input": "[2,7,11,15]\n9"
+    },
+    {
+      "expected": "[1,2]",
+      "input": "[3,2,4]\n6"
+    },
+    {
+      "expected": "[0,1]",
+      "input": "[3,3]\n6"
+    }
+  ],
+  "title": "Two Sum"
+}

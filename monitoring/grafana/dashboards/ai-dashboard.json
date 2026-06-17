@@ -1,0 +1,114 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "uid": "web-resolver-ai",
+  "title": "Web Resolver — AI Analyzer",
+  "tags": ["ai", "gigachat", "web-resolver"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Calls/s (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "sum(rate(ai_analyzer_calls_total{application=\"web-resolver-task\"}[5m]))", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops", "decimals": 2}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Fallback-rate (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {"expr": "(sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[5m])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 1)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0, "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.1}, {"color": "red", "value": 0.25}]}}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Cache hit-rate (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "(sum(rate(ai_analyzer_calls_total{outcome=\"cache_hit\"}[5m])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 1)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Schema-valid ratio (5m)",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {"expr": "(sum(rate(ai_analyzer_schema_valid_total{valid=\"true\"}[5m])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_schema_valid_total[5m])), 1)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Calls by variant / outcome (5m)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "sum by (variant, outcome) (rate(ai_analyzer_calls_total{application=\"web-resolver-task\"}[5m]))", "legendFormat": "{{variant}} / {{outcome}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    },
+    {
+      "id": 6,
+      "type": "piechart",
+      "title": "Calls by variant (last 1h)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "sum by (variant) (increase(ai_analyzer_calls_total{application=\"web-resolver-task\"}[1h]))", "legendFormat": "{{variant}}", "refId": "A"}
+      ],
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}, "pieType": "donut", "legend": {"showLegend": true, "placement": "right"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Fallback-rate: 5m vs 1h",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "(sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[5m])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_calls_total[5m])), 1)", "legendFormat": "5m", "refId": "A"},
+        {"expr": "(sum(rate(ai_analyzer_calls_total{outcome=\"fallback\"}[1h])) or vector(0)) / clamp_min(sum(rate(ai_analyzer_calls_total[1h])), 1)", "legendFormat": "1h", "refId": "B"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "percentunit", "max": 1, "min": 0}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Latency p50 / p95 / p99",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"expr": "histogram_quantile(0.50, sum by (le) (rate(ai_analyzer_latency_seconds_bucket{application=\"web-resolver-task\"}[5m])))", "legendFormat": "p50", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum by (le) (rate(ai_analyzer_latency_seconds_bucket{application=\"web-resolver-task\"}[5m])))", "legendFormat": "p95", "refId": "B"},
+        {"expr": "histogram_quantile(0.99, sum by (le) (rate(ai_analyzer_latency_seconds_bucket{application=\"web-resolver-task\"}[5m])))", "legendFormat": "p99", "refId": "C"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "s"}}
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Schema validation rate (valid / invalid)",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20},
+      "targets": [
+        {"expr": "sum by (valid) (rate(ai_analyzer_schema_valid_total{application=\"web-resolver-task\"}[5m]))", "legendFormat": "valid={{valid}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "ops"}}
+    }
+  ]
+}

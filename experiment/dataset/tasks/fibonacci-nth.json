@@ -1,0 +1,21 @@
+{
+  "description": "Вернуть n-е число Фибоначчи. F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2).",
+  "id": "fibonacci-nth",
+  "language": "python",
+  "reference_solution": "def fib(n: int) -> int:\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n",
+  "tests": [
+    {
+      "expected": "0",
+      "input": "0"
+    },
+    {
+      "expected": "1",
+      "input": "1"
+    },
+    {
+      "expected": "55",
+      "input": "10"
+    }
+  ],
+  "title": "Fibonacci n-th"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "def is_anagram(s, t):\n    return sorted(s) == sorted(t.lower() / 0)  # ZeroDivisionError\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "деление",
+    "ноль",
+    "TypeError"
+  ],
+  "id": "anagram-check-rte-01",
+  "taskId": "anagram-check"
+}

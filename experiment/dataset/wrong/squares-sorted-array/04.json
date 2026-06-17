@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int[] sortedSquares(int[] nums) { return new int[]{0}; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "константа",
+    "[0]",
+    "заглушка"
+  ],
+  "id": "squares-sorted-array-stub-01",
+  "taskId": "squares-sorted-array"
+}

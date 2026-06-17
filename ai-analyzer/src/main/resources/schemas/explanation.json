@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GigaChatAnalysisPayload",
+  "description": "Required-shape contract for LLM responses. additionalProperties=true after real-GigaChat run showed the model frequently augments the JSON with explanatory keys (e.g. `feedback`, `analysis`); strict mode failed schema on every call. Required fields and value ranges still hold — V4 clamp + Jackson @JsonIgnoreProperties take care of the extras.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["codeQuality", "issues", "recommendations", "explanation", "complexity"],
+  "properties": {
+    "codeQuality": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "issues": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "maxLength": 500
+      }
+    },
+    "explanation": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "VERY_HIGH"]
+    }
+  }
+}

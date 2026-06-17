@@ -1,0 +1,121 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "uid": "web-resolver-kafka",
+  "title": "Web Resolver — Kafka",
+  "tags": ["kafka", "web-resolver"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": {"from": "now-1h", "to": "now"},
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Brokers online",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [
+        {"expr": "kafka_brokers", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Total consumer lag",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [
+        {"expr": "sum(kafka_consumergroup_lag)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 100}, {"color": "red", "value": 1000}]}}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Under-replicated partitions",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [
+        {"expr": "sum(kafka_topic_partition_under_replicated_partition)", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "red", "value": 1}]}}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Topics",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [
+        {"expr": "count(count by (topic) (kafka_topic_partitions))", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}},
+      "options": {"reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Consumer lag by group",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "sum by (consumergroup) (kafka_consumergroup_lag)", "legendFormat": "{{consumergroup}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Consumer lag by topic",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "sum by (topic) (kafka_consumergroup_lag)", "legendFormat": "{{topic}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Throughput per topic (msg/s produced)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "sum by (topic) (rate(kafka_topic_partition_current_offset[5m]))", "legendFormat": "{{topic}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "mps"}}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Consumed rate per group (msg/s)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [
+        {"expr": "sum by (consumergroup) (rate(kafka_consumergroup_current_offset_sum[5m]))", "legendFormat": "{{consumergroup}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "mps"}}
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Latest offset per topic (cumulative)",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+      "targets": [
+        {"expr": "sum by (topic) (kafka_topic_partition_current_offset)", "legendFormat": "{{topic}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Consumer group members",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+      "targets": [
+        {"expr": "kafka_consumergroup_members", "legendFormat": "{{consumergroup}}", "refId": "A"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "short"}}
+    }
+  ]
+}

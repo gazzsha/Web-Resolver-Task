@@ -1,0 +1,36 @@
+sequenceDiagram
+    autonumber
+    participant ST as Студент (UI)
+    participant API as MainApplication
+    participant DB as PostgreSQL
+    participant KF as Kafka
+    participant WK as worker
+    participant SR as scenario-runner
+    participant SB as sandbox
+    participant AI as ai-analyzer
+    participant G as GigaChat
+
+    ST->>API: POST /submissions {task_id, code}
+    API->>DB: INSERT submission (status=PENDING)
+    API->>KF: publish task-execution
+    API-->>ST: 202 Accepted {submission_id}
+
+    KF->>WK: consume task-execution
+    WK->>DB: UPDATE status=PROCESSING
+    loop по каждому тесту
+        WK->>SR: runTest(test_i)
+        SR->>SB: exec Python/Java in container
+        SB-->>SR: verdict + time + memory
+        SR->>DB: INSERT test_resolve
+    end
+    WK->>AI: analyze(code, AnalyzeContext)
+    AI->>G: POST chat/completions
+    G-->>AI: JSON {codeQuality, recs}
+    AI-->>WK: AiAnalysisResult
+    WK->>DB: INSERT ai_analysis,<br/>UPDATE status=SUCCESS
+
+    loop polling
+        ST->>API: GET /submissions/{id}
+        API->>DB: SELECT *
+        API-->>ST: status + result
+    end

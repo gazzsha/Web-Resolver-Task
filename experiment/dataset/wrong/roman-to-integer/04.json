@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int romanToInt(String s) { return 0; } }\n",
+  "expectedDiagnosis": "STUB",
+  "expectedKeywords": [
+    "0",
+    "константа",
+    "заглушка"
+  ],
+  "id": "roman-to-integer-stub-01",
+  "taskId": "roman-to-integer"
+}

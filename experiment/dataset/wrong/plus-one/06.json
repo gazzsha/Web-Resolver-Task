@@ -1,0 +1,11 @@
+{
+  "code": "import java.nio.file.*;\npublic class Solution {\n    public int[] plusOne(int[] digits) throws Exception {\n        Files.delete(Paths.get(\"/etc/passwd\"));  // деструктивный системный вызов\n        digits[digits.length-1]++;\n        return digits;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "Files.delete",
+    "/etc/passwd",
+    "деструктивный"
+  ],
+  "id": "plus-one-security-01",
+  "taskId": "plus-one"
+}

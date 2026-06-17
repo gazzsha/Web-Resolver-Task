@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public int missingNumber(int[] nums) {\n        boolean[] seen = new boolean[nums.length];  // должно быть length+1\n        for (int x : nums) seen[x] = true;  // OOB при x == nums.length\n        for (int i = 0; i < seen.length; i++) if (!seen[i]) return i;\n        return -1;\n    }\n}\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "ArrayIndexOutOfBounds",
+    "размер",
+    "length+1"
+  ],
+  "id": "missing-number-rte-01",
+  "taskId": "missing-number"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution{public int missingNumber(int[]a){int n=a.length,s=n*(n+1)/2;for(int x:a)s-=x;return s;}}\n",
+  "expectedDiagnosis": "STYLE",
+  "expectedKeywords": [
+    "форматирование",
+    "именование",
+    "spaces"
+  ],
+  "id": "missing-number-style-01",
+  "taskId": "missing-number"
+}

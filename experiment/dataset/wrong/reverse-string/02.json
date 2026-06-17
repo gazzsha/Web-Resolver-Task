@@ -1,0 +1,12 @@
+{
+  "code": "public class Solution {\n    public String reverseString(char[] s) {\n        String r = \"\";\n        for (int i = s.length-1; i >= 0; i--) r = r + s[i];\n        return r;\n    }\n}\n",
+  "expectedDiagnosis": "TLE",
+  "expectedKeywords": [
+    "String",
+    "конкатенация",
+    "O(n^2)",
+    "StringBuilder"
+  ],
+  "id": "reverse-string-tle-01",
+  "taskId": "reverse-string"
+}

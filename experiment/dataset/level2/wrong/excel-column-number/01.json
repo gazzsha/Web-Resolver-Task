@@ -1,0 +1,11 @@
+{
+  "code": "public class Solution { public int titleToNumber(String s) { return s.charAt(s.length()); } }\n",
+  "expectedDiagnosis": "RTE",
+  "expectedKeywords": [
+    "StringIndexOutOfBounds",
+    "length",
+    "off-by-one"
+  ],
+  "id": "excel-column-number-rte-01",
+  "taskId": "excel-column-number"
+}

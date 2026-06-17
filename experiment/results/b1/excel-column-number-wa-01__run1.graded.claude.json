@@ -1,0 +1,13 @@
+{
+  "itemId": "excel-column-number-wa-01",
+  "variant": "b1",
+  "runIndex": 1,
+  "judge_model": "claude-opus-4-7-via-agent-sdk",
+  "judge_call_id": "aff93f8c-f25b-41df-9514-f37321d2992e",
+  "axis_correctness": 1,
+  "axis_location": 1,
+  "axis_actionable": 1,
+  "axis_no_hallucinations": 1,
+  "quality_score": 4,
+  "judge_rationale": "Верно: обработан только charAt(0), нужен перевод всей строки в 26-ричную"
+}
