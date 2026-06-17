@@ -45,3 +45,5 @@ thesis/build
 thesis/sources
 thesis/*.md
 thesis/*.docx
+
+docs
