@@ -76,7 +76,8 @@ private data class CliArgs(
     val out: Path,
     val limit: Int,
     val runs: Int,
-    val onlyItems: Set<String>
+    val onlyItems: Set<String>,
+    val manifest: Path?
 )
 
 private fun parseCli(args: Array<String>): CliArgs {
@@ -91,14 +92,15 @@ private fun parseCli(args: Array<String>): CliArgs {
         out = Paths.get(map["out"] ?: "experiment/results"),
         limit = map["limit"]?.toInt() ?: 60,
         runs = map["runs"]?.toInt() ?: 3,
-        onlyItems = map["only"]?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet().orEmpty()
+        onlyItems = map["only"]?.split(",")?.map { it.trim() }?.filter { it.isNotEmpty() }?.toSet().orEmpty(),
+        manifest = map["manifest"]?.let { Paths.get(it) }
     )
 }
 
-// Level-2 confirmatory design: only B1 (zero-shot), B1f (few-shot), B2 (AST-hybrid).
-// B0 (rule-based baseline) and B3 (no-guards ablation) are reserved for a future Level-3
-// extension and are intentionally NOT run in the confirmatory protocol.
-private val ALL_VARIANTS = listOf("b1", "b1f", "b2")
+// Confirmatory design: two configurations — B1 (обычный промпт, zero-shot) и
+// B2 (AstHybridAnalyzer). B1f (few-shot), B0 (rule-based) и B3 (no-guards) не
+// входят в подтверждающий протокол.
+private val ALL_VARIANTS = listOf("b1", "b2")
 
 fun main(args: Array<String>) {
     val cli = parseCli(args)
@@ -110,7 +112,7 @@ fun main(args: Array<String>) {
 
     val variants = if (cli.variant == "all") ALL_VARIANTS else listOf(cli.variant)
     val gitCommit = currentGitCommit()
-    val allItems = loadDataset(cli.dataset, cli.limit)
+    val allItems = cli.manifest?.let { loadManifest(it) } ?: loadDataset(cli.dataset, cli.limit)
     val items = if (cli.onlyItems.isEmpty()) allItems else allItems.filter { it.id in cli.onlyItems }
     println("[runner] mode=${if (mockMode) "mock" else "real"} variants=$variants " +
         "items=${items.size} runs=${cli.runs} gitCommit=$gitCommit")
@@ -211,6 +213,30 @@ internal data class DatasetItem(
     }
 }
 
+/**
+ * Загрузка выборки из манифеста (experiment/dataset/corpus_250.json), собранного
+ * скриптом select_corpus_250.py. Манифест самодостаточен: содержит code, language,
+ * expectedDiagnosis и (для атак) owaspClass/attackVector/successCriterion — поэтому
+ * раннеру не нужно пересобирать поля из исходных файлов датасета.
+ */
+internal fun loadManifest(manifestPath: Path): List<DatasetItem> {
+    val arr: JsonNode = MAPPER.readTree(manifestPath.toFile())
+    val items = mutableListOf<DatasetItem>()
+    for (node in arr) {
+        items += DatasetItem(
+            id = node["id"].asText(),
+            kind = node["kind"].asText(),                 // "wrong" | "attack" | "correct"
+            code = node["code"].asText(),
+            language = node["language"]?.asText() ?: "java",
+            expectedDiagnosis = node["expectedDiagnosis"].asText(),
+            owaspClass = node["owaspClass"]?.asText(),
+            attackVector = node["attackVector"]?.asText(),
+            successCriterion = node["successCriterion"]?.asText()
+        )
+    }
+    return items
+}
+
 internal fun loadDataset(root: Path, limit: Int): List<DatasetItem> {
     val items = mutableListOf<DatasetItem>()
     val wrongRoot = root.resolve("wrong")
@@ -264,6 +290,7 @@ internal fun synthesizeVerdict(item: DatasetItem): List<SandboxExecutionResult> 
         "TLE" -> ExecutionStatus.TIME_LIMIT_EXCEEDED
         "RTE" -> ExecutionStatus.RUNTIME_ERROR
         "STYLE", "SECURITY" -> ExecutionStatus.SUCCESS
+        "OK" -> ExecutionStatus.SUCCESS  // корректное решение: тесты проходят (контроль ложных срабатываний)
         "V1", "V2", "V3", "V4", "V5", "V6" -> ExecutionStatus.RUNTIME_ERROR
         else -> ExecutionStatus.RUNTIME_ERROR
     }

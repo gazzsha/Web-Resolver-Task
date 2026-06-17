@@ -24,9 +24,24 @@ Snap*
 # Secrets (Prometheus scraper password, etc.)
 secrets/
 
-# Claude Code local settings / runtime
-.claude/.DS_Store
-.claude/scheduled_tasks.lock
-.claude/worktrees/
+# Claude Code: настройки, агенты, скиллы, worktrees, runtime
+.claude/
+# Инструкции проекта для Claude
+CLAUDE.md
+# MCP-конфигурации
+.mcp.json
+**/.mcp.json
+# Прочие AI-ассистенты
+.cursor/
+.windsurf/
+.aider*
+# Claude-генерируемые файлы (в т.ч. оценки судьи-Claude в эксперименте)
+*.claude.json
+**/*.graded.claude.json
 
 experiment
+
+thesis/build
+thesis/sources
+thesis/*.md
+thesis/*.docx

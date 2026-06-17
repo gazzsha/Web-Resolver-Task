@@ -10,12 +10,14 @@ Any *-fallback or rule-based → False.
 from __future__ import annotations
 import json
 import math
+import os
 from pathlib import Path
 from collections import defaultdict
 from statistics import median
 
-RESULTS = Path("experiment/results")
-VARIANTS = ["b1", "b1f", "b2"]
+# Папку результатов можно переопределить: RESULTS_DIR=experiment/results_250 python3 recompute_summary.py
+RESULTS = Path(os.environ.get("RESULTS_DIR", "experiment/results"))
+VARIANTS = ["b1", "b2"]
 
 
 def aggregate(variant: str):

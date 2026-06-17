@@ -441,7 +441,7 @@ def main() -> None:
     args = ap.parse_args()
 
     judge = _autodetect_judge() if args.judge == "auto" else args.judge
-    variants = ["b1", "b1f", "b2"] if args.variant == "all" else [args.variant]
+    variants = ["b1", "b2"] if args.variant == "all" else [args.variant]
     in_root = Path(args.input)
     out_root = Path(args.out) if args.out else in_root
     only = {s.strip() for s in args.only.split(",") if s.strip()} or None
